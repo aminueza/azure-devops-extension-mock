@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "types": "index.d.ts",
+  "type": "commonjs",
   "scripts": {
-    "test": "jest"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
