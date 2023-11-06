@@ -28,7 +28,7 @@
     "@faker-js/faker": "^8.0.2",
     "@jest/globals": "^29.6.4",
     "azure-devops-extension-api": "^4.0.0",
-    "azure-devops-extension-sdk": "^3.1.2",
+    "azure-devops-extension-sdk": "^4.0.0",
     "jest": "^29.6.4",
     "typescript": "^5.2.2"
   }
