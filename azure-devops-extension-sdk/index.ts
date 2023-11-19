@@ -9,7 +9,6 @@ import {
   IPageContext,
 } from "azure-devops-extension-sdk";
 import { faker } from "@faker-js/faker";
-import { jest } from "@jest/globals";
 
 /**
  * Mocking SDK's init function to return
@@ -21,6 +20,11 @@ export const init = (options?: IExtensionInitOptions): Promise<void> => {
   );
 };
 
+/**
+ * Mocking SDK.ready() to return
+ * resolve(successful execution/init) to activate the .then block
+ * timeout to simulate a long running operation
+  */
 export const ready = (): Promise<void> => {
   return new Promise((resolve) => setTimeout(() => resolve(), 1000));
 };
@@ -28,8 +32,12 @@ export const ready = (): Promise<void> => {
 /**
  * Mocking SDK.notifyLoadSucceeded does nothing
  */
-export const notifyLoadSucceeded = () => {};
+export const notifyLoadSucceeded = () => { };
 
+/**
+ * Mocking SDK.notifyLoadFailed does nothing
+ * timeout to simulate a long running operation
+ * */
 export const notifyLoadFailed = (_: Error | string): Promise<void> => {
   return new Promise((resolve) => setTimeout(() => resolve(), 1000));
 };
@@ -42,12 +50,12 @@ export const getConfiguration = (params?: { [key: string]: any }) => {
   return params
     ? params
     : {
-        id: faker.string.uuid(),
-        version: faker.system.semver(),
-        name: faker.lorem.slug(),
-        publisherId: faker.lorem.slug(),
-        commitSha: faker.git.commitSha(),
-      };
+      id: faker.string.uuid(),
+      version: faker.system.semver(),
+      name: faker.lorem.slug(),
+      publisherId: faker.lorem.slug(),
+      commitSha: faker.git.commitSha(),
+    };
 };
 
 /**
@@ -88,6 +96,9 @@ export const getHost = (): IHostContext => {
   };
 };
 
+/**
+ * Mocking SDK.getExtensionContext() and provide random values
+ * */
 export const getExtensionContext = (): IExtensionContext => {
   return {
     id: faker.lorem.slug(),
@@ -132,6 +143,9 @@ export const getPageContext = (): IPageContext => {
   };
 };
 
+/**
+ * Get the context about the host page
+ * */
 export const getWebContext = () => {
   return {
     project: {
@@ -146,20 +160,44 @@ export const getWebContext = () => {
  * Mocking SDK.register()
  * Assign the callback methods (parameter instance) passed from the controls to the spy
  */
-export const register = <T = any>(instanceId: string, instance: T) => {};
+export const register = <T = any>(instanceId: string, instance: T) => {
+  console.log("Registering instance: " + instanceId);
+};
 
-export const unregister = (instanceId: string) => {};
+/**
+ * Mocking SDK.unregister()
+ * Assign the callback methods (parameter instance) passed from the controls to the spy
+ * */
+export const unregister = (instanceId: string) => {
+  console.log("Unregistering instance: " + instanceId);
+};
 
+/**
+ * Mocking SDK.notifyLoadSucceeded does nothing
+ * */
 export const getAppToken = () =>
   new Promise((resolve) =>
     resolve(Buffer.from(faker.string.uuid()).toString("base64"))
   );
 
+/**
+ * Mocking SDK.notifyLoadSucceeded does nothing
+ * */
 export const getAccessToken = () =>
   new Promise((resolve) =>
     resolve(Buffer.from(faker.string.uuid()).toString("base64"))
   );
 
-export const resize = (width?: number, height?: number) => {};
+/**
+ * Mocking SDK.notifyLoadSucceeded does nothing
+ * */
+export const resize = (width?: number, height?: number) => {
+  console.log(`Resizing to ${width}x${height}`);
+};
 
-export const applyTheme = (themeData: { [varName: string]: string }) => {};
+/**
+ * Mocking SDK.notifyLoadSucceeded does nothing
+ * */
+export const applyTheme = (themeData: { [varName: string]: string }) => {
+  console.log(`Applying theme: ${JSON.stringify(themeData)}`);
+};
