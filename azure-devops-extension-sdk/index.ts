@@ -9,6 +9,7 @@ import {
   IPageContext,
 } from "azure-devops-extension-sdk";
 import { faker } from "@faker-js/faker";
+import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 
 /**
  * Mocking SDK's init function to return
@@ -161,14 +162,16 @@ export const getWebContext = () => {
  * Assign the callback methods (parameter instance) passed from the controls to the spy
  */
 export const register = <T = any>(instanceId: string, instance: T) => {
+  instanceObjects[instanceId] = instance;
   console.log("Registering instance: " + instanceId);
 };
 
 /**
- * Mocking SDK.unregister()
- * Assign the callback methods (parameter instance) passed from the controls to the spy
- * */
+* Mocking SDK.unregister()
+* Assign the callback methods (parameter instance) passed from the controls to the spy
+* */
 export const unregister = (instanceId: string) => {
+  delete instanceObjects[instanceId];
   console.log("Unregistering instance: " + instanceId);
 };
 
