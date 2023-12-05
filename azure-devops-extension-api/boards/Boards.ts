@@ -19,7 +19,8 @@ import {
     BoardRowCollectionResponse,
     BoardRowUpdate,
     BoardItemStateSyncCreate,
-    BoardItemStateSync
+    BoardItemStateSync,
+    BoardsRestClient
 } from "azure-devops-extension-api/Boards";
 import {
     boardColumnCollectionResponse,
@@ -37,7 +38,7 @@ import {
  * Mocked AccountsRestClient
  */
 export class MockBoardsRestClient extends RestClientBase {
-    public TYPE = 'BoardsRestClient';
+    public TYPE = BoardsRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
     }

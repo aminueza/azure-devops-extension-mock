@@ -1,7 +1,6 @@
 import {
   IHostContext,
   IUserContext,
-  HostType,
   IExtensionInitOptions,
   ContextIdentifier,
   ITeamContext,
@@ -12,14 +11,26 @@ import { faker } from "@faker-js/faker";
 import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 
 /**
+ * Mocking SDK's HostType enum
+ */
+export enum HostType {
+  Unknown = 0,
+  Deployment = 1,
+  Enterprise = 2,
+  Organization = 4,
+}
+
+/**
  * Mocking SDK's init function to return
  * resolve(successful execution/init) to activate the .then block
  */
 export const init = (options?: IExtensionInitOptions): Promise<void> => {
-  return new Promise((resolve) =>
-    options?.loaded ? setTimeout(() => resolve(), 1000) : resolve()
-  );
-};
+  return new Promise((resolve, reject) =>
+    options?.loaded ?
+      setTimeout(() => resolve(), 1000) :
+      reject(new Error('Initialization failed because "loaded" is not set to true.'))
+  )
+}
 
 /**
  * Mocking SDK.ready() to return
@@ -178,16 +189,15 @@ export const unregister = (instanceId: string) => {
 /**
  * Mocking SDK.notifyLoadSucceeded does nothing
  * */
-export const getAppToken = () =>
-  new Promise((resolve) =>
+export const getAppToken = (): Promise<string> =>
+  new Promise<string>((resolve) =>
     resolve(Buffer.from(faker.string.uuid()).toString("base64"))
   );
-
 /**
  * Mocking SDK.notifyLoadSucceeded does nothing
  * */
-export const getAccessToken = () =>
-  new Promise((resolve) =>
+export const getAccessToken = (): Promise<string> =>
+  new Promise<string>((resolve) =>
     resolve(Buffer.from(faker.string.uuid()).toString("base64"))
   );
 

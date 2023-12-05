@@ -8,39 +8,39 @@ import {
     MockProjectPageService
 } from "./common/CommonServices";
 import { MockAccountsRestClient } from "./accounts/Accounts";
+import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
+import { BoardsRestClient } from "azure-devops-extension-api/Boards";
+import { MockBoardsRestClient } from "./boards/Boards";
 
 export const getService = (serviceId: string) => {
-    switch (serviceId) {
-        case CommonServiceIds.ExtensionDataService:
-            return MockExtensionDataService
-        case CommonServiceIds.GlobalMessagesService:
-            return MockGlobalMessagesService
-        case CommonServiceIds.HostNavigationService:
-            return MockHostNavigationService
-        case CommonServiceIds.HostPageLayoutService:
-            return MockHostPageLayoutService
-        case CommonServiceIds.LocationService:
-            return MockLocationService
-        case CommonServiceIds.ProjectPageService:
-            return MockProjectPageService
-        default:
-            throw new Error('Unknown service id for mock:' + serviceId)
+    const serviceDictionary: { [key: string]: any } = {
+        [CommonServiceIds.ExtensionDataService]: MockExtensionDataService,
+        [CommonServiceIds.GlobalMessagesService]: MockGlobalMessagesService,
+        [CommonServiceIds.HostNavigationService]: MockHostNavigationService,
+        [CommonServiceIds.HostPageLayoutService]: MockHostPageLayoutService,
+        [CommonServiceIds.LocationService]: MockLocationService,
+        [CommonServiceIds.ProjectPageService]: MockProjectPageService,
+    };
+
+    if (serviceDictionary.hasOwnProperty(serviceId)) {
+        return serviceDictionary[serviceId];
+    } else {
+        throw new Error('Unknown service id for mock: ' + serviceId);
     }
 };
 
 export function getClient(clientClass: any) {
-    switch (new clientClass().TYPE) {
-        case 'AccountsRestClient':
-            return new MockAccountsRestClient({}) as any;
-        // case 'WikiRestClient':
-        //   return new WikiRestClient({}) as any;
-        // case 'GitRestClient':
-        //   return new GitRestClient({}) as any;
-        // case 'WorkItemTrackingProcessRestClient':
-        //   return new WorkItemTrackingProcessRestClient({}) as any;
-        // case 'WorkItemTrackingRestClient':
-        //   return new WorkItemTrackingRestClient({}) as any;
-        default:
-            throw new Error('Failed to get mock client' + new clientClass().TYPE);
+    const clientTypes: { [key: string]: any } = {
+        [typeof AccountsRestClient]: MockAccountsRestClient,
+        [typeof BoardsRestClient]: MockBoardsRestClient,
+    };
+
+    const clientType = typeof new clientClass().TYPE;
+
+    if (clientTypes.hasOwnProperty(clientType)) {
+        const ClientConstructor = clientTypes[clientType];
+        return new ClientConstructor({});
+    } else {
+        throw new Error('Failed to get mock client: ' + new clientClass().TYPE);
     }
 }

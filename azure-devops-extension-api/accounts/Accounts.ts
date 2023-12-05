@@ -1,6 +1,6 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api";
 import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
-import { Account, AccountCreateInfoInternal } from "azure-devops-extension-api/Accounts";
+import { Account, AccountCreateInfoInternal, AccountsRestClient } from "azure-devops-extension-api/Accounts";
 import { faker } from "@faker-js/faker";
 import { accounts } from "./Data";
 
@@ -8,7 +8,7 @@ import { accounts } from "./Data";
  * Mocked AccountsRestClient
  */
 export class MockAccountsRestClient extends RestClientBase {
-    public TYPE = 'AccountsRestClient';
+    public TYPE = AccountsRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
     }
