@@ -8,7 +8,7 @@ export const accounts = Array.from({ length: 10 }, () => (
     {
         accountId: faker.string.uuid(),
         accountName: faker.lorem.slug(),
-        accountOwner: faker.internet.userName(),
+        accountOwner: faker.internet.username(),
         accountStatus: faker.helpers.arrayElement([
             AccountStatus.None,
             AccountStatus.Enabled,
@@ -19,10 +19,10 @@ export const accounts = Array.from({ length: 10 }, () => (
             AccountType.Personal,
             AccountType.Organization]),
         accountUri: faker.internet.url(),
-        createdBy: faker.internet.userName(),
+        createdBy: faker.internet.username(),
         createdDate: faker.date.past(),
         hasMoved: faker.datatype.boolean(),
-        lastUpdatedBy: faker.internet.userName(),
+        lastUpdatedBy: faker.internet.username(),
         lastUpdatedDate: faker.date.past(),
         namespaceId: faker.string.uuid(),
         newCollectionId: faker.string.uuid(),
