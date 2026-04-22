@@ -9,5 +9,6 @@
     "skipLibCheck": true,
     "types": ["jest", "node"]
   },
+  "include": ["azure-devops-extension-api", "azure-devops-extension-sdk"],
   "exclude": ["node_modules", "dist", "__tests__", "jest-helpers"]
 }
