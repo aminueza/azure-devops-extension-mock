@@ -1,11 +1,11 @@
 import { CommonServiceIds } from "azure-devops-extension-api/Common";
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
-import { BoardsRestClient } from "azure-devops-extension-api/Boards";
+import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient } from "azure-devops-extension-api/Git";
-import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines/PipelinesClient";
+import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
@@ -42,7 +42,7 @@ import {
 
 // Register the real → mock client mapping once at module load.
 registerMockClient(AccountsRestClient, MockAccountsRestClient as any);
-registerMockClient(BoardsRestClient, MockBoardsRestClient as any);
+registerMockClient(WorkRestClient, MockBoardsRestClient as any);
 registerMockClient(BuildRestClient, MockBuildRestClient as any);
 registerMockClient(CoreRestClient, MockCoreRestClient as any);
 registerMockClient(DashboardRestClient, MockDashboardRestClient as any);

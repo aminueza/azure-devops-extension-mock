@@ -2,12 +2,17 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
+    "moduleResolution": "bundler",
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true,
-    "types": ["jest", "node"]
+    "ignoreDeprecations": "6.0",
+    "types": ["jest", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "azure-devops-extension-sdk/SDK": ["./node_modules/azure-devops-extension-sdk/SDK.d.ts"]
+    }
   },
   "include": ["azure-devops-extension-api", "azure-devops-extension-sdk"],
   "exclude": ["node_modules", "dist", "__tests__", "jest-helpers"]

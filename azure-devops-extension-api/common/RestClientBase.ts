@@ -1,69 +1,41 @@
-import { jest } from "@jest/globals";
-import { IVssRestClientOptions } from "azure-devops-extension-api";
-import { RestClientRequestParams } from "azure-devops-extension-api/Common/RestClientBase";
+import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 
-/**
- * Accessors to Mocked Rest Client Base methods
- */
-export const mockHTTPError = jest.fn().mockReturnValue(false);
-export const mockGetVersionedItemLink = jest.fn();
-export const mockPostRequests = jest.fn((requestUrl: string, request: RestClientRequestParams) => { return request });
-export let spyAuthorizationHeader: string;
+export interface RestClientRequestParams {
+    routeTemplate: string;
+    apiVersion: string;
+    routeValues?: { [key: string]: any };
+    body?: any;
+    queryParams?: { [key: string]: any };
+    method?: string;
+    httpResponseType?: string;
+    customHeaders?: { [headerName: string]: any };
+    returnRawResponse?: boolean;
+    isRawData?: boolean;
+    command?: string;
+}
 
-/**
- * Mocked Rest Client Base
- */
-export class MockRestClientBase {
-    public TYPE = 'RestClientBase';
+export class RestClientBase {
+    private _options: IVssRestClientOptions;
+    private _rootPath: string;
+
     constructor(options: IVssRestClientOptions) {
-        // call getAuthorizationHeader
-        options.authTokenProvider?.getAuthorizationHeader().then(
-            (value) => spyAuthorizationHeader = value
-        );
+        this._options = options;
+        this._rootPath = "";
     }
 
-    /**
-     * Gets the root path of the Service
-     *
-     * @returns Promise for the resolving the root path of the service.
-     */
     protected getRootPath(): Promise<string> {
-        return new Promise((resolve) => resolve("root"));
+        return Promise.resolve(this._rootPath);
     }
 
-    /**
-     * Issue a request to a VSS REST endpoint.
-     *
-     * @param requestParams request options
-     * @returns Promise for the response
-     */
     protected beginRequest<T>(requestParams: RestClientRequestParams): Promise<T> {
-        const result: any = [];
-        return new Promise((resolve) => resolve(result));
+        return Promise.resolve({} as T);
     }
 
-    /**
-     * Issue a request to a VSS REST endpoint at the specified location
-     *
-     * @param requestUrl Resolved URL of the request
-     * @param apiVersion API version
-     * @param requestParams Optional request parameters
-     */
-    protected _issueRequest<T>(requestUrl: string, apiVersion: string, requestParams: RestClientRequestParams): Promise<T> {
-
-        if (mockHTTPError()) {
-            throw new Error("Mocked HTTP Error");
-        }
-
-        let result: any = [];
-
-        if (requestUrl.match(/\/api\/versioneditem\/\d+\?api-version=/) && requestParams.method === "GET") {
-            result = mockGetVersionedItemLink();
-        }
-        else if (requestParams.method === "POST") {
-            mockPostRequests(requestUrl, requestParams);
-        }
-
-        return new Promise((resolve) => resolve(result));
+    protected _issueRequest<T>(
+        requestUrl: string,
+        apiVersion: string,
+        requestParams: RestClientRequestParams
+    ): Promise<T> {
+        return Promise.resolve({} as T);
     }
 }

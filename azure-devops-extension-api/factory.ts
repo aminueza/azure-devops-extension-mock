@@ -1,5 +1,5 @@
-import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
-import { IVssRestClientOptions } from "azure-devops-extension-api";
+import { RestClientBase } from "./common/RestClientBase";
+import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 
 type Class<T = unknown> = new (...args: any[]) => T;
 
@@ -9,16 +9,16 @@ export type MockOverrides<T> = Partial<{
         : T[K];
 }>;
 
-const registry = new Map<Class, Class<RestClientBase>>();
+const registry = new Map<Class, Class>();
 
-export function registerMockClient<T extends RestClientBase>(
+export function registerMockClient<T extends object>(
     real: Class<T>,
     mock: Class<T>
 ): void {
     registry.set(real, mock);
 }
 
-export function getRegisteredMockClient<T extends RestClientBase>(
+export function getRegisteredMockClient<T extends object>(
     real: Class<T>
 ): Class<T> | undefined {
     return registry.get(real) as Class<T> | undefined;
@@ -31,7 +31,7 @@ export function getRegisteredMockClient<T extends RestClientBase>(
  * Useful for clients we don't ship hand-written fixtures for, or for unit tests
  * that want to pin specific method responses.
  */
-export function mockClient<T extends RestClientBase>(
+export function mockClient<T extends object>(
     clientClass: Class<T>,
     overrides: MockOverrides<T> = {},
     options: IVssRestClientOptions = {} as IVssRestClientOptions

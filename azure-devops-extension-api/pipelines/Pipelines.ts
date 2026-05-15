@@ -1,6 +1,6 @@
-import { IVssRestClientOptions } from "azure-devops-extension-api";
-import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
-import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines/PipelinesClient";
+import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
+import { RestClientBase } from "../common/RestClientBase";
+import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import {
     Pipeline,
     Run,
@@ -10,7 +10,7 @@ import {
     PreviewRun,
     CreatePipelineParameters,
     RunPipelineParameters
-} from "azure-devops-extension-api/Pipelines/Pipelines";
+} from "azure-devops-extension-api/Pipelines";
 import {
     makeArtifact,
     makeLog,

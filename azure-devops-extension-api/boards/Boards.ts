@@ -1,5 +1,5 @@
-import { IVssRestClientOptions } from "azure-devops-extension-api";
-import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
+import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
+import { RestClientBase } from "../common/RestClientBase";
 import {
     CreateBoard,
     BoardResponse,
@@ -19,9 +19,9 @@ import {
     BoardRowCollectionResponse,
     BoardRowUpdate,
     BoardItemStateSyncCreate,
-    BoardItemStateSync,
-    BoardsRestClient
-} from "azure-devops-extension-api/Boards";
+    BoardItemStateSync
+} from "./types";
+import { WorkRestClient } from "azure-devops-extension-api/Work";
 import {
     boardColumnCollectionResponse,
     boardColumnResponse,
@@ -35,10 +35,10 @@ import {
 } from "./Data";
 
 /**
- * Mocked AccountsRestClient
+ * Mocked WorkRestClient
  */
 export class MockBoardsRestClient extends RestClientBase {
-    public TYPE = BoardsRestClient;
+    public TYPE = WorkRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
     }
