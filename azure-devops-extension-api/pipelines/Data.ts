@@ -8,7 +8,7 @@ import {
     Log,
     LogCollection,
     PreviewRun
-} from "azure-devops-extension-api/Pipelines/Pipelines";
+} from "azure-devops-extension-api/Pipelines";
 
 export const makePipeline = (): Pipeline => ({
     id: faker.number.int({ min: 1, max: 10_000 }),

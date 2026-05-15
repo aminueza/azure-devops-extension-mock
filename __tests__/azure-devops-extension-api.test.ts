@@ -1,10 +1,10 @@
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
-import { BoardsRestClient } from "azure-devops-extension-api/Boards";
+import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient, BuildStatus } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient, PullRequestStatus } from "azure-devops-extension-api/Git";
-import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines/PipelinesClient";
+import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
@@ -18,7 +18,7 @@ describe("getClient registry", () => {
     it("returns a working mock for each registered client class", () => {
         const classes: any[] = [
             AccountsRestClient,
-            BoardsRestClient,
+            WorkRestClient,
             BuildRestClient,
             CoreRestClient,
             DashboardRestClient,

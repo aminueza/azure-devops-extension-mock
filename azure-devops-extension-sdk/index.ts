@@ -3,10 +3,10 @@ import {
   IUserContext,
   IExtensionInitOptions,
   ContextIdentifier,
-  ITeamContext,
   IExtensionContext,
+  ITeamContext,
   IPageContext,
-} from "azure-devops-extension-sdk";
+} from "azure-devops-extension-sdk/SDK";
 import { faker } from "@faker-js/faker";
 import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 

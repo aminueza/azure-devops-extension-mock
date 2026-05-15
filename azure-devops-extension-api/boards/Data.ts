@@ -13,7 +13,7 @@ import {
     BoardRow,
     BoardRowCollectionResponse,
     BoardItemStateSync
-} from "azure-devops-extension-api/Boards";
+} from "./types";
 
 const boardColumns = Array.from({ length: 5 }, () => ({
     id: faker.string.uuid(),

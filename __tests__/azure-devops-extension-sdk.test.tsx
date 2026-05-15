@@ -1,5 +1,5 @@
 
-import { IPageContext, ITeamContext } from 'azure-devops-extension-sdk';
+import { IPageContext, ITeamContext } from 'azure-devops-extension-sdk/SDK';
 import {
     HostType,
     applyTheme,

@@ -5,6 +5,9 @@ module.exports = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     moduleNameMapper: {
         '^azure-devops-extension-sdk$': '<rootDir>/azure-devops-extension-sdk',
+        '^azure-devops-extension-api/Common/Context$': '<rootDir>/node_modules/azure-devops-extension-api/Common/Context.d.ts',
+        '^azure-devops-extension-api/Common/RestClientBase$': '<rootDir>/node_modules/azure-devops-extension-api/Common/RestClientBase.d.ts',
+        '^azure-devops-extension-sdk/SDK$': '<rootDir>/node_modules/azure-devops-extension-sdk/SDK.d.ts',
     },
     transform: {
         '\\.tsx?$': 'ts-jest',

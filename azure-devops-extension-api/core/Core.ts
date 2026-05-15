@@ -1,5 +1,5 @@
-import { IVssRestClientOptions } from "azure-devops-extension-api";
-import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
+import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
+import { RestClientBase } from "../common/RestClientBase";
 import {
     CoreRestClient,
     Process,
