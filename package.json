@@ -70,6 +70,6 @@
     "azure-devops-extension-sdk": "^4.0.0",
     "jest": "^30.0.0",
     "ts-jest": "^29.1.1",
-    "typescript": "^6.0.0"
+    "typescript": "^7.0.0"
   }
 }
