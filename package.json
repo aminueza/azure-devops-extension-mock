@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/aminueza/azure-devops-extension-mock#readme",
   "dependencies": {
-    "@faker-js/faker": "^9.0.0"
+    "@faker-js/faker": "^10.0.0"
   },
   "peerDependencies": {
     "azure-devops-extension-api": "^4.0.0 || ^5.272.3",
