@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     TestRun,
     TestRunState,
@@ -19,75 +19,75 @@ const outcomeValues = [
 ];
 
 export const makeTestRun = (id?: number): TestRun => ({
-    id: id ?? faker.number.int({ min: 1, max: 100_000 }),
-    name: `Test Run ${faker.lorem.slug()}`,
-    url: faker.internet.url(),
+    id: id ?? fake.number.int({ min: 1, max: 100_000 }),
+    name: `Test Run ${fake.lorem.slug()}`,
+    url: fake.internet.url(),
     isAutomated: true,
     state: TestRunState.Completed as unknown as string,
-    startedDate: faker.date.recent(),
-    completedDate: faker.date.recent(),
+    startedDate: fake.date.recent(),
+    completedDate: fake.date.recent(),
     owner: makeIdentityRef() as any,
-    build: { id: String(faker.number.int()), name: faker.lorem.slug() } as any,
-    project: { id: faker.string.uuid(), name: faker.company.name() } as any,
+    build: { id: String(fake.number.int()), name: fake.lorem.slug() } as any,
+    project: { id: fake.string.uuid(), name: fake.company.name() } as any,
     totalTests: 100,
     passedTests: 95,
     incompleteTests: 0,
     unanalyzedTests: 0,
     notApplicableTests: 0,
-    iteration: `Sprint ${faker.number.int({ min: 1, max: 30 })}`,
-    webAccessUrl: faker.internet.url()
+    iteration: `Sprint ${fake.number.int({ min: 1, max: 30 })}`,
+    webAccessUrl: fake.internet.url()
 } as unknown as TestRun);
 
 export const makeTestCaseResult = (id?: number): TestCaseResult => ({
-    id: id ?? faker.number.int(),
-    testRun: { id: String(faker.number.int()) } as any,
+    id: id ?? fake.number.int(),
+    testRun: { id: String(fake.number.int()) } as any,
     testCase: {
-        id: String(faker.number.int()),
-        name: faker.lorem.sentence(),
-        url: faker.internet.url()
+        id: String(fake.number.int()),
+        name: fake.lorem.sentence(),
+        url: fake.internet.url()
     } as any,
-    testCaseTitle: faker.lorem.sentence(),
-    outcome: faker.helpers.arrayElement(outcomeValues) as unknown as string,
+    testCaseTitle: fake.lorem.sentence(),
+    outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
     state: "Completed",
-    automatedTestName: faker.lorem.slug(),
-    automatedTestStorage: faker.system.fileName(),
-    priority: faker.number.int({ min: 1, max: 4 }),
+    automatedTestName: fake.lorem.slug(),
+    automatedTestStorage: fake.system.fileName(),
+    priority: fake.number.int({ min: 1, max: 4 }),
     revision: 1,
-    durationInMs: faker.number.int({ min: 1, max: 10_000 }),
-    startedDate: faker.date.recent(),
-    completedDate: faker.date.recent(),
+    durationInMs: fake.number.int({ min: 1, max: 10_000 }),
+    startedDate: fake.date.recent(),
+    completedDate: fake.date.recent(),
     runBy: makeIdentityRef() as any,
     owner: makeIdentityRef() as any,
-    build: { id: String(faker.number.int()), name: faker.lorem.slug() } as any,
-    project: { id: faker.string.uuid(), name: faker.company.name() } as any
+    build: { id: String(fake.number.int()), name: fake.lorem.slug() } as any,
+    project: { id: fake.string.uuid(), name: fake.company.name() } as any
 } as unknown as TestCaseResult);
 
 export const makeShallowResult = (): ShallowTestCaseResult => ({
-    id: faker.number.int(),
-    runId: faker.number.int(),
-    refId: faker.number.int(),
-    testCaseTitle: faker.lorem.sentence(),
-    automatedTestName: faker.lorem.slug(),
-    automatedTestStorage: faker.system.fileName(),
-    outcome: faker.helpers.arrayElement(["Passed", "Failed", "NotExecuted"]),
-    priority: faker.number.int({ min: 1, max: 4 }),
+    id: fake.number.int(),
+    runId: fake.number.int(),
+    refId: fake.number.int(),
+    testCaseTitle: fake.lorem.sentence(),
+    automatedTestName: fake.lorem.slug(),
+    automatedTestStorage: fake.system.fileName(),
+    outcome: fake.helpers.arrayElement(["Passed", "Failed", "NotExecuted"]),
+    priority: fake.number.int({ min: 1, max: 4 }),
     isReRun: false,
-    owner: faker.person.fullName()
+    owner: fake.person.fullName()
 } as unknown as ShallowTestCaseResult);
 
 export const makeAttachment = (): TestAttachment => ({
-    id: faker.number.int(),
-    fileName: faker.system.fileName(),
-    comment: faker.lorem.sentence(),
+    id: fake.number.int(),
+    fileName: fake.system.fileName(),
+    comment: fake.lorem.sentence(),
     attachmentType: "GeneralAttachment" as any,
-    size: faker.number.int({ min: 1, max: 10_000_000 }),
-    createdDate: faker.date.recent(),
-    url: faker.internet.url()
+    size: fake.number.int({ min: 1, max: 10_000_000 }),
+    createdDate: fake.date.recent(),
+    url: fake.internet.url()
 } as unknown as TestAttachment);
 
 export const makeAttachmentRef = (): TestAttachmentReference => ({
-    id: faker.number.int(),
-    url: faker.internet.url()
+    id: fake.number.int(),
+    url: fake.internet.url()
 } as unknown as TestAttachmentReference);
 
 export const testRuns: TestRun[] = Array.from({ length: 5 }, () => makeTestRun());

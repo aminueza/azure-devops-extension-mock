@@ -3,6 +3,9 @@ import { IPageContext, ITeamContext } from 'azure-devops-extension-sdk/SDK';
 import {
     HostType,
     applyTheme,
+    disableNestedAppAuth,
+    enableNestedAppAuth,
+    isNestedAppAuthEnabled,
     getAccessToken,
     getAppToken,
     getConfiguration,
@@ -233,6 +236,18 @@ describe('Mock Functions Tests', () => {
         applyTheme(themeData);
 
         expect(console.log).toHaveBeenCalledWith(`Applying theme: ${JSON.stringify(themeData)}`);
+    });
+
+    it('should enable and disable nested app auth', async () => {
+        expect(isNestedAppAuthEnabled()).toBe(false);
+
+        await expect(enableNestedAppAuth()).resolves.toBeUndefined();
+        expect(isNestedAppAuthEnabled()).toBe(true);
+        expect(console.log).toHaveBeenCalledWith('Enabling nested app auth');
+
+        disableNestedAppAuth();
+        expect(isNestedAppAuthEnabled()).toBe(false);
+        expect(console.log).toHaveBeenCalledWith('Disabling nested app auth');
     });
 
 });

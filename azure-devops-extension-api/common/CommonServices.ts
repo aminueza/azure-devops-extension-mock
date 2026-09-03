@@ -1,5 +1,5 @@
 import { ExtensionDataCollection, IDialogOptions, IDocumentOptions, IExtensionDataManager, IExtensionDataService, IGlobalDialog, IGlobalMessageBanner, IGlobalMessagesService, IHostNavigationService, IHostPageLayoutService, ILocationService, IMessageDialogOptions, IPanelOptions, IProjectInfo, IProjectPageService, IToast, TeamFoundationHostType } from "azure-devops-extension-api/Common";
-import { faker } from "@faker-js/faker";
+import { fake } from "./fixtures";
 
 /**
  * Mocking IProjectPageService to return
@@ -8,8 +8,8 @@ import { faker } from "@faker-js/faker";
 export const MockProjectPageService: IProjectPageService = {
     getProject: async (): Promise<IProjectInfo> => {
         return {
-            id: faker.string.uuid(),
-            name: faker.lorem.slug(),
+            id: fake.string.uuid(),
+            name: fake.lorem.slug(),
         };
     }
 }
@@ -20,15 +20,15 @@ export const MockProjectPageService: IProjectPageService = {
  * */
 export const MockLocationService: ILocationService = {
     getResourceAreaLocation: async (resourceAreaId: string) => {
-        return `https://${faker.internet.domainName()}/resource/${resourceAreaId}`;
+        return `https://${fake.internet.domainName()}/resource/${resourceAreaId}`;
     },
 
     getServiceLocation: async (serviceInstanceType?: string, hostType?: TeamFoundationHostType) => {
-        return `https://${faker.internet.domainName()}/service/${serviceInstanceType || 'defaultService'}/${hostType || 'defaultHost'}`;
+        return `https://${fake.internet.domainName()}/service/${serviceInstanceType || 'defaultService'}/${hostType || 'defaultHost'}`;
     },
 
     routeUrl: async (routeId: string, routeValues?: { [key: string]: string }, hostPath?: string) => {
-        const baseHost = hostPath || `https://${faker.internet.domainName()}`;
+        const baseHost = hostPath || `https://${fake.internet.domainName()}`;
         const routeValueString = routeValues ? Object.entries(routeValues).map(([key, value]) => `${key}=${value}`).join('&') : '';
         return `${baseHost}/route/${routeId}${routeValueString ? '?' + routeValueString : ''}`;
     }
@@ -39,7 +39,7 @@ export const MockLocationService: ILocationService = {
  * the function calls
  * */
 export const MockHostPageLayoutService: IHostPageLayoutService = {
-    getFullScreenMode: async () => faker.datatype.boolean(),
+    getFullScreenMode: async () => fake.datatype.boolean(),
 
     openCustomDialog: <TResult>(contentContributionId: string, options?: IDialogOptions<TResult>) => {
         console.log(`Opening custom dialog with ID: ${contentContributionId}`);
@@ -70,25 +70,25 @@ export const MockHostPageLayoutService: IHostPageLayoutService = {
  * the function calls
  * */
 export const MockHostNavigationService: IHostNavigationService = {
-    getHash: async () => `#${faker.lorem.word()}`,
+    getHash: async () => `#${fake.lorem.word()}`,
 
     getPageNavigationElements: async () => [{
-        id: faker.string.uuid(),
-        name: faker.commerce.productName(),
-        type: faker.helpers.arrayElement(['link', 'button']),
+        id: fake.string.uuid(),
+        name: fake.commerce.productName(),
+        type: fake.helpers.arrayElement(['link', 'button']),
     }],
 
     getPageRoute: async () => ({
-        id: faker.string.uuid(),
+        id: fake.string.uuid(),
         routeValues: {
-            key1: faker.lorem.word(),
-            key2: faker.commerce.productName(),
+            key1: fake.lorem.word(),
+            key2: fake.commerce.productName(),
         }
     }),
 
     getQueryParams: async () => ({
-        param1: faker.lorem.word(),
-        param2: faker.lorem.word(),
+        param1: fake.lorem.word(),
+        param2: fake.lorem.word(),
     }),
 
     navigate: (url: string) => {
@@ -96,7 +96,7 @@ export const MockHostNavigationService: IHostNavigationService = {
     },
 
     onHashChanged: (callback: (hash: string) => void) => {
-        callback(`#${faker.lorem.word()}`);
+        callback(`#${fake.lorem.word()}`);
     },
 
     openNewWindow: (url: string, features: string) => {
@@ -151,36 +151,41 @@ export const MockGlobalMessagesService: IGlobalMessagesService = {
 };
 
 export const MockExtensionDataManager: IExtensionDataManager = {
-    getValue: async (key: string, documentOptions?: IDocumentOptions | undefined) => {
+    getValue: async <T>(key: string, documentOptions?: IDocumentOptions | undefined): Promise<T> => {
         console.log(`Getting value for key: ${key}, document options: ${JSON.stringify(documentOptions)}`);
-        return new Promise(() => faker.lorem.word());
+        return fake.lorem.word() as unknown as T;
     },
-    setValue: async (key: string, value: any, documentOptions?: IDocumentOptions) => {
+    setValue: async <T>(key: string, value: T, documentOptions?: IDocumentOptions): Promise<T> => {
         console.log(`Setting value for key: ${key} to: ${value} with document options: ${JSON.stringify(documentOptions)}`);
-        return new Promise(() => faker.lorem.word());
+        return value;
     },
     getDocument: async (collectionName: string, id: string, documentOptions?: IDocumentOptions) => {
         console.log(`Getting document with ID: ${id} from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`);
-        return new Promise(() => faker.lorem.paragraph());
+        return Promise.resolve(fake.lorem.paragraph());
     },
     getDocuments: async (collectionName: string, documentOptions?: IDocumentOptions) => {
         console.log(`Getting documents from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`);
-        return new Promise(() => [faker.lorem.paragraph()]);
+        return Promise.resolve([fake.lorem.paragraph()]);
     },
     setDocument: async (content: string) => {
         console.log(`Setting document to: ${content}`);
     },
     queryCollections: async (collections: ExtensionDataCollection[]) => {
         console.log(`Querying collections: ${JSON.stringify(collections)}`);
-        return new Promise(() => [faker.lorem.paragraph()]);
+        return collections;
     },
     queryCollectionsByName: async (collectionNames: string[]) => {
         console.log(`Querying collections by name: ${JSON.stringify(collectionNames)}`);
-        return new Promise(() => [faker.lorem.paragraph()]);
+        return collectionNames.map(collectionName => ({
+            collectionName,
+            scopeType: "Default",
+            scopeValue: "Current",
+            documents: [fake.lorem.paragraph()]
+        }));
     },
     createDocument: async (content: string) => {
         console.log(`Creating document with content: ${content}`);
-        return faker.lorem.word();
+        return fake.lorem.word();
     },
     deleteDocument: async (documentId: string) => {
         console.log(`Deleting document with ID: ${documentId}`);
@@ -193,6 +198,6 @@ export const MockExtensionDataManager: IExtensionDataManager = {
 export const MockExtensionDataService: IExtensionDataService = {
     getExtensionDataManager(extensionId: string, accessToken: string) {
         console.log(`Getting extension data manager for extension ID: ${extensionId} and access token: ${accessToken}`);
-        return new Promise(() => MockExtensionDataManager);
+        return Promise.resolve(MockExtensionDataManager);
     }
 };

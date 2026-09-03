@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     Release,
     ReleaseDefinition,
@@ -15,8 +15,8 @@ import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
-    id: faker.number.int(),
-    releaseId: faker.number.int(),
+    id: fake.number.int(),
+    releaseId: fake.number.int(),
     name,
     status: EnvironmentStatus.Succeeded,
     deploySteps: [],
@@ -24,8 +24,8 @@ export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
     variableGroups: [],
     rank: 1,
     owner: makeIdentityRef(),
-    createdOn: faker.date.recent(),
-    modifiedOn: faker.date.recent(),
+    createdOn: fake.date.recent(),
+    modifiedOn: fake.date.recent(),
     conditions: [],
     postDeployApprovals: [],
     preDeployApprovals: [],
@@ -33,16 +33,16 @@ export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
 } as unknown as ReleaseEnvironment);
 
 export const makeReleaseDefinition = (): ReleaseDefinition => ({
-    id: faker.number.int({ min: 1, max: 10_000 }),
-    name: faker.lorem.slug(),
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    name: fake.lorem.slug(),
     path: "\\",
-    revision: faker.number.int({ min: 1, max: 30 }),
-    url: faker.internet.url(),
+    revision: fake.number.int({ min: 1, max: 30 }),
+    url: fake.internet.url(),
     createdBy: makeIdentityRef(),
-    createdOn: faker.date.recent(),
+    createdOn: fake.date.recent(),
     modifiedBy: makeIdentityRef(),
-    modifiedOn: faker.date.recent(),
-    description: faker.lorem.sentence(),
+    modifiedOn: fake.date.recent(),
+    description: fake.lorem.sentence(),
     environments: [makeEnvironment("Dev"), makeEnvironment("QA"), makeEnvironment("Production")],
     artifacts: [],
     triggers: [],
@@ -53,61 +53,61 @@ export const makeReleaseDefinition = (): ReleaseDefinition => ({
 } as unknown as ReleaseDefinition);
 
 export const makeRelease = (): Release => ({
-    id: faker.number.int({ min: 1, max: 100_000 }),
-    name: `Release-${faker.number.int({ min: 1, max: 999 })}`,
+    id: fake.number.int({ min: 1, max: 100_000 }),
+    name: `Release-${fake.number.int({ min: 1, max: 999 })}`,
     status: ReleaseStatus.Active,
-    createdOn: faker.date.recent(),
-    modifiedOn: faker.date.recent(),
+    createdOn: fake.date.recent(),
+    modifiedOn: fake.date.recent(),
     modifiedBy: makeIdentityRef(),
     createdBy: makeIdentityRef(),
     environments: [makeEnvironment("Dev"), makeEnvironment("QA"), makeEnvironment("Production")],
     variables: {},
     variableGroups: [],
     artifacts: [],
-    releaseDefinition: { id: faker.number.int(), name: faker.lorem.slug() } as any,
-    description: faker.lorem.sentence(),
+    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
+    description: fake.lorem.sentence(),
     reason: 1 as any,
     releaseNameFormat: "Release-$(rev:r)",
     keepForever: false,
     definitionSnapshotRevision: 1,
-    logsContainerUrl: faker.internet.url(),
-    url: faker.internet.url(),
+    logsContainerUrl: fake.internet.url(),
+    url: fake.internet.url(),
     tags: [],
     projectReference: makeProjectReference() as any,
     _links: {} as any
 } as unknown as Release);
 
 export const makeDeployment = (): Deployment => ({
-    id: faker.number.int(),
-    release: { id: faker.number.int(), name: `Release-${faker.number.int()}` } as any,
-    releaseDefinition: { id: faker.number.int(), name: faker.lorem.slug() } as any,
-    releaseEnvironment: { id: faker.number.int(), name: "Production" } as any,
+    id: fake.number.int(),
+    release: { id: fake.number.int(), name: `Release-${fake.number.int()}` } as any,
+    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
+    releaseEnvironment: { id: fake.number.int(), name: "Production" } as any,
     deploymentStatus: DeploymentStatus.Succeeded,
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
-    queuedOn: faker.date.recent(),
-    startedOn: faker.date.recent(),
-    completedOn: faker.date.recent(),
+    queuedOn: fake.date.recent(),
+    startedOn: fake.date.recent(),
+    completedOn: fake.date.recent(),
     attempt: 1,
     reason: 1 as any,
     _links: {} as any
 } as unknown as Deployment);
 
 export const makeApproval = (): ReleaseApproval => ({
-    id: faker.number.int(),
-    release: { id: faker.number.int(), name: `Release-${faker.number.int()}` } as any,
-    releaseDefinition: { id: faker.number.int(), name: faker.lorem.slug() } as any,
-    releaseEnvironment: { id: faker.number.int(), name: "Production" } as any,
+    id: fake.number.int(),
+    release: { id: fake.number.int(), name: `Release-${fake.number.int()}` } as any,
+    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
+    releaseEnvironment: { id: fake.number.int(), name: "Production" } as any,
     approver: makeIdentityRef(),
     approvedBy: makeIdentityRef(),
     status: ApprovalStatus.Pending,
     approvalType: ApprovalType.PreDeploy,
     rank: 1,
     attempt: 1,
-    createdOn: faker.date.recent(),
-    modifiedOn: faker.date.recent(),
+    createdOn: fake.date.recent(),
+    modifiedOn: fake.date.recent(),
     comments: "",
-    url: faker.internet.url(),
+    url: fake.internet.url(),
     _links: {} as any
 } as unknown as ReleaseApproval);
 
