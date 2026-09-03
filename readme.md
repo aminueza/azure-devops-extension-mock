@@ -5,7 +5,6 @@ Jest mock for the [Azure DevOps Extension SDK](https://www.npmjs.com/package/azu
 [![npm](https://img.shields.io/npm/v/azure-devops-extension-mock)](https://www.npmjs.com/package/azure-devops-extension-mock)
 [![Node.js CI](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/node.js.yml/badge.svg)](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/node.js.yml)
 [![Security](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/security.yml/badge.svg)](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/security.yml)
-[![CodeQL](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/codeql.yml/badge.svg)](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/codeql.yml)
 
 ## Install
 
@@ -160,7 +159,8 @@ npm run audit:prod    # production dependency audit
 ```
 
 CI runs tests on Node 22 and 24 (`node.js.yml`), weekly `npm audit` and
-Gitleaks scans (`security.yml`), and CodeQL analysis (`codeql.yml`).
+Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
+scanning setup.
 
 ## Releasing
 

@@ -18,7 +18,6 @@ First release on npm.
 - Jest helpers `amd-transformer` and `setup-globals` for loading the AMD-only real package under Node.
 - Internal, dependency-free fixture generator with a `seed()` function for deterministic test data.
 - Release workflow publishing to npm with provenance via trusted publishing.
-- CodeQL analysis workflow.
 
 ### Changed
 
