@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     Build,
     BuildDefinition,
@@ -17,111 +17,111 @@ import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeBuildDefinition = (): BuildDefinition => ({
-    id: faker.number.int({ min: 1, max: 10_000 }),
-    name: faker.lorem.slug(),
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    name: fake.lorem.slug(),
     path: "\\",
-    revision: faker.number.int({ min: 1, max: 50 }),
+    revision: fake.number.int({ min: 1, max: 50 }),
     type: DefinitionType.Build,
     queueStatus: 0,
-    uri: faker.internet.url(),
-    url: faker.internet.url(),
+    uri: fake.internet.url(),
+    url: fake.internet.url(),
     project: makeProjectReference() as any,
     quality: DefinitionQuality.Definition,
     authoredBy: makeIdentityRef(),
     queue: {
-        id: faker.number.int(),
+        id: fake.number.int(),
         name: "Azure Pipelines",
-        url: faker.internet.url(),
-        pool: { id: faker.number.int(), name: "Azure Pipelines", isHosted: true }
+        url: fake.internet.url(),
+        pool: { id: fake.number.int(), name: "Azure Pipelines", isHosted: true }
     },
     process: { type: 2, yamlFilename: "azure-pipelines.yml" } as any,
     repository: {
-        id: faker.string.uuid(),
+        id: fake.string.uuid(),
         type: "TfsGit",
-        name: faker.lorem.slug(),
-        url: faker.internet.url(),
+        name: fake.lorem.slug(),
+        url: fake.internet.url(),
         defaultBranch: "refs/heads/main"
     } as any,
-    createdDate: faker.date.recent(),
+    createdDate: fake.date.recent(),
     _links: {} as any
 } as unknown as BuildDefinition);
 
 export const makeBuild = (): Build => ({
-    id: faker.number.int({ min: 1, max: 100_000 }),
-    buildNumber: `${faker.date.recent().getFullYear()}.${faker.number.int({ min: 1, max: 999 })}`,
+    id: fake.number.int({ min: 1, max: 100_000 }),
+    buildNumber: `${fake.date.recent().getFullYear()}.${fake.number.int({ min: 1, max: 999 })}`,
     status: BuildStatus.Completed,
     result: BuildResult.Succeeded,
     reason: BuildReason.Manual,
-    queueTime: faker.date.recent(),
-    startTime: faker.date.recent(),
-    finishTime: faker.date.recent(),
+    queueTime: fake.date.recent(),
+    startTime: fake.date.recent(),
+    finishTime: fake.date.recent(),
     sourceBranch: "refs/heads/main",
-    sourceVersion: faker.git.commitSha(),
-    url: faker.internet.url(),
-    uri: faker.internet.url(),
+    sourceVersion: fake.git.commitSha(),
+    url: fake.internet.url(),
+    uri: fake.internet.url(),
     definition: makeBuildDefinition() as BuildDefinitionReference,
     project: makeProjectReference() as any,
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
     lastChangedBy: makeIdentityRef(),
-    lastChangedDate: faker.date.recent(),
+    lastChangedDate: fake.date.recent(),
     logs: {
-        id: faker.number.int(),
+        id: fake.number.int(),
         type: "Container",
-        url: faker.internet.url()
+        url: fake.internet.url()
     } as any,
     repository: {
-        id: faker.string.uuid(),
+        id: fake.string.uuid(),
         type: "TfsGit"
     } as any,
     _links: {} as any
 } as unknown as Build);
 
 export const makeArtifact = (name = "drop"): BuildArtifact => ({
-    id: faker.number.int(),
+    id: fake.number.int(),
     name,
-    source: faker.string.uuid(),
+    source: fake.string.uuid(),
     resource: {
         type: "Container",
-        data: `#/${faker.number.int()}/${name}`,
+        data: `#/${fake.number.int()}/${name}`,
         properties: {},
-        url: faker.internet.url(),
-        downloadUrl: faker.internet.url()
+        url: fake.internet.url(),
+        downloadUrl: fake.internet.url()
     } as any
 } as unknown as BuildArtifact);
 
 export const makeTimelineRecord = (): TimelineRecord => ({
-    id: faker.string.uuid(),
-    parentId: faker.string.uuid(),
+    id: fake.string.uuid(),
+    parentId: fake.string.uuid(),
     type: "Task",
-    name: faker.lorem.slug(),
-    startTime: faker.date.recent(),
-    finishTime: faker.date.recent(),
+    name: fake.lorem.slug(),
+    startTime: fake.date.recent(),
+    finishTime: fake.date.recent(),
     state: 2 as any,
     result: 0 as any,
-    workerName: faker.lorem.slug(),
-    order: faker.number.int(),
-    log: { id: faker.number.int(), type: "Container", url: faker.internet.url() } as any,
-    changeId: faker.number.int(),
-    url: faker.internet.url()
+    workerName: fake.lorem.slug(),
+    order: fake.number.int(),
+    log: { id: fake.number.int(), type: "Container", url: fake.internet.url() } as any,
+    changeId: fake.number.int(),
+    url: fake.internet.url()
 } as unknown as TimelineRecord);
 
 export const makeTimeline = (): Timeline => ({
-    id: faker.string.uuid(),
-    changeId: faker.number.int(),
-    lastChangedBy: faker.string.uuid(),
-    lastChangedOn: faker.date.recent(),
+    id: fake.string.uuid(),
+    changeId: fake.number.int(),
+    lastChangedBy: fake.string.uuid(),
+    lastChangedOn: fake.date.recent(),
     records: Array.from({ length: 3 }, makeTimelineRecord),
-    url: faker.internet.url()
+    url: fake.internet.url()
 } as unknown as Timeline);
 
 export const makeChange = (): Change => ({
-    id: faker.git.commitSha(),
-    message: faker.git.commitMessage(),
+    id: fake.git.commitSha(),
+    message: fake.git.commitMessage(),
     type: "TfsGit",
     author: makeIdentityRef(),
-    timestamp: faker.date.recent(),
-    location: faker.internet.url()
+    timestamp: fake.date.recent(),
+    location: fake.internet.url()
 } as unknown as Change);
 
 export const buildDefinitions = Array.from({ length: 5 }, makeBuildDefinition);

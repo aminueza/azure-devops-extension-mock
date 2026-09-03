@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     Dashboard,
     DashboardGroup,
@@ -10,54 +10,54 @@ import {
 } from "azure-devops-extension-api/Dashboard";
 
 export const makeWidget = (name = "Team Members"): Widget => ({
-    id: faker.string.uuid(),
+    id: fake.string.uuid(),
     name,
-    contributionId: `ms.vss-dashboards-web.${faker.lorem.slug()}-widget`,
+    contributionId: `ms.vss-dashboards-web.${fake.lorem.slug()}-widget`,
     position: {
-        row: faker.number.int({ min: 1, max: 4 }),
-        column: faker.number.int({ min: 1, max: 4 })
+        row: fake.number.int({ min: 1, max: 4 }),
+        column: fake.number.int({ min: 1, max: 4 })
     } as WidgetPosition,
     size: {
-        rowSpan: faker.number.int({ min: 1, max: 3 }),
-        columnSpan: faker.number.int({ min: 1, max: 3 })
+        rowSpan: fake.number.int({ min: 1, max: 3 }),
+        columnSpan: fake.number.int({ min: 1, max: 3 })
     } as WidgetSize,
     settings: "{}",
     settingsVersion: { major: 1, minor: 0, patch: 0, isTest: false } as any,
-    url: faker.internet.url(),
-    typeId: faker.string.uuid(),
+    url: fake.internet.url(),
+    typeId: fake.string.uuid(),
     dashboard: null as any,
     lightboxOptions: { width: 800, height: 600, resizable: false } as LightboxOptions,
-    loadingImageUrl: faker.image.url(),
-    eTag: faker.string.uuid(),
+    loadingImageUrl: fake.image.url(),
+    eTag: fake.string.uuid(),
     isNameConfigurable: true,
     isEnabled: true,
     _links: {} as any
 } as unknown as Widget);
 
 export const makeDashboard = (name = "Overview"): Dashboard => ({
-    id: faker.string.uuid(),
+    id: fake.string.uuid(),
     name,
-    description: faker.lorem.sentence(),
-    position: faker.number.int({ min: 0, max: 5 }),
+    description: fake.lorem.sentence(),
+    position: fake.number.int({ min: 0, max: 5 }),
     refreshInterval: 0,
-    ownerId: faker.string.uuid(),
+    ownerId: fake.string.uuid(),
     widgets: Array.from({ length: 3 }, () => makeWidget()),
-    url: faker.internet.url(),
-    eTag: faker.string.uuid(),
+    url: fake.internet.url(),
+    eTag: fake.string.uuid(),
     dashboardScope: DashboardScope.Project_Team,
-    groupId: faker.string.uuid(),
+    groupId: fake.string.uuid(),
     _links: {} as any
 } as unknown as Dashboard);
 
 export const makeDashboardGroup = (): DashboardGroup => ({
     dashboardEntries: Array.from({ length: 2 }, () => ({
-        id: faker.string.uuid(),
-        name: faker.lorem.slug(),
-        position: faker.number.int()
+        id: fake.string.uuid(),
+        name: fake.lorem.slug(),
+        position: fake.number.int()
     } as unknown as Dashboard)),
     permission: 0 as any,
     teamDashboardPermission: 0 as any,
-    url: faker.internet.url(),
+    url: fake.internet.url(),
     _links: {} as any
 } as unknown as DashboardGroup);
 

@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     Pipeline,
     Run,
@@ -11,32 +11,32 @@ import {
 } from "azure-devops-extension-api/Pipelines";
 
 export const makePipeline = (): Pipeline => ({
-    id: faker.number.int({ min: 1, max: 10_000 }),
-    name: faker.lorem.slug(),
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    name: fake.lorem.slug(),
     folder: "\\",
-    revision: faker.number.int({ min: 1, max: 20 }),
-    url: faker.internet.url(),
+    revision: fake.number.int({ min: 1, max: 20 }),
+    url: fake.internet.url(),
     configuration: {
         type: "yaml" as any,
         path: "azure-pipelines.yml",
         repository: {
-            id: faker.string.uuid(),
+            id: fake.string.uuid(),
             type: "azureReposGit",
-            fullName: `${faker.lorem.slug()}/${faker.lorem.slug()}`
+            fullName: `${fake.lorem.slug()}/${fake.lorem.slug()}`
         } as any
     } as any,
     _links: {} as any
 } as unknown as Pipeline);
 
 export const makeRun = (pipelineId = 1): Run => ({
-    id: faker.number.int({ min: 1, max: 100_000 }),
-    name: `${faker.date.recent().getFullYear()}.${faker.number.int()}`,
+    id: fake.number.int({ min: 1, max: 100_000 }),
+    name: `${fake.date.recent().getFullYear()}.${fake.number.int()}`,
     state: RunState.Completed,
     result: RunResult.Succeeded,
-    createdDate: faker.date.recent(),
-    finishedDate: faker.date.recent(),
-    url: faker.internet.url(),
-    pipeline: { id: pipelineId, name: faker.lorem.slug() } as Pipeline,
+    createdDate: fake.date.recent(),
+    finishedDate: fake.date.recent(),
+    url: fake.internet.url(),
+    pipeline: { id: pipelineId, name: fake.lorem.slug() } as Pipeline,
     resources: {} as any,
     variables: {},
     _links: {} as any
@@ -45,31 +45,31 @@ export const makeRun = (pipelineId = 1): Run => ({
 export const makeArtifact = (name = "drop"): Artifact => ({
     name,
     signedContent: {
-        url: faker.internet.url(),
-        signatureExpires: faker.date.future()
+        url: fake.internet.url(),
+        signatureExpires: fake.date.future()
     },
-    url: faker.internet.url()
+    url: fake.internet.url()
 } as unknown as Artifact);
 
 export const makeLog = (id = 1): Log => ({
     id,
-    createdOn: faker.date.recent(),
-    lastChangedOn: faker.date.recent(),
-    lineCount: faker.number.int({ min: 1, max: 5000 }),
-    signedContent: { url: faker.internet.url(), signatureExpires: faker.date.future() },
-    url: faker.internet.url()
+    createdOn: fake.date.recent(),
+    lastChangedOn: fake.date.recent(),
+    lineCount: fake.number.int({ min: 1, max: 5000 }),
+    signedContent: { url: fake.internet.url(), signatureExpires: fake.date.future() },
+    url: fake.internet.url()
 } as unknown as Log);
 
 export const pipelines: Pipeline[] = Array.from({ length: 5 }, makePipeline);
 export const runs: Run[] = Array.from({ length: 8 }, () => makeRun(pipelines[0].id));
 export const logCollection: LogCollection = {
     logs: [makeLog(1), makeLog(2), makeLog(3)],
-    url: faker.internet.url(),
-    signedContent: { url: faker.internet.url(), signatureExpires: faker.date.future() } as any
+    url: fake.internet.url(),
+    signedContent: { url: fake.internet.url(), signatureExpires: fake.date.future() } as any
 } as LogCollection;
 
 export const makePreviewRun = (): PreviewRun => ({
     finalYaml: "stages:\n- stage: Build\n  jobs:\n  - job: Build\n    steps:\n    - script: echo Hello",
-    id: faker.number.int(),
-    name: `preview-${faker.lorem.slug()}`
+    id: fake.number.int(),
+    name: `preview-${fake.lorem.slug()}`
 } as unknown as PreviewRun);

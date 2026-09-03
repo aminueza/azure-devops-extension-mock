@@ -47,8 +47,11 @@ export function mockClient<T extends object>(
                 return (overrides as any)[prop];
             }
             const value = Reflect.get(target, prop, receiver);
+            if (prop === "TYPE") {
+                return value;
+            }
             if (typeof value === "function") {
-                return value.bind(target);
+                return registered ? value.bind(target) : (..._args: unknown[]) => Promise.resolve(undefined);
             }
             if (value !== undefined) {
                 return value;

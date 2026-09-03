@@ -1,7 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { Account, AccountCreateInfoInternal, AccountsRestClient } from "azure-devops-extension-api/Accounts";
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import { accounts } from "./Data";
 
 /**
@@ -18,12 +18,12 @@ export class MockAccountsRestClient extends RestClientBase {
         usePrecreated?: boolean
     ): Promise<Account> {
         console.log(`Creating account with info: ${JSON.stringify(info)}, usePrecreated: ${usePrecreated}`)
-        return new Promise((resolve) => resolve(faker.helpers.arrayElement(accounts)));
+        return new Promise((resolve) => resolve(fake.helpers.arrayElement(accounts)));
     }
 
     getAccount(accountId: string): Promise<Account> {
         console.log(`Getting account with id: ${accountId}`)
-        return new Promise((resolve) => resolve(faker.helpers.arrayElement(accounts)));
+        return new Promise((resolve) => resolve(fake.helpers.arrayElement(accounts)));
     }
 
     getAccounts(

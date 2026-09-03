@@ -75,7 +75,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(agentQueues);
     }
 
-    getAgentQueue(_project: string, queueId: number): Promise<TaskAgentQueue> {
+    getAgentQueue(queueId: number, _project?: string): Promise<TaskAgentQueue> {
         const found = agentQueues.find(q => q.id === queueId);
         return Promise.resolve(found ?? { ...makeAgentQueue(), id: queueId });
     }

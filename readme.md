@@ -2,6 +2,7 @@
 
 Jest mock for the [Azure DevOps Extension SDK](https://www.npmjs.com/package/azure-devops-extension-sdk) and [Azure DevOps Extension API](https://www.npmjs.com/package/azure-devops-extension-api). Lets you unit-test Azure DevOps web extensions without a live organization, project, or network.
 
+[![npm](https://img.shields.io/npm/v/azure-devops-extension-mock)](https://www.npmjs.com/package/azure-devops-extension-mock)
 [![Node.js CI](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/node.js.yml/badge.svg)](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/node.js.yml)
 [![Security](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/security.yml/badge.svg)](https://github.com/aminueza/azure-devops-extension-mock/actions/workflows/security.yml)
 
@@ -11,10 +12,12 @@ Jest mock for the [Azure DevOps Extension SDK](https://www.npmjs.com/package/azu
 npm install --save-dev azure-devops-extension-mock
 ```
 
+The package has no runtime dependencies. Requires Node.js 20.19 or newer.
+
 Peer dependencies (you almost certainly already have them):
 
 - `azure-devops-extension-api` ≥ 4
-- `azure-devops-extension-sdk` ≥ 4
+- `azure-devops-extension-sdk` ≥ 4 (v5 supported)
 - `jest` ≥ 29 (optional — only if you're testing with jest)
 
 ## Quick start
@@ -44,7 +47,7 @@ expect(repos.length).toBeGreaterThan(0);
 
 ## Coverage
 
-The following REST clients ship with ready-made mocks and faker-backed
+The following REST clients ship with ready-made mocks and generated
 fixtures. Every other Azure DevOps client is still callable through
 `mockClient()` — methods will resolve to `undefined` unless you override them.
 
@@ -108,6 +111,17 @@ for unknown ids.
 Re-exported from `azure-devops-extension-mock/sdk`, matching the real SDK's
 shape with randomly-generated fixture data.
 
+### Deterministic fixtures
+
+Fixture data is random by default. Call `seed` to make a test run
+reproducible:
+
+```ts
+import { fake } from "azure-devops-extension-mock/fixtures";
+
+beforeEach(() => fake.seed(1234));
+```
+
 ## Using with jest
 
 Two things to wire up when testing an extension:
@@ -139,13 +153,23 @@ module.exports = {
 
 ```bash
 npm ci
-npm test        # runs jest (SDK + API mocks + registry + overrides)
-npm run build   # emits dist/
-npm audit       # production dependency audit
+npm test              # runs jest with coverage (90% threshold enforced)
+npm run build         # emits dist/
+npm run audit:prod    # production dependency audit
 ```
 
-CI runs tests on Node 20 and 22, plus weekly `npm audit`, CodeQL, and
-Gitleaks scans in `.github/workflows/security.yml`.
+CI runs tests on Node 22 and 24 (`node.js.yml`), weekly `npm audit` and
+Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
+scanning setup.
+
+## Releasing
+
+1. Update the version in `package.json` and move the `Unreleased` notes in
+   `CHANGELOG.md` under that version.
+2. Merge to `main`, then push a tag matching the version: `git tag v1.2.3 && git push origin v1.2.3`.
+3. `release.yml` builds, tests, audits, publishes to npm with provenance
+   via [trusted publishing](https://docs.npmjs.com/trusted-publishers), and
+   creates the GitHub release. No npm token is stored in the repository.
 
 ## License
 

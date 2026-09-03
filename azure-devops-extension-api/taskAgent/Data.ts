@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     TaskAgent,
     TaskAgentPool,
@@ -14,18 +14,18 @@ import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef } from "../core/Data";
 
 export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
-    id: faker.number.int({ min: 1, max: 1000 }),
+    id: fake.number.int({ min: 1, max: 1000 }),
     name,
-    scope: faker.string.uuid(),
+    scope: fake.string.uuid(),
     isHosted: name.startsWith("Azure"),
     poolType: TaskAgentPoolType.Automation,
-    size: faker.number.int({ min: 1, max: 50 }),
+    size: fake.number.int({ min: 1, max: 50 }),
     agentCloudId: 0,
     isLegacy: false,
     autoProvision: false,
     autoSize: false,
     autoUpdate: true,
-    createdOn: faker.date.past(),
+    createdOn: fake.date.past(),
     createdBy: makeIdentityRef(),
     owner: makeIdentityRef(),
     targetSize: 0,
@@ -33,21 +33,21 @@ export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
 } as unknown as TaskAgentPool);
 
 export const makeAgent = (name?: string): TaskAgent => ({
-    id: faker.number.int({ min: 1, max: 10_000 }),
-    name: name ?? `agent-${faker.lorem.slug()}`,
-    version: `${faker.number.int({ min: 2, max: 3 })}.218.0`,
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    name: name ?? `agent-${fake.lorem.slug()}`,
+    version: `${fake.number.int({ min: 2, max: 3 })}.218.0`,
     status: TaskAgentStatus.Online,
     enabled: true,
-    osDescription: faker.helpers.arrayElement([
+    osDescription: fake.helpers.arrayElement([
         "Linux 5.15.0",
         "Microsoft Windows 10.0.20348",
         "Darwin 22.4.0"
     ]),
     provisioningState: "Provisioned",
     accessPoint: "CodexAccessMapping",
-    createdOn: faker.date.past(),
+    createdOn: fake.date.past(),
     maxParallelism: 1,
-    statusChangedOn: faker.date.recent(),
+    statusChangedOn: fake.date.recent(),
     systemCapabilities: {
         "Agent.OS": "Linux",
         "Agent.OSArchitecture": "X64"
@@ -57,11 +57,11 @@ export const makeAgent = (name?: string): TaskAgent => ({
 } as unknown as TaskAgent);
 
 export const makeAgentQueue = (name = "Default"): TaskAgentQueue => ({
-    id: faker.number.int(),
+    id: fake.number.int(),
     name,
-    projectId: faker.string.uuid(),
+    projectId: fake.string.uuid(),
     pool: {
-        id: faker.number.int(),
+        id: fake.number.int(),
         name,
         isHosted: name.startsWith("Azure"),
         poolType: TaskAgentPoolType.Automation
@@ -70,27 +70,27 @@ export const makeAgentQueue = (name = "Default"): TaskAgentQueue => ({
 } as unknown as TaskAgentQueue);
 
 export const makeTaskGroup = (): TaskGroup => ({
-    id: faker.string.uuid(),
-    name: faker.lorem.slug(),
-    description: faker.lorem.sentence(),
+    id: fake.string.uuid(),
+    name: fake.lorem.slug(),
+    description: fake.lorem.sentence(),
     version: { major: 1, minor: 0, patch: 0, isTest: false } as any,
     revision: 1,
     tasks: [],
     inputs: [],
     outputs: [],
     createdBy: makeIdentityRef(),
-    createdOn: faker.date.past(),
+    createdOn: fake.date.past(),
     modifiedBy: makeIdentityRef(),
-    modifiedOn: faker.date.recent(),
-    author: faker.person.fullName(),
-    owner: faker.person.fullName(),
+    modifiedOn: fake.date.recent(),
+    author: fake.person.fullName(),
+    owner: fake.person.fullName(),
     _links: {} as any
 } as unknown as TaskGroup);
 
 export const makeVariableGroup = (name?: string): VariableGroup => ({
-    id: faker.number.int(),
-    name: name ?? faker.lorem.slug(),
-    description: faker.lorem.sentence(),
+    id: fake.number.int(),
+    name: name ?? fake.lorem.slug(),
+    description: fake.lorem.sentence(),
     type: "Vsts",
     providerData: undefined as unknown as VariableGroupProviderData,
     variables: {
@@ -98,21 +98,21 @@ export const makeVariableGroup = (name?: string): VariableGroup => ({
     } as any,
     variableGroupProjectReferences: [],
     createdBy: makeIdentityRef(),
-    createdOn: faker.date.past(),
+    createdOn: fake.date.past(),
     modifiedBy: makeIdentityRef(),
-    modifiedOn: faker.date.recent(),
+    modifiedOn: fake.date.recent(),
     isShared: false
 } as unknown as VariableGroup);
 
 export const makeDeploymentGroup = (): DeploymentGroup => ({
-    id: faker.number.int(),
-    name: faker.lorem.slug(),
-    description: faker.lorem.sentence(),
-    project: { id: faker.string.uuid(), name: faker.company.name() } as any,
+    id: fake.number.int(),
+    name: fake.lorem.slug(),
+    description: fake.lorem.sentence(),
+    project: { id: fake.string.uuid(), name: fake.company.name() } as any,
     pool: makeAgentPool() as any,
-    machineCount: faker.number.int({ min: 1, max: 50 }),
+    machineCount: fake.number.int({ min: 1, max: 50 }),
     machines: [],
-    poolId: faker.number.int(),
+    poolId: fake.number.int(),
     _links: {} as any
 } as unknown as DeploymentGroup);
 

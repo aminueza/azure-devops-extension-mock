@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     Process,
     ProcessType,
@@ -15,95 +15,95 @@ import { PagedList, IdentityRef, TeamMember } from "azure-devops-extension-api/W
 import { OperationReference, OperationStatus } from "azure-devops-extension-api/Operations";
 
 export const makeIdentityRef = (): IdentityRef => ({
-    id: faker.string.uuid(),
-    displayName: faker.person.fullName(),
-    uniqueName: faker.internet.email(),
-    descriptor: `aad.${faker.string.alphanumeric(16)}`,
-    imageUrl: faker.image.avatar(),
-    url: faker.internet.url(),
-    directoryAlias: faker.internet.username(),
+    id: fake.string.uuid(),
+    displayName: fake.person.fullName(),
+    uniqueName: fake.internet.email(),
+    descriptor: `aad.${fake.string.alphanumeric(16)}`,
+    imageUrl: fake.image.avatar(),
+    url: fake.internet.url(),
+    directoryAlias: fake.internet.username(),
     inactive: false,
     isAadIdentity: true,
     isContainer: false,
     isDeletedInOrigin: false,
-    profileUrl: faker.internet.url(),
+    profileUrl: fake.internet.url(),
     _links: {} as any
 });
 
 export const makeProjectReference = (): TeamProjectReference => ({
-    id: faker.string.uuid(),
-    abbreviation: faker.string.alpha({ length: 4 }).toUpperCase(),
-    name: faker.company.name(),
-    description: faker.lorem.sentence(),
-    url: faker.internet.url(),
+    id: fake.string.uuid(),
+    abbreviation: fake.string.alpha({ length: 4 }).toUpperCase(),
+    name: fake.company.name(),
+    description: fake.lorem.sentence(),
+    url: fake.internet.url(),
     state: "wellFormed" as any,
-    revision: faker.number.int({ min: 1, max: 100 }),
-    visibility: faker.helpers.arrayElement([
+    revision: fake.number.int({ min: 1, max: 100 }),
+    visibility: fake.helpers.arrayElement([
         ProjectVisibility.Private,
         ProjectVisibility.Public
     ]),
-    lastUpdateTime: faker.date.recent(),
-    defaultTeamImageUrl: faker.image.avatar()
+    lastUpdateTime: fake.date.recent(),
+    defaultTeamImageUrl: fake.image.avatar()
 } as TeamProjectReference);
 
 export const makeProject = (): TeamProject => ({
     ...makeProjectReference(),
     capabilities: {
         versioncontrol: { sourceControlType: "Git" },
-        processTemplate: { templateName: "Agile", templateTypeId: faker.string.uuid() }
+        processTemplate: { templateName: "Agile", templateTypeId: fake.string.uuid() }
     },
     defaultTeam: {
-        id: faker.string.uuid(),
-        name: `${faker.company.name()} Team`,
-        url: faker.internet.url()
+        id: fake.string.uuid(),
+        name: `${fake.company.name()} Team`,
+        url: fake.internet.url()
     } as WebApiTeamRef,
     _links: {} as any
 } as unknown as TeamProject);
 
 export const makeTeam = (): WebApiTeam => ({
-    id: faker.string.uuid(),
-    name: `${faker.company.name()} Team`,
-    description: faker.lorem.sentence(),
-    url: faker.internet.url(),
-    identityUrl: faker.internet.url(),
-    projectId: faker.string.uuid(),
-    projectName: faker.company.name(),
+    id: fake.string.uuid(),
+    name: `${fake.company.name()} Team`,
+    description: fake.lorem.sentence(),
+    url: fake.internet.url(),
+    identityUrl: fake.internet.url(),
+    projectId: fake.string.uuid(),
+    projectName: fake.company.name(),
     identity: makeIdentityRef()
 } as unknown as WebApiTeam);
 
 export const makeTeamMember = (): TeamMember => ({
     identity: makeIdentityRef(),
-    isTeamAdmin: faker.datatype.boolean()
+    isTeamAdmin: fake.datatype.boolean()
 });
 
 export const makeProcess = (): Process => ({
-    id: faker.string.uuid(),
-    name: faker.helpers.arrayElement(["Agile", "Scrum", "CMMI", "Basic"]),
-    description: faker.lorem.sentence(),
-    url: faker.internet.url(),
-    isDefault: faker.datatype.boolean(),
+    id: fake.string.uuid(),
+    name: fake.helpers.arrayElement(["Agile", "Scrum", "CMMI", "Basic"]),
+    description: fake.lorem.sentence(),
+    url: fake.internet.url(),
+    isDefault: fake.datatype.boolean(),
     type: ProcessType.System,
     _links: {} as any
 } as unknown as Process);
 
 export const makeOperationReference = (): OperationReference => ({
-    id: faker.string.uuid(),
-    pluginId: faker.string.uuid(),
+    id: fake.string.uuid(),
+    pluginId: fake.string.uuid(),
     status: OperationStatus.Succeeded,
-    url: faker.internet.url()
+    url: fake.internet.url()
 });
 
 export const makeProjectCollectionReference = (): TeamProjectCollectionReference => ({
-    id: faker.string.uuid(),
-    name: faker.company.name(),
-    url: faker.internet.url(),
-    avatarUrl: faker.image.avatar()
+    id: fake.string.uuid(),
+    name: fake.company.name(),
+    url: fake.internet.url(),
+    avatarUrl: fake.image.avatar()
 } as TeamProjectCollectionReference);
 
 export const makeTagDefinition = (): WebApiTagDefinition => ({
-    id: faker.string.uuid(),
-    name: faker.lorem.word(),
-    url: faker.internet.url(),
+    id: fake.string.uuid(),
+    name: fake.lorem.word(),
+    url: fake.internet.url(),
     active: true
 });
 
@@ -117,5 +117,5 @@ export const processes: Process[] = Array.from({ length: 4 }, makeProcess);
 export const teamMembers: TeamMember[] = Array.from({ length: 5 }, makeTeamMember);
 export const projectCollections: TeamProjectCollection[] = Array.from({ length: 2 }, () => ({
     ...makeProjectCollectionReference(),
-    description: faker.lorem.sentence()
+    description: fake.lorem.sentence()
 } as unknown as TeamProjectCollection));

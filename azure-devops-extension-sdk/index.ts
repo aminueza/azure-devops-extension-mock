@@ -7,7 +7,7 @@ import {
   ITeamContext,
   IPageContext,
 } from "azure-devops-extension-sdk/SDK";
-import { faker } from "@faker-js/faker";
+import { fake } from "../azure-devops-extension-api/common/fixtures";
 import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 
 /**
@@ -62,11 +62,11 @@ export const getConfiguration = (params?: { [key: string]: any }) => {
   return params
     ? params
     : {
-      id: faker.string.uuid(),
-      version: faker.system.semver(),
-      name: faker.lorem.slug(),
-      publisherId: faker.lorem.slug(),
-      commitSha: faker.git.commitSha(),
+      id: fake.string.uuid(),
+      version: fake.system.semver(),
+      name: fake.lorem.slug(),
+      publisherId: fake.lorem.slug(),
+      commitSha: fake.git.commitSha(),
     };
 };
 
@@ -74,7 +74,7 @@ export const getConfiguration = (params?: { [key: string]: any }) => {
  * Mocking SDK.getContributionId returns some Id
  */
 export function getContributionId() {
-  return faker.lorem.slug();
+  return fake.lorem.slug();
 }
 
 /**
@@ -82,11 +82,11 @@ export function getContributionId() {
  */
 export const getUser = (): IUserContext => {
   return {
-    descriptor: "aad." + Buffer.from(faker.word.noun()).toString("base64"),
-    id: faker.string.uuid(),
-    name: faker.internet.exampleEmail(),
-    displayName: faker.person.firstName() + " " + faker.person.lastName(),
-    imageUrl: faker.image.avatar(),
+    descriptor: "aad." + Buffer.from(fake.word.noun()).toString("base64"),
+    id: fake.string.uuid(),
+    name: fake.internet.exampleEmail(),
+    displayName: fake.person.firstName() + " " + fake.person.lastName(),
+    imageUrl: fake.image.avatar(),
   };
 };
 
@@ -95,11 +95,11 @@ export const getUser = (): IUserContext => {
  */
 export const getHost = (): IHostContext => {
   return {
-    id: faker.lorem.slug(),
-    name: faker.lorem.slug(),
-    serviceVersion: faker.system.semver(),
-    isHosted: faker.datatype.boolean(),
-    type: faker.helpers.arrayElement([
+    id: fake.lorem.slug(),
+    name: fake.lorem.slug(),
+    serviceVersion: fake.system.semver(),
+    isHosted: fake.datatype.boolean(),
+    type: fake.helpers.arrayElement([
       HostType.Unknown,
       HostType.Deployment,
       HostType.Enterprise,
@@ -113,10 +113,10 @@ export const getHost = (): IHostContext => {
  * */
 export const getExtensionContext = (): IExtensionContext => {
   return {
-    id: faker.lorem.slug(),
-    publisherId: faker.lorem.slug(),
-    extensionId: faker.lorem.slug(),
-    version: faker.system.semver(),
+    id: fake.lorem.slug(),
+    publisherId: fake.lorem.slug(),
+    extensionId: fake.lorem.slug(),
+    version: fake.system.semver(),
   };
 };
 
@@ -125,8 +125,8 @@ export const getExtensionContext = (): IExtensionContext => {
  */
 export const getTeamContext = (): ITeamContext => {
   return {
-    id: faker.string.uuid(),
-    name: faker.lorem.slug(),
+    id: fake.string.uuid(),
+    name: fake.lorem.slug(),
   };
 };
 
@@ -139,18 +139,18 @@ export const getPageContext = (): IPageContext => {
     timeZonesConfiguration: {
       daylightSavingsAdjustments: [
         {
-          offset: faker.number.int(),
-          start: faker.date.recent(),
+          offset: fake.number.int(),
+          start: fake.date.recent(),
         },
       ],
     },
     globalization: {
-      culture: faker.lorem.slug(),
-      explicitTheme: faker.lorem.slug(),
-      theme: faker.lorem.slug(),
-      timeZoneId: faker.lorem.slug(),
-      timezoneOffset: faker.number.int(),
-      typeAheadDisabled: faker.datatype.boolean(),
+      culture: fake.lorem.slug(),
+      explicitTheme: fake.lorem.slug(),
+      theme: fake.lorem.slug(),
+      timeZoneId: fake.lorem.slug(),
+      timezoneOffset: fake.number.int(),
+      typeAheadDisabled: fake.datatype.boolean(),
     },
   };
 };
@@ -161,8 +161,8 @@ export const getPageContext = (): IPageContext => {
 export const getWebContext = () => {
   return {
     project: {
-      id: faker.string.uuid(),
-      name: faker.lorem.slug(),
+      id: fake.string.uuid(),
+      name: fake.lorem.slug(),
     } as ContextIdentifier,
     team: getTeamContext(),
   };
@@ -191,14 +191,14 @@ export const unregister = (instanceId: string) => {
  * */
 export const getAppToken = (): Promise<string> =>
   new Promise<string>((resolve) =>
-    resolve(Buffer.from(faker.string.uuid()).toString("base64"))
+    resolve(Buffer.from(fake.string.uuid()).toString("base64"))
   );
 /**
  * Mocking SDK.notifyLoadSucceeded does nothing
  * */
 export const getAccessToken = (): Promise<string> =>
   new Promise<string>((resolve) =>
-    resolve(Buffer.from(faker.string.uuid()).toString("base64"))
+    resolve(Buffer.from(fake.string.uuid()).toString("base64"))
   );
 
 /**
@@ -214,3 +214,18 @@ export const resize = (width?: number, height?: number) => {
 export const applyTheme = (themeData: { [varName: string]: string }) => {
   console.log(`Applying theme: ${JSON.stringify(themeData)}`);
 };
+
+let nestedAppAuthEnabled = false;
+
+export const enableNestedAppAuth = (): Promise<void> => {
+  nestedAppAuthEnabled = true;
+  console.log("Enabling nested app auth");
+  return Promise.resolve();
+};
+
+export const disableNestedAppAuth = (): void => {
+  nestedAppAuthEnabled = false;
+  console.log("Disabling nested app auth");
+};
+
+export const isNestedAppAuthEnabled = (): boolean => nestedAppAuthEnabled;

@@ -121,8 +121,8 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     // Logs — return empty content. Callers typically use the `logs` link on the build.
-    getBuildLog(): Promise<ArrayBuffer> {
-        return Promise.resolve(new ArrayBuffer(0));
+    getBuildLog(): Promise<string> {
+        return Promise.resolve(["Starting: Build", "Finishing: Build"].join("\n"));
     }
 
     getBuildLogs(): Promise<any[]> {

@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { fake } from "../common/fixtures";
 import {
     WorkItem,
     WorkItemType,
@@ -15,40 +15,40 @@ const states = ["New", "Active", "Resolved", "Closed", "Removed"];
 const types = ["Bug", "Task", "User Story", "Feature", "Epic"];
 
 export const makeWorkItemReference = (): WorkItemReference => ({
-    id: faker.number.int({ min: 1, max: 10_000 }),
-    url: faker.internet.url()
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    url: fake.internet.url()
 });
 
 export const makeWorkItem = (id?: number): WorkItem => {
-    const workItemId = id ?? faker.number.int({ min: 1, max: 10_000 });
+    const workItemId = id ?? fake.number.int({ min: 1, max: 10_000 });
     return {
         id: workItemId,
-        rev: faker.number.int({ min: 1, max: 10 }),
-        url: faker.internet.url(),
+        rev: fake.number.int({ min: 1, max: 10 }),
+        url: fake.internet.url(),
         fields: {
             "System.Id": workItemId,
-            "System.Title": faker.lorem.sentence(),
-            "System.State": faker.helpers.arrayElement(states),
-            "System.WorkItemType": faker.helpers.arrayElement(types),
+            "System.Title": fake.lorem.sentence(),
+            "System.State": fake.helpers.arrayElement(states),
+            "System.WorkItemType": fake.helpers.arrayElement(types),
             "System.AssignedTo": {
-                displayName: faker.person.fullName(),
-                uniqueName: faker.internet.email(),
-                id: faker.string.uuid()
+                displayName: fake.person.fullName(),
+                uniqueName: fake.internet.email(),
+                id: fake.string.uuid()
             },
-            "System.CreatedBy": faker.person.fullName(),
-            "System.CreatedDate": faker.date.past().toISOString(),
-            "System.ChangedDate": faker.date.recent().toISOString(),
-            "System.AreaPath": `${faker.company.name()}\\Area`,
-            "System.IterationPath": `${faker.company.name()}\\Sprint 1`,
-            "System.TeamProject": faker.company.name(),
+            "System.CreatedBy": fake.person.fullName(),
+            "System.CreatedDate": fake.date.past().toISOString(),
+            "System.ChangedDate": fake.date.recent().toISOString(),
+            "System.AreaPath": `${fake.company.name()}\\Area`,
+            "System.IterationPath": `${fake.company.name()}\\Sprint 1`,
+            "System.TeamProject": fake.company.name(),
             "System.Tags": "",
-            "System.Description": faker.lorem.paragraph()
+            "System.Description": fake.lorem.paragraph()
         },
         relations: [],
         _links: {
-            self: { href: faker.internet.url() },
-            html: { href: faker.internet.url() },
-            workItemType: { href: faker.internet.url() }
+            self: { href: fake.internet.url() },
+            html: { href: fake.internet.url() },
+            workItemType: { href: fake.internet.url() }
         } as any
     } as unknown as WorkItem;
 };
@@ -56,11 +56,11 @@ export const makeWorkItem = (id?: number): WorkItem => {
 export const makeWorkItemType = (name = "Bug"): WorkItemType => ({
     name,
     referenceName: `Microsoft.VSTS.WorkItemTypes.${name.replace(/\s/g, "")}`,
-    description: faker.lorem.sentence(),
-    color: faker.color.rgb({ format: "hex" }).slice(1),
+    description: fake.lorem.sentence(),
+    color: fake.color.rgb({ format: "hex" }).slice(1),
     icon: {
         id: name.toLowerCase(),
-        url: faker.internet.url()
+        url: fake.internet.url()
     } as any,
     isDisabled: false,
     xmlForm: "",
@@ -69,30 +69,30 @@ export const makeWorkItemType = (name = "Bug"): WorkItemType => ({
     transitions: {},
     states: states.map(s => ({
         name: s,
-        color: faker.color.rgb({ format: "hex" }).slice(1),
+        color: fake.color.rgb({ format: "hex" }).slice(1),
         category: s
     } as unknown as WorkItemStateColor)),
-    url: faker.internet.url(),
+    url: fake.internet.url(),
     _links: {} as any
 } as unknown as WorkItemType);
 
-export const makeQuery = (id = faker.string.uuid()): QueryHierarchyItem => ({
+export const makeQuery = (id = fake.string.uuid()): QueryHierarchyItem => ({
     id,
-    name: faker.lorem.words(3),
-    path: `Shared Queries/${faker.lorem.word()}`,
+    name: fake.lorem.words(3),
+    path: `Shared Queries/${fake.lorem.word()}`,
     isFolder: false,
     isPublic: true,
     hasChildren: false,
     queryType: QueryType.Flat,
     wiql: "SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project",
-    url: faker.internet.url(),
+    url: fake.internet.url(),
     _links: {} as any
 } as unknown as QueryHierarchyItem);
 
 export const makeQueryResult = (): WorkItemQueryResult => ({
     queryType: QueryType.Flat,
     queryResultType: QueryResultType.WorkItem,
-    asOf: faker.date.recent(),
+    asOf: fake.date.recent(),
     columns: [
         { referenceName: "System.Id", name: "ID", url: "" },
         { referenceName: "System.Title", name: "Title", url: "" },
@@ -111,6 +111,6 @@ export const categories: WorkItemTypeCategory[] = types.map(t => ({
     name: `${t} Category`,
     defaultWorkItemType: makeWorkItemType(t),
     workItemTypes: [makeWorkItemType(t)],
-    url: faker.internet.url(),
+    url: fake.internet.url(),
     _links: {} as any
 } as unknown as WorkItemTypeCategory));
