@@ -18,4 +18,17 @@ module.exports = {
         'node_modules/(?!azure-devops-extension-api)',
     ],
     setupFiles: ['<rootDir>/jest-helpers/setup-globals.js'],
+    collectCoverageFrom: [
+        'azure-devops-extension-api/**/*.ts',
+        'azure-devops-extension-sdk/**/*.ts',
+        '!**/*.d.ts',
+    ],
+    coverageThreshold: {
+        global: {
+            statements: 90,
+            branches: 90,
+            functions: 90,
+            lines: 90,
+        },
+    },
 };
