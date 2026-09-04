@@ -9,6 +9,12 @@ import {
 } from "azure-devops-extension-sdk/SDK";
 import { fake } from "../azure-devops-extension-api/common/fixtures";
 import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
+import { getService as getMockService } from "../azure-devops-extension-api";
+
+export const sdkVersion = 4.2;
+
+export const getService = async <T>(contributionId: string): Promise<T> =>
+  getMockService<T>(contributionId);
 
 /**
  * Mocking SDK's HostType enum

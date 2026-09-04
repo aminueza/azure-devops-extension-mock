@@ -81,9 +81,9 @@ export const registerMockService = (serviceId: string, service: unknown): void =
 /**
  * Returns a mock REST client for the given real client class.
  *
- * If a hand-written mock is registered for `clientClass`, a fresh instance is
- * returned. Otherwise the real class is auto-stubbed via `mockClient` so every
- * method returns `Promise.resolve(undefined)`.
+ * If a hand-written mock is registered for `clientClass`, its methods are
+ * used. Any method of the real client that the mock does not implement
+ * resolves to `undefined`, so every method of every client is callable.
  *
  * Pass `overrides` to pin specific method responses for a test.
  */
@@ -91,14 +91,6 @@ export function getClient<T extends object>(
     clientClass: new (...args: any[]) => T,
     overrides: MockOverrides<T> = {}
 ): T {
-    const registered = getRegisteredMockClient(clientClass as any);
-    if (registered) {
-        const instance = new (registered as any)({});
-        if (Object.keys(overrides).length === 0) {
-            return instance as T;
-        }
-        return mockClient(clientClass as any, overrides) as unknown as T;
-    }
     return mockClient(clientClass as any, overrides) as unknown as T;
 }
 

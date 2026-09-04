@@ -25,7 +25,6 @@ import {
     makeVariableGroup,
     taskGroups,
     variableGroups,
-    variableGroupsPage
 } from "./Data";
 
 /**
@@ -88,10 +87,6 @@ export class MockTaskAgentRestClient extends RestClientBase {
     // Variable groups
     getVariableGroups(_project: string): Promise<VariableGroup[]> {
         return Promise.resolve(variableGroups);
-    }
-
-    getVariableGroupsPaged(_project: string): Promise<PagedList<VariableGroup>> {
-        return Promise.resolve(variableGroupsPage);
     }
 
     getVariableGroup(_project: string, groupId: number): Promise<VariableGroup> {
