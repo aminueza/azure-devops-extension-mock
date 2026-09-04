@@ -37,6 +37,7 @@
   "scripts": {
     "build": "tsc --outDir dist",
     "test": "jest --verbose --coverage",
+    "surface": "node scripts/surface.js",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "prepublishOnly": "npm run build && npm test && npm run audit:prod"
   },
