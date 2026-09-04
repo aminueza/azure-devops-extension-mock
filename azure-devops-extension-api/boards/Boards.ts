@@ -1,249 +1,296 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
+import { TeamContext } from "azure-devops-extension-api/Core";
+import * as Work from "azure-devops-extension-api/Work";
 import { RestClientBase } from "../common/RestClientBase";
+import { makeIdentityRef } from "../core/Data";
 import {
-    CreateBoard,
-    BoardResponse,
-    BoardReference,
-    UpdateBoard,
-    BoardColumnResponse,
-    BoardColumnCreate,
-    BoardColumnCollectionResponse,
-    BoardColumnUpdate,
-    BoardItemResponse,
-    NewBoardItem,
-    BoardItemCollectionResponse,
-    UpdateBoardItem,
-    BoardItemBatchOperation,
-    BoardRowResponse,
-    BoardRowCreate,
-    BoardRowCollectionResponse,
-    BoardRowUpdate,
-    BoardItemStateSyncCreate,
-    BoardItemStateSync
-} from "./types";
-import { WorkRestClient } from "azure-devops-extension-api/Work";
-import {
-    boardColumnCollectionResponse,
-    boardColumnResponse,
-    boardItemCollectionResponse,
-    boardItemResponse,
-    boardItemStateSync,
-    boardReferences,
-    boardResponse,
-    boardRowCollectionResponse,
-    boardRowResponse
+    backlogs,
+    boardCharts,
+    boards,
+    columnSuggestedValues,
+    iterations,
+    makeBacklog,
+    makeBacklogConfiguration,
+    makeBacklogLevelWorkItems,
+    makeBoard,
+    makeBoardBadge,
+    makeBoardCardRuleSettings,
+    makeBoardCardSettings,
+    makeBoardChart,
+    makeBoardUserSettings,
+    makeDeliveryViewData,
+    makeIteration,
+    makeIterationCapacity,
+    makeIterationWorkItems,
+    makeParentChildWIMap,
+    makePlan,
+    makeProcessConfiguration,
+    makeReorderResult,
+    makeTaskboardColumns,
+    makeTaskboardWorkItemColumn,
+    makeTeamCapacity,
+    makeTeamDaysOff,
+    makeTeamFieldValues,
+    makeTeamMemberCapacity,
+    makeTeamSetting,
+    plans,
+    rowSuggestedValues
 } from "./Data";
 
-/**
- * Mocked WorkRestClient
- */
+const findBoard = (id: string): Work.Board | undefined =>
+    boards.find(b => b.id === id || b.name === id);
+
+const badgeSvg = (id: string): string =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="20"><title>${id}</title></svg>`;
+
 export class MockBoardsRestClient extends RestClientBase {
-    public TYPE = WorkRestClient;
+    public TYPE = Work.WorkRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
     }
 
-    createBoard(
-        postedBoard: CreateBoard,
-        project: string
-    ): Promise<BoardResponse> {
-        console.log(`Creating board with info: ${JSON.stringify(postedBoard)}, project: ${project}`)
-        return new Promise((resolve) => resolve(boardResponse));
+    updateAutomationRule(_ruleRequestModel: Work.TeamAutomationRulesSettingsRequestModel, _teamContext: TeamContext): Promise<void> {
+        return Promise.resolve();
     }
 
-    deleteBoard(
-        project: string,
-        id: number
-    ): Promise<void> {
-        console.log(`Deleting board with project: ${project}, id: ${id}`)
-        return new Promise((resolve) => resolve());
+    getBacklogConfigurations(_teamContext: TeamContext): Promise<Work.BacklogConfiguration> {
+        return Promise.resolve(makeBacklogConfiguration());
     }
 
-    getBoard(
-        project: string,
-        id: number
-    ): Promise<BoardResponse> {
-        console.log(`Getting board with project: ${project}, id: ${id}`)
-        return new Promise((resolve) => resolve(boardResponse));
+    getBacklogLevelWorkItems(_teamContext: TeamContext, _backlogId: string): Promise<Work.BacklogLevelWorkItems> {
+        return Promise.resolve(makeBacklogLevelWorkItems());
     }
 
-    getBoards(
-        project: string,
-        top?: number,
-        skip?: number
-    ): Promise<BoardReference[]> {
-        console.log(`Getting boards with project: ${project}, top: ${top}, skip: ${skip}`)
-        return new Promise((resolve) => resolve(boardReferences));
+    getBacklog(_teamContext: TeamContext, id: string): Promise<Work.BacklogLevelConfiguration> {
+        const found = backlogs.find(b => b.id === id || b.name === id);
+        return Promise.resolve(found ?? { ...makeBacklog(), id });
     }
 
-    updateBoard(
-        updatedBoard: UpdateBoard,
-        project: string,
-        id: number,
-        eTag: String
-    ): Promise<BoardResponse> {
-        console.log(`Updating board with info: ${JSON.stringify(updatedBoard)}, project: ${project}, id: ${id}, eTag: ${eTag}`)
-        return new Promise((resolve) => resolve(boardResponse));
+    getBacklogs(_teamContext: TeamContext): Promise<Work.BacklogLevelConfiguration[]> {
+        return Promise.resolve(backlogs);
     }
 
-    createBoardColumn(
-        boardColumn: BoardColumnCreate,
-        project: string,
-        board: number
-    ): Promise<BoardColumnResponse> {
-        console.log(`Creating board column with info: ${JSON.stringify(boardColumn)}, project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardColumnResponse));
+    getBoardBadge(_teamContext: TeamContext, id: string, _columnOptions?: Work.BoardBadgeColumnOptions, _columns?: string[]): Promise<Work.BoardBadge> {
+        return Promise.resolve(makeBoardBadge(id));
     }
 
-    deleteBoardColumn(
-        project: string,
-        board: number,
-        id: string,
-        forceRemoveItems: boolean
-    ): Promise<void> {
-        console.log(`Deleting board column with project: ${project}, board: ${board}, id: ${id}, forceRemoveItems: ${forceRemoveItems}`)
-        return new Promise((resolve) => resolve());
+    getBoardBadgeData(_teamContext: TeamContext, id: string, _columnOptions?: Work.BoardBadgeColumnOptions, _columns?: string[]): Promise<string> {
+        return Promise.resolve(badgeSvg(id));
     }
 
-    getBoardColumn(
-        project: string,
-        board: number,
-        id: string
-    ): Promise<BoardColumnResponse> {
-        console.log(`Getting board column with project: ${project}, board: ${board}, id: ${id}`)
-        return new Promise((resolve) => resolve(boardColumnResponse));
+    getColumnSuggestedValues(_project?: string): Promise<Work.BoardSuggestedValue[]> {
+        return Promise.resolve(columnSuggestedValues);
     }
 
-    getBoardColumns(
-        project: string,
-        board: number
-    ): Promise<BoardColumnCollectionResponse> {
-        console.log(`Getting board columns with project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardColumnCollectionResponse));
+    getBoardMappingParentItems(_teamContext: TeamContext, _childBacklogContextCategoryRefName: string, workitemIds: number[]): Promise<Work.ParentChildWIMap[]> {
+        return Promise.resolve([{ ...makeParentChildWIMap(), childWorkItemIds: workitemIds }]);
     }
 
-    updateBoardColumn(
-        boardColumn: BoardColumnUpdate,
-        project: string,
-        board: number,
-        id: string,
-        eTag: String
-    ): Promise<BoardColumnResponse> {
-        console.log(`Updating board column with info: ${JSON.stringify(boardColumn)}, project: ${project}, board: ${board}, id: ${id}, eTag: ${eTag}`)
-        return new Promise((resolve) => resolve(boardColumnResponse));
+    getRowSuggestedValues(_project?: string): Promise<Work.BoardSuggestedValue[]> {
+        return Promise.resolve(rowSuggestedValues);
     }
 
-    addBoardItem(
-        item: NewBoardItem,
-        project: string,
-        board: number
-    ): Promise<BoardItemResponse> {
-        console.log(`Adding board item with info: ${JSON.stringify(item)}, project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardItemResponse));
+    getBoard(_teamContext: TeamContext, id: string): Promise<Work.Board> {
+        return Promise.resolve(findBoard(id) ?? { ...makeBoard(), id });
     }
 
-    getBoardItem(
-        project: string,
-        board: number,
-        id: string
-    ): Promise<BoardItemResponse> {
-        console.log(`Getting board item with project: ${project}, board: ${board}, id: ${id}`)
-        return new Promise((resolve) => resolve(boardItemResponse));
+    getBoards(_teamContext: TeamContext): Promise<Work.BoardReference[]> {
+        return Promise.resolve(boards.map(({ id, name, url }) => ({ id, name, url })));
     }
 
-    getBoardItems(
-        project: string,
-        board: number
-    ): Promise<BoardItemCollectionResponse> {
-        console.log(`Getting board items with project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardItemCollectionResponse));
+    setBoardOptions(options: { [key: string]: string }, _teamContext: TeamContext, _id: string): Promise<{ [key: string]: string }> {
+        return Promise.resolve(options);
     }
 
-    removeBoardItem(
-        project: string,
-        board: number,
-        id: string
-    ): Promise<void> {
-        console.log(`Removing board item with project: ${project}, board: ${board}, id: ${id}`)
-        return new Promise((resolve) => resolve());
+    getBoardUserSettings(_teamContext: TeamContext, _board: string): Promise<Work.BoardUserSettings> {
+        return Promise.resolve(makeBoardUserSettings());
     }
 
-    updateBoardItem(
-        updateItemDef: UpdateBoardItem,
-        project: string,
-        board: number,
-        id: string,
-        eTag: String
-    ): Promise<BoardItemResponse> {
-        console.log(`Updating board item with info: ${JSON.stringify(updateItemDef)}, project: ${project}, board: ${board}, id: ${id}, eTag: ${eTag}`)
-        return new Promise((resolve) => resolve(boardItemResponse));
+    updateBoardUserSettings(boardUserSettings: { [key: string]: string }, _teamContext: TeamContext, _board: string): Promise<Work.BoardUserSettings> {
+        return Promise.resolve({ autoRefreshState: boardUserSettings.autoRefreshState === "true" });
     }
 
-    updateBoardItems(
-        batchRequest: BoardItemBatchOperation,
-        project: string,
-        board: number
-    ): Promise<BoardItemCollectionResponse> {
-        console.log(`Updating board items with info: ${JSON.stringify(batchRequest)}, project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardItemCollectionResponse));
+    getCapacitiesWithIdentityRefAndTotals(_teamContext: TeamContext, _iterationId: string): Promise<Work.TeamCapacity> {
+        return Promise.resolve(makeTeamCapacity());
     }
 
-    createBoardRow(
-        boardRow: BoardRowCreate,
-        project: string,
-        board: number
-    ): Promise<BoardRowResponse> {
-        console.log(`Creating board row with info: ${JSON.stringify(boardRow)}, project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardRowResponse));
+    getCapacityWithIdentityRef(_teamContext: TeamContext, _iterationId: string, teamMemberId: string): Promise<Work.TeamMemberCapacityIdentityRef> {
+        return Promise.resolve({ ...makeTeamMemberCapacity(), teamMember: { ...makeIdentityRef(), id: teamMemberId } });
     }
 
-    deleteBoardRow(
-        project: string,
-        board: number,
-        id: string,
-        forceRemoveItems: boolean
-    ): Promise<void> {
-        console.log(`Deleting board row with project: ${project}, board: ${board}, id: ${id}, forceRemoveItems: ${forceRemoveItems}`)
-        return new Promise((resolve) => resolve());
+    replaceCapacitiesWithIdentityRef(capacities: Work.TeamMemberCapacityIdentityRef[], _teamContext: TeamContext, _iterationId: string): Promise<Work.TeamMemberCapacityIdentityRef[]> {
+        return Promise.resolve(capacities);
     }
 
-    getBoardRow(
-        project: string,
-        board: number,
-        id: string
-    ): Promise<BoardRowResponse> {
-        console.log(`Getting board row with project: ${project}, board: ${board}, id: ${id}`)
-        return new Promise((resolve) => resolve(boardRowResponse));
+    updateCapacityWithIdentityRef(patch: Work.CapacityPatch, _teamContext: TeamContext, _iterationId: string, teamMemberId: string): Promise<Work.TeamMemberCapacityIdentityRef> {
+        return Promise.resolve({ ...makeTeamMemberCapacity(), ...patch, teamMember: { ...makeIdentityRef(), id: teamMemberId } });
     }
 
-    getBoardRows(
-        project: string,
-        board: number
-    ): Promise<BoardRowCollectionResponse> {
-        console.log(`Getting board rows with project: ${project}, board: ${board}`)
-        return new Promise((resolve) => resolve(boardRowCollectionResponse));
+    getBoardCardRuleSettings(_teamContext: TeamContext, _board: string): Promise<Work.BoardCardRuleSettings> {
+        return Promise.resolve(makeBoardCardRuleSettings());
     }
 
-    updateBoardRow(
-        boardRow: BoardRowUpdate,
-        project: string,
-        board: number,
-        id: string,
-        eTag: String
-    ): Promise<BoardRowResponse> {
-        console.log(`Updating board row with info: ${JSON.stringify(boardRow)}, project: ${project}, board: ${board}, id: ${id}, eTag: ${eTag}`)
-        return new Promise((resolve) => resolve(boardRowResponse));
+    updateBoardCardRuleSettings(boardCardRuleSettings: Work.BoardCardRuleSettings, _teamContext: TeamContext, _board: string): Promise<Work.BoardCardRuleSettings> {
+        return Promise.resolve(boardCardRuleSettings);
     }
 
-    createBoardSyncAction(
-        boardSync: BoardItemStateSyncCreate,
-        project: string,
-        board: number,
-        column: string
-    ): Promise<BoardItemStateSync> {
-        console.log(`Creating board sync action with info: ${JSON.stringify(boardSync)}, project: ${project}, board: ${board}, column: ${column}`)
-        return new Promise((resolve) => resolve(boardItemStateSync));
+    updateTaskboardCardRuleSettings(_boardCardRuleSettings: Work.BoardCardRuleSettings, _teamContext: TeamContext): Promise<void> {
+        return Promise.resolve();
     }
 
+    getBoardCardSettings(_teamContext: TeamContext, _board: string): Promise<Work.BoardCardSettings> {
+        return Promise.resolve(makeBoardCardSettings());
+    }
 
+    updateBoardCardSettings(boardCardSettingsToSave: Work.BoardCardSettings, _teamContext: TeamContext, _board: string): Promise<Work.BoardCardSettings> {
+        return Promise.resolve(boardCardSettingsToSave);
+    }
+
+    updateTaskboardCardSettings(_boardCardSettingsToSave: Work.BoardCardSettings, _teamContext: TeamContext): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getBoardChart(_teamContext: TeamContext, _board: string, name: string): Promise<Work.BoardChart> {
+        return Promise.resolve(makeBoardChart(name));
+    }
+
+    getBoardCharts(_teamContext: TeamContext, _board: string): Promise<Work.BoardChartReference[]> {
+        return Promise.resolve(boardCharts);
+    }
+
+    updateBoardChart(chart: Work.BoardChart, _teamContext: TeamContext, _board: string, name: string): Promise<Work.BoardChart> {
+        return Promise.resolve({ ...makeBoardChart(name), ...chart, name });
+    }
+
+    getBoardColumns(_teamContext: TeamContext, board: string): Promise<Work.BoardColumn[]> {
+        return Promise.resolve((findBoard(board) ?? makeBoard()).columns);
+    }
+
+    updateBoardColumns(boardColumns: Work.BoardColumn[], _teamContext: TeamContext, _board: string): Promise<Work.BoardColumn[]> {
+        return Promise.resolve(boardColumns);
+    }
+
+    getDeliveryTimelineData(_project: string, id: string, revision?: number, startDate?: Date, endDate?: Date): Promise<Work.DeliveryViewData> {
+        const data = makeDeliveryViewData();
+        return Promise.resolve({
+            ...data,
+            id,
+            revision: revision ?? data.revision,
+            startDate: startDate ?? data.startDate,
+            endDate: endDate ?? data.endDate
+        });
+    }
+
+    getTotalIterationCapacities(_project: string, _iterationId: string): Promise<Work.IterationCapacity> {
+        return Promise.resolve(makeIterationCapacity());
+    }
+
+    deleteTeamIteration(_teamContext: TeamContext, _id: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getTeamIteration(_teamContext: TeamContext, id: string): Promise<Work.TeamSettingsIteration> {
+        const found = iterations.find(i => i.id === id);
+        return Promise.resolve(found ?? { ...makeIteration(), id });
+    }
+
+    getTeamIterations(_teamContext: TeamContext, timeframe?: string): Promise<Work.TeamSettingsIteration[]> {
+        if (!timeframe) return Promise.resolve(iterations);
+        return Promise.resolve(iterations.filter(i => i.attributes.timeFrame === Work.TimeFrame.Current));
+    }
+
+    postTeamIteration(iteration: Work.TeamSettingsIteration, _teamContext: TeamContext): Promise<Work.TeamSettingsIteration> {
+        return Promise.resolve({ ...makeIteration(), ...iteration });
+    }
+
+    createPlan(postedPlan: Work.CreatePlan, _project: string): Promise<Work.Plan> {
+        return Promise.resolve({ ...makePlan(), ...postedPlan });
+    }
+
+    deletePlan(_project: string, _id: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPlan(_project: string, id: string): Promise<Work.Plan> {
+        const found = plans.find(p => p.id === id);
+        return Promise.resolve(found ?? { ...makePlan(), id });
+    }
+
+    getPlans(_project: string): Promise<Work.Plan[]> {
+        return Promise.resolve(plans);
+    }
+
+    updatePlan(updatedPlan: Work.UpdatePlan, _project: string, id: string): Promise<Work.Plan> {
+        return Promise.resolve({ ...makePlan(), ...updatedPlan, id });
+    }
+
+    getProcessConfiguration(_project: string): Promise<Work.ProcessConfiguration> {
+        return Promise.resolve(makeProcessConfiguration());
+    }
+
+    getBoardRows(_teamContext: TeamContext, board: string): Promise<Work.BoardRow[]> {
+        return Promise.resolve((findBoard(board) ?? makeBoard()).rows);
+    }
+
+    updateBoardRows(boardRows: Work.BoardRow[], _teamContext: TeamContext, _board: string): Promise<Work.BoardRow[]> {
+        return Promise.resolve(boardRows);
+    }
+
+    getColumns(_teamContext: TeamContext): Promise<Work.TaskboardColumns> {
+        return Promise.resolve(makeTaskboardColumns());
+    }
+
+    updateColumns(updateColumns: Work.UpdateTaskboardColumn[], _teamContext: TeamContext): Promise<Work.TaskboardColumns> {
+        return Promise.resolve({ ...makeTaskboardColumns(), columns: updateColumns, isCustomized: true });
+    }
+
+    getWorkItemColumns(_teamContext: TeamContext, _iterationId: string): Promise<Work.TaskboardWorkItemColumn[]> {
+        return Promise.resolve(Array.from({ length: 3 }, makeTaskboardWorkItemColumn));
+    }
+
+    updateWorkItemColumn(_updateColumn: Work.UpdateTaskboardWorkItemColumn, _teamContext: TeamContext, _iterationId: string, _workItemId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getTeamDaysOff(_teamContext: TeamContext, _iterationId: string): Promise<Work.TeamSettingsDaysOff> {
+        return Promise.resolve(makeTeamDaysOff());
+    }
+
+    updateTeamDaysOff(daysOffPatch: Work.TeamSettingsDaysOffPatch, _teamContext: TeamContext, _iterationId: string): Promise<Work.TeamSettingsDaysOff> {
+        return Promise.resolve({ ...makeTeamDaysOff(), ...daysOffPatch });
+    }
+
+    getTeamFieldValues(_teamContext: TeamContext): Promise<Work.TeamFieldValues> {
+        return Promise.resolve(makeTeamFieldValues());
+    }
+
+    updateTeamFieldValues(patch: Work.TeamFieldValuesPatch, _teamContext: TeamContext): Promise<Work.TeamFieldValues> {
+        return Promise.resolve({ ...makeTeamFieldValues(), ...patch });
+    }
+
+    getTeamSettings(_teamContext: TeamContext): Promise<Work.TeamSetting> {
+        return Promise.resolve(makeTeamSetting());
+    }
+
+    updateTeamSettings(teamSettingsPatch: Work.TeamSettingsPatch, _teamContext: TeamContext): Promise<Work.TeamSetting> {
+        const settings = makeTeamSetting();
+        return Promise.resolve({
+            ...settings,
+            ...teamSettingsPatch,
+            backlogIteration: { ...settings.backlogIteration, id: teamSettingsPatch.backlogIteration },
+            defaultIteration: { ...settings.defaultIteration, id: teamSettingsPatch.defaultIteration }
+        });
+    }
+
+    getIterationWorkItems(_teamContext: TeamContext, _iterationId: string): Promise<Work.IterationWorkItems> {
+        return Promise.resolve(makeIterationWorkItems());
+    }
+
+    reorderBacklogWorkItems(operation: Work.ReorderOperation, _teamContext: TeamContext): Promise<Work.ReorderResult[]> {
+        return Promise.resolve(operation.ids.map(makeReorderResult));
+    }
+
+    reorderIterationWorkItems(operation: Work.ReorderOperation, _teamContext: TeamContext, _iterationId: string): Promise<Work.ReorderResult[]> {
+        return Promise.resolve(operation.ids.map(makeReorderResult));
+    }
 }

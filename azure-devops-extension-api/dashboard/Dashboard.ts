@@ -1,10 +1,14 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
+import { fake } from "../common/fixtures";
 import {
     DashboardRestClient,
     Dashboard,
     DashboardGroup,
-    Widget
+    Widget,
+    WidgetMetadataResponse,
+    WidgetScope,
+    WidgetTypesResponse
 } from "azure-devops-extension-api/Dashboard";
 import { TeamContext } from "azure-devops-extension-api/Core";
 import {
@@ -12,20 +16,23 @@ import {
     dashboardGroup,
     makeDashboard,
     makeWidget,
-    widgets
+    makeWidgetMetadata,
+    widgets,
+    widgetTypes
 } from "./Data";
 
-/**
- * Mocked DashboardRestClient — dashboards and widgets.
- */
 export class MockDashboardRestClient extends RestClientBase {
     public TYPE = DashboardRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
     }
 
-    getDashboardsByProject(_teamContext: TeamContext): Promise<Dashboard[]> {
-        return Promise.resolve(dashboards);
+    createDashboard(dashboard: Dashboard, _teamContext: TeamContext): Promise<Dashboard> {
+        return Promise.resolve({ ...makeDashboard(), ...dashboard });
+    }
+
+    deleteDashboard(_teamContext: TeamContext, _dashboardId: string): Promise<void> {
+        return Promise.resolve();
     }
 
     getDashboard(_teamContext: TeamContext, dashboardId: string): Promise<Dashboard> {
@@ -33,8 +40,8 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeDashboard(), id: dashboardId });
     }
 
-    createDashboard(dashboard: Dashboard, _teamContext: TeamContext): Promise<Dashboard> {
-        return Promise.resolve({ ...makeDashboard(), ...dashboard });
+    getDashboardsByProject(_teamContext: TeamContext): Promise<Dashboard[]> {
+        return Promise.resolve(dashboards);
     }
 
     replaceDashboard(
@@ -45,22 +52,8 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve({ ...makeDashboard(), ...dashboard, id: dashboardId });
     }
 
-    replaceDashboards(group: any, _teamContext: TeamContext): Promise<any> {
+    replaceDashboards(group: DashboardGroup, _teamContext: TeamContext): Promise<DashboardGroup> {
         return Promise.resolve({ ...dashboardGroup, ...group });
-    }
-
-    deleteDashboard(_teamContext: TeamContext, _dashboardId: string): Promise<void> {
-        return Promise.resolve();
-    }
-
-    // Widgets
-    getWidget(
-        _teamContext: TeamContext,
-        _dashboardId: string,
-        widgetId: string
-    ): Promise<Widget> {
-        const found = widgets.find(w => w.id === widgetId);
-        return Promise.resolve(found ?? { ...makeWidget(), id: widgetId });
     }
 
     createWidget(
@@ -71,13 +64,22 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve({ ...makeWidget(), ...widget });
     }
 
-    updateWidget(
-        widget: Widget,
+    deleteWidget(
+        _teamContext: TeamContext,
+        dashboardId: string,
+        _widgetId: string
+    ): Promise<Dashboard> {
+        const found = dashboards.find(d => d.id === dashboardId);
+        return Promise.resolve(found ?? { ...makeDashboard(), id: dashboardId });
+    }
+
+    getWidget(
         _teamContext: TeamContext,
         _dashboardId: string,
         widgetId: string
     ): Promise<Widget> {
-        return Promise.resolve({ ...makeWidget(), ...widget, id: widgetId });
+        const found = widgets.find(w => w.id === widgetId);
+        return Promise.resolve(found ?? { ...makeWidget(), id: widgetId });
     }
 
     replaceWidget(
@@ -89,12 +91,28 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve({ ...makeWidget(), ...widget, id: widgetId });
     }
 
-    deleteWidget(
+    updateWidget(
+        widget: Widget,
         _teamContext: TeamContext,
-        dashboardId: string,
-        _widgetId: string
-    ): Promise<Dashboard> {
-        const dash = dashboards.find(d => d.id === dashboardId) ?? makeDashboard();
-        return Promise.resolve(dash);
+        _dashboardId: string,
+        widgetId: string
+    ): Promise<Widget> {
+        return Promise.resolve({ ...makeWidget(), ...widget, id: widgetId });
+    }
+
+    getWidgetMetadata(contributionId: string, _project?: string): Promise<WidgetMetadataResponse> {
+        const found = widgetTypes.find(w => w.contributionId === contributionId);
+        return Promise.resolve({
+            uri: fake.internet.url(),
+            widgetMetadata: found ?? makeWidgetMetadata(contributionId)
+        });
+    }
+
+    getWidgetTypes(scope: WidgetScope, _project?: string): Promise<WidgetTypesResponse> {
+        return Promise.resolve({
+            _links: {},
+            uri: fake.internet.url(),
+            widgetTypes: widgetTypes.filter(w => w.supportedScopes.includes(scope))
+        });
     }
 }

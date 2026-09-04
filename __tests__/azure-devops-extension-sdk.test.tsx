@@ -13,7 +13,9 @@ import {
     getExtensionContext,
     getHost,
     getPageContext,
+    getService,
     getTeamContext,
+    sdkVersion,
     getUser,
     getWebContext,
     init,
@@ -236,6 +238,16 @@ describe('Mock Functions Tests', () => {
         applyTheme(themeData);
 
         expect(console.log).toHaveBeenCalledWith(`Applying theme: ${JSON.stringify(themeData)}`);
+    });
+
+    it('should expose the sdk version', () => {
+        expect(sdkVersion).toBe(4.2);
+    });
+
+    it('should resolve registered services through getService', async () => {
+        const service = await getService<{ getProject: () => Promise<{ id: string }> }>('ms.vss-tfs-web.tfs-page-data-service');
+        expect(typeof service.getProject).toBe('function');
+        await expect(getService('nobody.registered.this')).rejects.toThrow(/Unknown service id/);
     });
 
     it('should enable and disable nested app auth', async () => {
