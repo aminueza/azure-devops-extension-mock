@@ -1,14 +1,24 @@
 import { fake } from "../common/fixtures";
 import {
+    AuditAction,
     Build,
+    BuildBadge,
+    BuildController,
     BuildDefinition,
     BuildDefinitionReference,
+    BuildDefinitionRevision,
+    BuildDefinitionTemplate,
     BuildArtifact,
+    BuildMetric,
+    BuildResourceUsage,
     BuildResult,
     BuildStatus,
     BuildReason,
+    ControllerStatus,
+    DefinitionResourceReference,
     DefinitionType,
     DefinitionQuality,
+    Folder,
     Timeline,
     TimelineRecord,
     Change
@@ -124,6 +134,24 @@ export const makeChange = (): Change => ({
     location: fake.internet.url()
 } as unknown as Change);
 
+export const makeBuildBadge = (): BuildBadge => ({
+    buildId: fake.number.int({ min: 1, max: 100_000 }),
+    imageUrl: fake.internet.url()
+});
+
+export const makeBuildController = (): BuildController => ({
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    name: fake.lorem.slug(),
+    url: fake.internet.url(),
+    uri: fake.internet.url(),
+    description: fake.lorem.sentence(),
+    enabled: true,
+    status: ControllerStatus.Available,
+    createdDate: fake.date.recent(),
+    updatedDate: fake.date.recent(),
+    _links: {}
+});
+
 export const buildDefinitions = Array.from({ length: 5 }, makeBuildDefinition);
 const builds = Array.from({ length: 10 }, makeBuild);
 export const buildList = builds;
@@ -131,3 +159,108 @@ export const buildsPage: PagedList<Build> = Object.assign(builds, { continuation
 export const artifacts: BuildArtifact[] = [makeArtifact("drop"), makeArtifact("symbols")];
 export const timeline: Timeline = makeTimeline();
 export const changes: Change[] = Array.from({ length: 3 }, makeChange);
+export const buildControllers: BuildController[] = Array.from({ length: 3 }, makeBuildController);
+export const buildTags: string[] = Array.from({ length: 4 }, (_unused, index) => `${fake.lorem.word()}-build-${index}`);
+export const definitionTags: string[] = Array.from({ length: 3 }, (_unused, index) => `${fake.lorem.word()}-def-${index}`);
+export const projectTags: string[] = [...buildTags, ...definitionTags];
+
+export const makeFolder = (path: string): Folder => ({
+    path,
+    description: fake.lorem.sentence(),
+    createdBy: makeIdentityRef(),
+    createdOn: fake.date.recent(),
+    lastChangedBy: makeIdentityRef(),
+    lastChangedDate: fake.date.recent(),
+    project: makeProjectReference()
+});
+
+export const makeBuildDefinitionTemplate = (
+    id: string,
+    category: string
+): BuildDefinitionTemplate => ({
+    id,
+    category,
+    name: fake.lorem.slug(),
+    description: fake.lorem.sentence(),
+    canDelete: true,
+    defaultHostedQueue: "Azure Pipelines",
+    icons: { medium: fake.image.url() },
+    iconTaskId: fake.string.uuid(),
+    template: makeBuildDefinition()
+});
+
+export const makeBuildMetric = (name: string, scope: string, date: Date): BuildMetric => ({
+    name,
+    scope,
+    date,
+    intValue: fake.number.int({ min: 1, max: 500 })
+});
+
+export const makeBuildDefinitionRevision = (
+    revision: number,
+    changeType: AuditAction
+): BuildDefinitionRevision => ({
+    revision,
+    changeType,
+    name: fake.lorem.slug(),
+    comment: fake.lorem.sentence(),
+    changedBy: makeIdentityRef(),
+    changedDate: fake.date.recent(),
+    definitionUrl: fake.internet.url()
+});
+
+export const makeDefinitionResourceReference = (
+    id: string,
+    type: string
+): DefinitionResourceReference => ({
+    id,
+    type,
+    name: fake.lorem.slug(),
+    authorized: true
+});
+
+export const makeBuildResourceUsage = (): BuildResourceUsage => ({
+    distributedTaskAgents: fake.number.int({ min: 1, max: 50 }),
+    paidPrivateAgentSlots: fake.number.int({ min: 0, max: 10 }),
+    totalUsage: fake.number.int({ min: 1, max: 100 }),
+    xamlControllers: fake.number.int({ min: 0, max: 5 })
+});
+
+export const folders: Folder[] = [
+    makeFolder("\\"),
+    makeFolder("\\shared"),
+    makeFolder("\\shared\\nightly"),
+    makeFolder("\\legacy")
+];
+
+export const definitionTemplates: BuildDefinitionTemplate[] = [
+    makeBuildDefinitionTemplate("template-classic", "Build"),
+    makeBuildDefinitionTemplate("template-yaml", "Build"),
+    makeBuildDefinitionTemplate("template-empty", "Deploy")
+];
+
+export const buildMetrics: BuildMetric[] = [
+    makeBuildMetric("TotalBuilds", "Daily", new Date("2024-01-01T00:00:00.000Z")),
+    makeBuildMetric("SuccessfulBuilds", "Daily", new Date("2024-06-01T00:00:00.000Z")),
+    makeBuildMetric("FailedBuilds", "Hourly", new Date("2024-12-01T00:00:00.000Z"))
+];
+
+export const definitionRevisions: BuildDefinitionRevision[] = [
+    makeBuildDefinitionRevision(1, AuditAction.Add),
+    makeBuildDefinitionRevision(2, AuditAction.Update),
+    makeBuildDefinitionRevision(3, AuditAction.Delete)
+];
+
+export const definitionResources: DefinitionResourceReference[] = [
+    makeDefinitionResourceReference("endpoint-1", "endpoint"),
+    makeDefinitionResourceReference("queue-1", "queue"),
+    makeDefinitionResourceReference("variablegroup-1", "variablegroup")
+];
+
+export const resourceUsage: BuildResourceUsage = makeBuildResourceUsage();
+
+export const definitionProperties: Record<string, unknown> = {
+    owner: fake.person.fullName(),
+    stage: "canary",
+    retentionDays: 30
+};
