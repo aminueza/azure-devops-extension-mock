@@ -1,6 +1,16 @@
 import { WikiRestClient, WikiType } from "azure-devops-extension-api/Wiki";
-import { getClient, MockWikiRestClient } from "../azure-devops-extension-api";
-import * as WikiData from "../azure-devops-extension-api/wiki/Data";
+import {
+    CommentExpandOptions,
+    CommentReactionType,
+    CommentSortOrder,
+    CommentState
+} from "azure-devops-extension-api/Comments";
+import { GitVersionOptions, GitVersionType, VersionControlRecursionType } from "azure-devops-extension-api/Git";
+import { getClient } from "../azure-devops-extension-api";
+
+const decode = (buffer: ArrayBuffer): string => new TextDecoder().decode(buffer);
+
+const version = { version: "wikiMain", versionOptions: GitVersionOptions.None, versionType: GitVersionType.Branch };
 
 describe("WikiRestClient mock", () => {
     beforeAll(() => {
@@ -10,38 +20,192 @@ describe("WikiRestClient mock", () => {
         jest.restoreAllMocks();
     });
 
-    const client = getClient(WikiRestClient) as unknown as MockWikiRestClient;
+    const client = getClient(WikiRestClient);
 
-    it("is registered under the WikiRestClient type", () => {
-        expect(client.TYPE).toBe(WikiRestClient);
+    it("creates a comment attachment", async () => {
+        const attachment = await client.createCommentAttachment("bytes", "proj", "wiki", 1);
+        expect(typeof attachment.id).toBe("string");
+        expect(typeof attachment.createdBy.displayName).toBe("string");
+        expect(attachment.createdDate).toBeInstanceOf(Date);
     });
 
-    it("lists wikis", async () => {
-        const wikis = await client.getAllWikis("proj");
-        expect(wikis.map(w => w.name)).toEqual(["Project.wiki", "Code.wiki"]);
-        for (const wiki of wikis) {
-            expect(typeof wiki.id).toBe("string");
-            expect(wiki.type).toBe(WikiType.ProjectWiki);
-            expect(wiki.mappedPath).toBe("/");
+    it("gets attachment content", async () => {
+        const content = await client.getAttachmentContent("proj", "wiki", 1, "att-1");
+        expect(content).toBeInstanceOf(ArrayBuffer);
+        expect(decode(content)).toBe("att-1");
+    });
+
+    it("adds a comment reaction", async () => {
+        const reaction = await client.addCommentReaction("proj", "wiki", 1, 7, CommentReactionType.Heart);
+        expect(reaction.commentId).toBe(7);
+        expect(reaction.type).toBe(CommentReactionType.Heart);
+        expect(reaction.isCurrentUserEngaged).toBe(true);
+        expect(reaction.count).toBeGreaterThan(0);
+    });
+
+    it("deletes a comment reaction", async () => {
+        const reaction = await client.deleteCommentReaction("proj", "wiki", 1, 7, CommentReactionType.Like);
+        expect(reaction.commentId).toBe(7);
+        expect(reaction.type).toBe(CommentReactionType.Like);
+        expect(reaction.isCurrentUserEngaged).toBe(false);
+        expect(reaction.count).toBe(0);
+    });
+
+    it("gets engaged users with defaults", async () => {
+        const users = await client.getEngagedUsers("proj", "wiki", 1, 7, CommentReactionType.Like);
+        expect(users.length).toBe(5);
+        for (const user of users) {
+            expect(typeof user.id).toBe("string");
         }
     });
 
-    it("gets a wiki by id", async () => {
-        const [first] = await client.getAllWikis();
-        const found = await client.getWiki(first.id);
-        expect(found).toBe(first);
+    it("gets engaged users with top and skip", async () => {
+        const all = await client.getEngagedUsers("proj", "wiki", 1, 7, CommentReactionType.Like);
+        const users = await client.getEngagedUsers("proj", "wiki", 1, 7, CommentReactionType.Like, 2, 1);
+        expect(users).toEqual(all.slice(1, 3));
     });
 
-    it("gets a wiki by name", async () => {
-        const [, second] = await client.getAllWikis();
-        const found = await client.getWiki("Code.wiki", "proj");
-        expect(found).toBe(second);
+    it("adds a comment echoing the request", async () => {
+        const comment = await client.addComment({ parentId: 3, text: "hello" }, "proj", "wiki", 1);
+        expect(comment.parentId).toBe(3);
+        expect(comment.text).toBe("hello");
+        expect(typeof comment.id).toBe("number");
+        expect(comment.state).toBe(CommentState.Active);
     });
 
-    it("fabricates a wiki for an unknown identifier", async () => {
-        const made = await client.getWiki("Missing.wiki");
-        expect(made.name).toBe("Missing.wiki");
-        expect(typeof made.id).toBe("string");
+    it("deletes a comment", async () => {
+        await expect(client.deleteComment("proj", "wiki", 1, 7)).resolves.toBeUndefined();
+    });
+
+    it("gets a known comment", async () => {
+        const list = await client.listComments("proj", "wiki", 1);
+        const comment = await client.getComment("proj", "wiki", 1, list.comments[0].id, true, CommentExpandOptions.All);
+        expect(comment).toBe(list.comments[0]);
+    });
+
+    it("fabricates an unknown comment", async () => {
+        const comment = await client.getComment("proj", "wiki", 1, 999_999);
+        expect(comment.id).toBe(999_999);
+        expect(typeof comment.text).toBe("string");
+    });
+
+    it("lists all comments", async () => {
+        const list = await client.listComments("proj", "wiki", 1);
+        expect(list.comments.length).toBe(3);
+        expect(list.count).toBe(3);
+        expect(list.totalCount).toBe(3);
+        expect(list.continuationToken).toBe("");
+    });
+
+    it("lists comments limited by top", async () => {
+        const list = await client.listComments(
+            "proj",
+            "wiki",
+            1,
+            2,
+            "token",
+            false,
+            CommentExpandOptions.Reactions,
+            CommentSortOrder.Desc,
+            0
+        );
+        expect(list.comments.length).toBe(2);
+        expect(list.count).toBe(2);
+    });
+
+    it("updates a comment", async () => {
+        const list = await client.listComments("proj", "wiki", 1);
+        const target = list.comments[1];
+        const updated = await client.updateComment(
+            { text: "edited", state: CommentState.Resolved },
+            "proj",
+            "wiki",
+            1,
+            target.id
+        );
+        expect(updated.id).toBe(target.id);
+        expect(updated.text).toBe("edited");
+        expect(updated.state).toBe(CommentState.Resolved);
+        expect(updated.createdBy).toBe(target.createdBy);
+    });
+
+    it("gets home page text without a path", async () => {
+        const text = await client.getPageText("proj", "wiki");
+        expect(text).toContain("# Home");
+    });
+
+    it("gets page text for a known path", async () => {
+        const text = await client.getPageText("proj", "wiki", "/API/Overview", VersionControlRecursionType.None, version, true);
+        expect(text).toContain("# Overview");
+    });
+
+    it("fabricates page text for an unknown path", async () => {
+        const text = await client.getPageText("proj", "wiki", "/Missing/Deep");
+        expect(text).toContain("# Deep");
+    });
+
+    it("gets page zip", async () => {
+        const zip = await client.getPageZip("proj", "wiki", "/FAQ");
+        expect(zip).toBeInstanceOf(ArrayBuffer);
+        expect(decode(zip)).toContain("# FAQ");
+    });
+
+    it("gets page text by known id", async () => {
+        const batch = await client.getPagesBatch({ top: 10, continuationToken: "", pageViewsForDays: 1 }, "proj", "wiki");
+        const faq = batch.find(d => d.path === "/FAQ")!;
+        const text = await client.getPageByIdText("proj", "wiki", faq.id, VersionControlRecursionType.Full, true);
+        expect(text).toContain("# FAQ");
+    });
+
+    it("fabricates page text for an unknown id", async () => {
+        const text = await client.getPageByIdText("proj", "wiki", 424_242);
+        expect(text).toContain("# Home");
+    });
+
+    it("gets page zip by id", async () => {
+        const batch = await client.getPagesBatch({ top: 10, continuationToken: "", pageViewsForDays: 1 }, "proj", "wiki");
+        const zip = await client.getPageByIdZip("proj", "wiki", batch[0].id);
+        expect(zip).toBeInstanceOf(ArrayBuffer);
+        expect(decode(zip)).toContain("# Home");
+    });
+
+    it("gets a batch of page details limited by top", async () => {
+        const batch = await client.getPagesBatch({ top: 2, continuationToken: "", pageViewsForDays: 7 }, "proj", "wiki", version);
+        expect(batch.length).toBe(2);
+        expect(batch.continuationToken).toBeNull();
+        for (const detail of batch) {
+            expect(typeof detail.id).toBe("number");
+            expect(detail.path.startsWith("/")).toBe(true);
+            expect(detail.viewStats.length).toBe(7);
+        }
+    });
+
+    it("gets the full batch when top is absent", async () => {
+        const batch = await client.getPagesBatch({} as any, "proj", "wiki");
+        expect(batch.length).toBe(4);
+        expect(batch.map(d => d.path)).toEqual(["/Home", "/Getting-Started", "/FAQ", "/API/Overview"]);
+    });
+
+    it("gets page data for a known id", async () => {
+        const [first] = await client.getPagesBatch({} as any, "proj", "wiki");
+        const detail = await client.getPageData("proj", "wiki", first.id);
+        expect(detail.id).toBe(first.id);
+        expect(detail.path).toBe(first.path);
+        expect(detail.viewStats.length).toBe(7);
+    });
+
+    it("gets page data limited to the requested days", async () => {
+        const detail = await client.getPageData("proj", "wiki", 777, 3);
+        expect(detail.id).toBe(777);
+        expect(detail.viewStats.length).toBe(3);
+        expect(detail.viewStats[0].day).toBeInstanceOf(Date);
+    });
+
+    it("creates or updates page view stats", async () => {
+        const stats = await client.createOrUpdatePageViewStats("proj", "wiki", version, "/Home", "/Old");
+        expect(stats.path).toBe("/Home");
+        expect(stats.count).toBeGreaterThan(0);
+        expect(stats.lastViewedTime).toBeInstanceOf(Date);
     });
 
     it("creates a wiki echoing the parameters", async () => {
@@ -51,8 +215,9 @@ describe("WikiRestClient mock", () => {
                 projectId: "proj-id",
                 repositoryId: "repo-id",
                 mappedPath: "/docs",
-                type: WikiType.CodeWiki
-            } as any,
+                type: WikiType.CodeWiki,
+                version
+            },
             "proj"
         );
         expect(created.name).toBe("New.wiki");
@@ -63,123 +228,48 @@ describe("WikiRestClient mock", () => {
         expect(typeof created.id).toBe("string");
     });
 
-    it("updates a wiki with provided versions", async () => {
-        const updated = await client.updateWiki({ versions: [{ version: "release" }] } as any, "wiki-1", "proj");
-        expect(updated.id).toBe("wiki-1");
-        expect(updated.versions).toEqual([{ version: "release" }]);
+    it("deletes a known wiki", async () => {
+        const [first] = await client.getAllWikis();
+        const deleted = await client.deleteWiki(first.id, "proj");
+        expect(deleted).toBe(first);
     });
 
-    it("updates a wiki with default versions", async () => {
-        const updated = await client.updateWiki({} as any, "wiki-2");
-        expect(updated.id).toBe("wiki-2");
-        expect(updated.versions).toEqual([{ version: "wikiMain" }]);
-    });
-
-    it("deletes a wiki returning a wiki", async () => {
-        const deleted = await client.deleteWiki("wiki-1", "proj");
-        expect(deleted.name).toBe("Project.wiki");
-        expect(typeof deleted.id).toBe("string");
-    });
-
-    it("returns a paged batch of page details", async () => {
-        const batch = await client.getPagesBatch({ top: 10 }, "proj", "wiki-1");
-        expect(batch.length).toBe(3);
-        expect(batch.continuationToken).toBe("");
-        for (const detail of batch) {
-            expect(typeof detail.id).toBe("number");
-            expect(detail.path.startsWith("/")).toBe(true);
-            expect(detail.viewStats.length).toBeGreaterThan(0);
+    it("lists wikis", async () => {
+        const wikis = await client.getAllWikis("proj");
+        expect(wikis.map(w => w.name)).toEqual(["Project.wiki", "Code.wiki"]);
+        expect(wikis[0].type).toBe(WikiType.ProjectWiki);
+        expect(wikis[1].type).toBe(WikiType.CodeWiki);
+        for (const wiki of wikis) {
+            expect(typeof wiki.id).toBe("string");
+            expect(wiki.versions[0].version).toBe("wikiMain");
         }
     });
 
-    it("gets page data for the requested id", async () => {
-        const detail = await client.getPageData("proj", "wiki-1", 42);
-        expect(detail.id).toBe(42);
-        expect(detail.viewStats.length).toBeGreaterThan(0);
+    it("gets a wiki by id", async () => {
+        const [first] = await client.getAllWikis();
+        expect(await client.getWiki(first.id)).toBe(first);
     });
 
-    it("gets the first page when no path is given", async () => {
-        const res = await client.getPage("proj", "wiki-1");
-        expect(res.page.path).toBe("/Home");
-        expect(res.page.isParentPage).toBe(true);
-        expect(res.eTag).toEqual([`"${res.page.id}"`]);
+    it("gets a wiki by name", async () => {
+        const [, second] = await client.getAllWikis();
+        expect(await client.getWiki("Code.wiki", "proj")).toBe(second);
     });
 
-    it("gets a known page by path", async () => {
-        const res = await client.getPage("proj", "wiki-1", "/FAQ");
-        expect(res.page.path).toBe("/FAQ");
-        expect(res.page.gitItemPath).toBe("/FAQ.md");
-        expect(res.page.isParentPage).toBe(false);
+    it("fabricates a wiki for an unknown identifier", async () => {
+        const made = await client.getWiki("missing-id");
+        expect(made.id).toBe("missing-id");
+        expect(made.name.endsWith(".wiki")).toBe(true);
     });
 
-    it("fabricates a page for an unknown path", async () => {
-        const res = await client.getPage("proj", "wiki-1", "/Nope/Deep");
-        expect(res.page.path).toBe("/Nope/Deep");
-        expect(res.page.content).toContain("# Deep");
-    });
-
-    it("gets page text for the first page when no path is given", async () => {
-        const text = await client.getPageText("proj", "wiki-1");
-        expect(text).toContain("# Home");
-    });
-
-    it("gets page text for a known path", async () => {
-        const text = await client.getPageText("proj", "wiki-1", "/API/Overview");
-        expect(text).toContain("# Overview");
-    });
-
-    it("fabricates page text for an unknown path", async () => {
-        const text = await client.getPageText("proj", "wiki-1", "/Missing");
-        expect(text).toContain("# Missing");
-    });
-
-    it("falls back to a generated home page when no fixture pages exist", async () => {
-        const backup = WikiData.pages.splice(0, WikiData.pages.length);
-        try {
-            const res = await client.getPage("proj", "wiki-1");
-            expect(res.page.path).toBe("/Home");
-            const text = await client.getPageText("proj", "wiki-1");
-            expect(text).toContain("# Home");
-        } finally {
-            WikiData.pages.push(...backup);
-        }
-    });
-
-    it("returns an empty string when the generated page has no content", async () => {
-        const spy = jest.spyOn(WikiData, "makeWikiPage").mockReturnValue({ id: 1, path: "/X" } as any);
-        try {
-            const text = await client.getPageText("proj", "wiki-1", "/X");
-            expect(text).toBe("");
-        } finally {
-            spy.mockRestore();
-        }
-    });
-
-    it("creates or updates a page with the given content", async () => {
-        const res = await client.createOrUpdatePage({ content: "hello" }, "proj", "wiki-1", "/New", "v1");
-        expect(res.page.path).toBe("/New");
-        expect(res.page.content).toBe("hello");
-        expect(res.eTag).toEqual([`"${res.page.id}"`]);
-    });
-
-    it("creates or updates a page without parameters", async () => {
-        const res = await client.createOrUpdatePage(undefined, "proj", "wiki-1", "/Empty", "v1");
-        expect(res.page.path).toBe("/Empty");
-        expect(res.page.content).toBeUndefined();
-    });
-
-    it("deletes a page returning its response", async () => {
-        const res = await client.deletePage("proj", "wiki-1", "/Old");
-        expect(res.page.path).toBe("/Old");
-        expect(res.eTag).toEqual([`"${res.page.id}"`]);
-    });
-
-    it("builds wiki pages and details with default arguments", () => {
-        const page = WikiData.makeWikiPage();
-        expect(page.path).toBe("/Home");
-        const detail = WikiData.makeWikiPageDetail();
-        expect(typeof detail.id).toBe("number");
-        const wiki = WikiData.makeWiki();
-        expect(wiki.name).toBe("Project.wiki");
+    it("updates a wiki echoing the parameters", async () => {
+        const [first] = await client.getAllWikis();
+        const updated = await client.updateWiki(
+            { name: "Renamed.wiki", versions: [{ ...version, version: "release" }] },
+            first.id,
+            "proj"
+        );
+        expect(updated.id).toBe(first.id);
+        expect(updated.name).toBe("Renamed.wiki");
+        expect(updated.versions[0].version).toBe("release");
     });
 });
