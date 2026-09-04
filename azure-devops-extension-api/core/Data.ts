@@ -2,16 +2,21 @@ import { fake } from "../common/fixtures";
 import {
     Process,
     ProcessType,
+    ProjectInfo,
+    ProjectProperty,
     ProjectVisibility,
+    Proxy,
     TeamProject,
     TeamProjectReference,
     TeamProjectCollection,
     TeamProjectCollectionReference,
+    WebApiConnectedService,
+    WebApiConnectedServiceDetails,
     WebApiTeam,
     WebApiTeamRef,
     WebApiTagDefinition
 } from "azure-devops-extension-api/Core";
-import { PagedList, IdentityRef, TeamMember } from "azure-devops-extension-api/WebApi";
+import { IdentityRef, TeamMember } from "azure-devops-extension-api/WebApi";
 import { OperationReference, OperationStatus } from "azure-devops-extension-api/Operations";
 
 export const makeIdentityRef = (): IdentityRef => ({
@@ -100,6 +105,13 @@ export const makeProjectCollectionReference = (): TeamProjectCollectionReference
     avatarUrl: fake.image.avatar()
 } as TeamProjectCollectionReference);
 
+export const makeProjectCollection = (): TeamProjectCollection => ({
+    ...makeProjectCollectionReference(),
+    description: fake.lorem.sentence(),
+    state: "Started",
+    _links: {} as any
+} as unknown as TeamProjectCollection);
+
 export const makeTagDefinition = (): WebApiTagDefinition => ({
     id: fake.string.uuid(),
     name: fake.lorem.word(),
@@ -107,15 +119,79 @@ export const makeTagDefinition = (): WebApiTagDefinition => ({
     active: true
 });
 
-const projectRefs = Array.from({ length: 5 }, makeProjectReference);
+export const makeConnectedService = (): WebApiConnectedService => ({
+    id: fake.string.uuid(),
+    url: fake.internet.url(),
+    authenticatedBy: makeIdentityRef(),
+    description: fake.lorem.sentence(),
+    friendlyName: fake.lorem.slug(),
+    kind: fake.helpers.arrayElement(["Custom", "AzureSubscription", "Chef", "Generic"]),
+    project: makeProjectReference(),
+    serviceUri: fake.internet.url()
+});
+
+export const makeConnectedServiceDetails = (
+    service: WebApiConnectedService = makeConnectedService()
+): WebApiConnectedServiceDetails => ({
+    id: service.id,
+    url: service.url,
+    connectedServiceMetaData: service,
+    credentialsXml: `<credentials token="${fake.string.alphanumeric(24)}" />`,
+    endPoint: service.serviceUri
+});
+
+export const makeProjectProperty = (name = `System.${fake.lorem.word()}`): ProjectProperty => ({
+    name,
+    value: fake.lorem.word()
+});
+
+export const makeProjectInfo = (): ProjectInfo => {
+    const reference = makeProjectReference();
+    return {
+        abbreviation: reference.abbreviation,
+        description: reference.description,
+        id: reference.id,
+        lastUpdateTime: reference.lastUpdateTime,
+        name: reference.name,
+        revision: reference.revision,
+        state: reference.state,
+        visibility: reference.visibility,
+        properties: Array.from({ length: 2 }, () => makeProjectProperty()),
+        uri: `vstfs:///Classification/TeamProject/${reference.id}`,
+        version: fake.number.int({ min: 1, max: 20 })
+    };
+};
+
+export const makeProxy = (): Proxy => ({
+    authorization: {
+        authorizationUrl: fake.internet.url(),
+        clientId: fake.string.uuid(),
+        identity: { identifier: fake.string.uuid(), identityType: "System.Identity" },
+        publicKey: { exponent: [1, 0, 1], modulus: [] }
+    },
+    description: fake.lorem.sentence(),
+    friendlyName: fake.lorem.slug(),
+    globalDefault: fake.datatype.boolean(),
+    site: fake.internet.domainName(),
+    siteDefault: fake.datatype.boolean(),
+    url: fake.internet.url()
+});
 
 export const projects: TeamProject[] = Array.from({ length: 5 }, makeProject);
-export const projectReferences: PagedList<TeamProjectReference> =
-    Object.assign(projectRefs, { continuationToken: "" }) as PagedList<TeamProjectReference>;
 export const teams: WebApiTeam[] = Array.from({ length: 3 }, makeTeam);
+export const readableTeams: WebApiTeam[] = Array.from({ length: 2 }, makeTeam);
 export const processes: Process[] = Array.from({ length: 4 }, makeProcess);
 export const teamMembers: TeamMember[] = Array.from({ length: 5 }, makeTeamMember);
-export const projectCollections: TeamProjectCollection[] = Array.from({ length: 2 }, () => ({
-    ...makeProjectCollectionReference(),
-    description: fake.lorem.sentence()
-} as unknown as TeamProjectCollection));
+export const projectCollections: TeamProjectCollection[] = Array.from({ length: 2 }, makeProjectCollection);
+export const identityMru: IdentityRef[] = Array.from({ length: 3 }, makeIdentityRef);
+export const connectedServices: WebApiConnectedService[] = Array.from({ length: 4 }, makeConnectedService);
+export const projectHistory: ProjectInfo[] = Array.from({ length: 5 }, (_, index) => ({
+    ...makeProjectInfo(),
+    revision: index + 1
+}));
+export const projectProperties: ProjectProperty[] = [
+    makeProjectProperty("System.ProcessTemplateType"),
+    makeProjectProperty("System.SourceControlGitEnabled"),
+    makeProjectProperty("System.CurrentProcessTemplateId")
+];
+export const proxies: Proxy[] = Array.from({ length: 2 }, makeProxy);

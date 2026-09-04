@@ -3,8 +3,10 @@ import {
     Dashboard,
     DashboardGroup,
     Widget,
+    WidgetMetadata,
     WidgetSize,
     WidgetPosition,
+    WidgetScope,
     DashboardScope,
     LightboxOptions
 } from "azure-devops-extension-api/Dashboard";
@@ -61,6 +63,37 @@ export const makeDashboardGroup = (): DashboardGroup => ({
     _links: {} as any
 } as unknown as DashboardGroup);
 
+export const makeWidgetMetadata = (
+    contributionId = `ms.vss-dashboards-web.${fake.lorem.slug()}-widget`
+): WidgetMetadata => ({
+    allowedSizes: [
+        { rowSpan: 1, columnSpan: 1 },
+        { rowSpan: 2, columnSpan: 2 }
+    ],
+    analyticsServiceRequired: false,
+    catalogIconUrl: fake.image.url(),
+    catalogInfoUrl: fake.internet.url(),
+    configurationContributionId: `${contributionId}-configuration`,
+    configurationContributionRelativeId: `${contributionId}-configuration`,
+    configurationRequired: fake.datatype.boolean(),
+    contentUri: fake.internet.url(),
+    contributionId,
+    defaultSettings: "{}",
+    description: fake.lorem.sentence(),
+    isEnabled: true,
+    isNameConfigurable: true,
+    isVisibleFromCatalog: true,
+    keywords: [fake.lorem.word()],
+    lightboxOptions: { width: 800, height: 600, resizable: false },
+    loadingImageUrl: fake.image.url(),
+    name: fake.lorem.words(2),
+    publisherName: fake.company.name(),
+    supportedScopes: [WidgetScope.Project_Team, WidgetScope.Collection_User],
+    tags: [fake.lorem.word()],
+    targets: [fake.lorem.word()],
+    typeId: fake.string.uuid()
+});
+
 export const dashboards: Dashboard[] = [
     makeDashboard("Overview"),
     makeDashboard("Sprint Health"),
@@ -68,3 +101,7 @@ export const dashboards: Dashboard[] = [
 ];
 export const widgets: Widget[] = Array.from({ length: 6 }, () => makeWidget());
 export const dashboardGroup: DashboardGroup = makeDashboardGroup();
+export const widgetTypes: WidgetMetadata[] = [
+    ...Array.from({ length: 3 }, () => makeWidgetMetadata()),
+    { ...makeWidgetMetadata(), supportedScopes: [WidgetScope.Project_Team] }
+];
