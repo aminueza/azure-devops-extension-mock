@@ -135,5 +135,3 @@ export const deploymentGroups: DeploymentGroup[] = Array.from({ length: 2 }, mak
 
 export const deploymentGroupsPage: PagedList<DeploymentGroup> =
     Object.assign([...deploymentGroups], { continuationToken: "" }) as PagedList<DeploymentGroup>;
-export const variableGroupsPage: PagedList<VariableGroup> =
-    Object.assign([...variableGroups], { continuationToken: "" }) as PagedList<VariableGroup>;

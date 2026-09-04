@@ -19,7 +19,6 @@ import {
     makeVariableGroup,
     taskGroups,
     variableGroups,
-    variableGroupsPage
 } from "../azure-devops-extension-api/taskAgent/Data";
 
 describe("TaskAgentRestClient mock", () => {
@@ -131,12 +130,6 @@ describe("TaskAgentRestClient mock", () => {
         expect(list[0].variables["MyVariable"].value).toBe("myValue");
     });
 
-    it("lists variable groups as a page", async () => {
-        const page = await (client as any).getVariableGroupsPaged("proj");
-        expect(page).toBe(variableGroupsPage);
-        expect(page.length).toBe(2);
-        expect(page.continuationToken).toBe("");
-    });
 
     it("returns a known variable group", async () => {
         const group = await client.getVariableGroup("proj", variableGroups[1].id);
@@ -270,6 +263,5 @@ describe("taskAgent Data factories", () => {
         expect(variableGroups.length).toBe(2);
         expect(deploymentGroups.length).toBe(2);
         expect([...deploymentGroupsPage]).toEqual(deploymentGroups);
-        expect([...variableGroupsPage]).toEqual(variableGroups);
     });
 });
