@@ -1,5 +1,6 @@
 import { fake } from "../common/fixtures";
 import {
+    Attachment,
     Comment,
     CommentThreadStatus,
     CommentType,
@@ -20,7 +21,11 @@ import {
     GitPush,
     GitAnnotatedTag,
     GitAsyncOperationStatus,
+    GitAsyncRefOperation,
+    GitAsyncRefOperationFailureStatus,
+    GitCherryPick,
     GitChange,
+    GitRevert,
     GitCommitDiffs,
     GitConflict,
     GitConflictType,
@@ -52,7 +57,7 @@ import {
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
 import { WebApiTagDefinition } from "azure-devops-extension-api/Core";
-import { ResourceRef } from "azure-devops-extension-api/WebApi";
+import { IdentityRef, ResourceRef } from "azure-devops-extension-api/WebApi";
 import {
     makeIdentityRef,
     makeProjectCollectionReference,
@@ -647,4 +652,99 @@ export const pullRequestThreadComments: Comment[] = [
 export const pullRequestThreads: GitPullRequestCommentThread[] = [
     makePullRequestThread(5301, CommentThreadStatus.Active, pullRequestThreadComments),
     makePullRequestThread(5302, CommentThreadStatus.Fixed, [makeComment(5411)])
+];
+
+export const makeAsyncRefOperation = (generatedRefName: string): GitAsyncRefOperation => ({
+    _links: {},
+    detailedStatus: {
+        conflict: false,
+        currentCommitId: fake.git.commitSha(),
+        failureMessage: "",
+        progress: 1,
+        status: GitAsyncRefOperationFailureStatus.None,
+        timedout: false
+    },
+    parameters: {
+        generatedRefName,
+        ontoRefName: "refs/heads/main",
+        repository: makeGitRepository(),
+        source: {
+            commitList: [makeCommit()],
+            pullRequestId: fake.number.int({ min: 1, max: 10_000 })
+        }
+    },
+    status: GitAsyncOperationStatus.Completed,
+    url: fake.internet.url()
+});
+
+export const makeCherryPick = (
+    cherryPickId: number,
+    generatedRefName: string
+): GitCherryPick => ({
+    ...makeAsyncRefOperation(generatedRefName),
+    cherryPickId
+});
+
+export const cherryPicks: GitCherryPick[] = [
+    makeCherryPick(6001, "refs/heads/cherry-pick/hotfix"),
+    makeCherryPick(6002, "refs/heads/cherry-pick/release"),
+    {
+        ...makeCherryPick(6003, "refs/heads/cherry-pick/feature"),
+        status: GitAsyncOperationStatus.Abandoned
+    }
+];
+
+export const cherryPickConflicts: GitConflict[] = [
+    makeGitConflict(6201, "/README.md", GitResolutionStatus.Unresolved),
+    makeGitConflict(6202, "/src/index.ts", GitResolutionStatus.Resolved),
+    makeGitConflict(6203, "/package.json", GitResolutionStatus.PartiallyResolved),
+    makeGitConflict(6204, "/src/git/Data.ts", GitResolutionStatus.Resolved)
+];
+
+export const makeRevert = (revertId: number, generatedRefName: string): GitRevert => ({
+    ...makeAsyncRefOperation(generatedRefName),
+    revertId
+});
+
+export const reverts: GitRevert[] = [
+    makeRevert(6101, "refs/heads/revert/hotfix"),
+    makeRevert(6102, "refs/heads/revert/release"),
+    {
+        ...makeRevert(6103, "refs/heads/revert/feature"),
+        status: GitAsyncOperationStatus.Abandoned
+    }
+];
+
+export const revertConflicts: GitConflict[] = [
+    makeGitConflict(6301, "/README.md", GitResolutionStatus.Resolved),
+    makeGitConflict(6302, "/src/index.ts", GitResolutionStatus.Unresolved),
+    makeGitConflict(6303, "/package.json", GitResolutionStatus.Resolved)
+];
+
+export const makeAttachment = (id: number, displayName: string): Attachment => ({
+    _links: {},
+    author: makeIdentityRef(),
+    contentHash: fake.git.commitSha(),
+    createdDate: fake.date.recent(),
+    description: fake.lorem.sentence(),
+    displayName,
+    id,
+    properties: {},
+    url: fake.internet.url()
+});
+
+export const pullRequestAttachments: Attachment[] = [
+    makeAttachment(6401, "design.png"),
+    makeAttachment(6402, "trace.log"),
+    makeAttachment(6403, "notes.md")
+];
+
+export const commentLikes: IdentityRef[] = [
+    { ...makeIdentityRef(), id: "liker-approver" },
+    { ...makeIdentityRef(), id: "liker-reviewer" }
+];
+
+export const likedComments: Comment[] = [
+    { ...makeComment(6501), usersLiked: commentLikes },
+    { ...makeComment(6502), usersLiked: [{ ...makeIdentityRef(), id: "liker-observer" }] }
 ];

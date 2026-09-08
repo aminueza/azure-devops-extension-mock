@@ -1,6 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import {
+    Attachment,
     GitRestClient,
     GitRepository,
     GitPullRequest,
@@ -17,6 +18,9 @@ import {
     GetAccessibleRepositoriesRequest,
     GetAccessibleRepositoriesResponse,
     GitAsyncOperationStatus,
+    GitAsyncRefOperationParameters,
+    GitCherryPick,
+    GitRevert,
     GitDeletedRepository,
     GitForkSyncRequest,
     GitForkSyncRequestParameters,
@@ -67,6 +71,8 @@ import {
     annotatedTags,
     branches,
     changes,
+    cherryPickConflicts,
+    cherryPicks,
     commits,
     commitStatuses,
     deletedRepositories,
@@ -74,8 +80,11 @@ import {
     forkSyncRequests,
     importRequests,
     items,
+    likedComments,
     makeAnnotatedTag,
+    makeAttachment,
     makeBranchStats,
+    makeCherryPick,
     makeComment,
     makeCommentThread,
     makeCommit,
@@ -100,9 +109,11 @@ import {
     makePullRequestThread,
     makePush,
     makeRefUpdateResult,
+    makeRevert,
     makeTreeArchive,
     makeTreeRef,
     merges,
+    pullRequestAttachments,
     pullRequestConflicts,
     pullRequestFileDiffDetails,
     pullRequestIterationStatuses,
@@ -116,6 +127,8 @@ import {
     pullRequests,
     refs,
     repositories,
+    revertConflicts,
+    reverts,
     suggestions,
     trees
 } from "./Data";
@@ -132,6 +145,40 @@ const applyPropertyPatch = (
         }),
         { ...base }
     );
+};
+
+const createdCherryPickId = 6011;
+const createdRevertId = 6111;
+const createdAttachmentId = 6411;
+
+const filterConflicts = (
+    source: GitConflict[],
+    excludeResolved?: boolean,
+    onlyResolved?: boolean
+): GitConflict[] => {
+    if (onlyResolved) {
+        return source.filter(c => c.resolutionStatus === GitResolutionStatus.Resolved);
+    }
+    if (excludeResolved) {
+        return source.filter(c => c.resolutionStatus !== GitResolutionStatus.Resolved);
+    }
+    return source;
+};
+
+const conflictPage = (
+    source: GitConflict[],
+    continuationToken?: string,
+    top?: number,
+    excludeResolved?: boolean,
+    onlyResolved?: boolean
+): PagedList<GitConflict> => {
+    const start = continuationToken ? Number(continuationToken) : 0;
+    const end = start + (top ?? source.length);
+    const selected = filterConflicts(source.slice(start, end), excludeResolved, onlyResolved);
+    const page: PagedList<GitConflict> = Object.assign(selected, {
+        continuationToken: end < source.length ? String(end) : null
+    });
+    return page;
 };
 
 export class MockGitRestClient extends RestClientBase {
@@ -1378,6 +1425,258 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string
     ): Promise<void> {
         return Promise.resolve();
+    }
+
+    createCherryPick(
+        cherryPickToCreate: GitAsyncRefOperationParameters,
+        _project: string,
+        _repositoryId: string
+    ): Promise<GitCherryPick> {
+        return Promise.resolve({
+            ...makeCherryPick(createdCherryPickId, cherryPickToCreate.generatedRefName),
+            parameters: cherryPickToCreate
+        });
+    }
+
+    getCherryPick(
+        _project: string,
+        cherryPickId: number,
+        _repositoryId: string
+    ): Promise<GitCherryPick> {
+        const found = cherryPicks.find(pick => pick.cherryPickId === cherryPickId);
+        return Promise.resolve(
+            found ?? makeCherryPick(cherryPickId, `refs/heads/cherry-pick/${cherryPickId}`)
+        );
+    }
+
+    getCherryPickForRefName(
+        _project: string,
+        _repositoryId: string,
+        refName: string
+    ): Promise<GitCherryPick> {
+        const found = cherryPicks.find(pick => pick.parameters.generatedRefName === refName);
+        return Promise.resolve(found ?? makeCherryPick(createdCherryPickId, refName));
+    }
+
+    getCherryPickRelationships(
+        _repositoryNameOrId: string,
+        commitId: string,
+        _project?: string,
+        _includeLinks?: boolean
+    ): Promise<GitCommitRef[]> {
+        const found = commits.find(commit => commit.commitId === commitId);
+        return Promise.resolve(found ? [found] : [{ ...makeCommit(), commitId }]);
+    }
+
+    getCherryPickConflict(
+        _repositoryId: string,
+        _cherryPickId: number,
+        conflictId: number,
+        _project?: string
+    ): Promise<GitConflict> {
+        const found = cherryPickConflicts.find(conflict => conflict.conflictId === conflictId);
+        return Promise.resolve(
+            found ?? makeGitConflict(conflictId, "/README.md", GitResolutionStatus.Unresolved)
+        );
+    }
+
+    getCherryPickConflicts(
+        _repositoryId: string,
+        _cherryPickId: number,
+        _project?: string,
+        continuationToken?: string,
+        top?: number,
+        excludeResolved?: boolean,
+        onlyResolved?: boolean,
+        _includeObsolete?: boolean
+    ): Promise<PagedList<GitConflict>> {
+        return Promise.resolve(
+            conflictPage(
+                cherryPickConflicts,
+                continuationToken,
+                top,
+                excludeResolved,
+                onlyResolved
+            )
+        );
+    }
+
+    updateCherryPickConflict(
+        conflict: GitConflict,
+        repositoryId: string,
+        cherryPickId: number,
+        conflictId: number,
+        project?: string
+    ): Promise<GitConflict> {
+        return this.getCherryPickConflict(
+            repositoryId,
+            cherryPickId,
+            conflictId,
+            project
+        ).then(existing => ({ ...existing, ...conflict, conflictId }));
+    }
+
+    updateCherryPickConflicts(
+        conflictUpdates: GitConflict[],
+        _repositoryId: string,
+        _cherryPickId: number,
+        _project?: string
+    ): Promise<GitConflictUpdateResult[]> {
+        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+    }
+
+    createRevert(
+        revertToCreate: GitAsyncRefOperationParameters,
+        _project: string,
+        _repositoryId: string
+    ): Promise<GitRevert> {
+        return Promise.resolve({
+            ...makeRevert(createdRevertId, revertToCreate.generatedRefName),
+            parameters: revertToCreate
+        });
+    }
+
+    getRevert(_project: string, revertId: number, _repositoryId: string): Promise<GitRevert> {
+        const found = reverts.find(revert => revert.revertId === revertId);
+        return Promise.resolve(
+            found ?? makeRevert(revertId, `refs/heads/revert/${revertId}`)
+        );
+    }
+
+    getRevertForRefName(
+        _project: string,
+        _repositoryId: string,
+        refName: string
+    ): Promise<GitRevert> {
+        const found = reverts.find(revert => revert.parameters.generatedRefName === refName);
+        return Promise.resolve(found ?? makeRevert(createdRevertId, refName));
+    }
+
+    getRevertConflict(
+        _repositoryId: string,
+        _revertId: number,
+        conflictId: number,
+        _project?: string
+    ): Promise<GitConflict> {
+        const found = revertConflicts.find(conflict => conflict.conflictId === conflictId);
+        return Promise.resolve(
+            found ?? makeGitConflict(conflictId, "/README.md", GitResolutionStatus.Unresolved)
+        );
+    }
+
+    getRevertConflicts(
+        _repositoryId: string,
+        _revertId: number,
+        _project?: string,
+        continuationToken?: string,
+        top?: number,
+        excludeResolved?: boolean,
+        onlyResolved?: boolean,
+        _includeObsolete?: boolean
+    ): Promise<PagedList<GitConflict>> {
+        return Promise.resolve(
+            conflictPage(revertConflicts, continuationToken, top, excludeResolved, onlyResolved)
+        );
+    }
+
+    updateRevertConflict(
+        conflict: GitConflict,
+        repositoryId: string,
+        revertId: number,
+        conflictId: number,
+        project?: string
+    ): Promise<GitConflict> {
+        return this.getRevertConflict(repositoryId, revertId, conflictId, project).then(
+            existing => ({ ...existing, ...conflict, conflictId })
+        );
+    }
+
+    updateRevertConflicts(
+        conflictUpdates: GitConflict[],
+        _repositoryId: string,
+        _revertId: number,
+        _project?: string
+    ): Promise<GitConflictUpdateResult[]> {
+        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+    }
+
+    createAttachment(
+        content: any,
+        fileName: string,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<Attachment> {
+        return Promise.resolve({
+            ...makeAttachment(createdAttachmentId, fileName),
+            properties: { content }
+        });
+    }
+
+    deleteAttachment(
+        _fileName: string,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getAttachmentContent(
+        fileName: string,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(makeTreeArchive(fileName));
+    }
+
+    getAttachmentZip(
+        fileName: string,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(makeTreeArchive(`${fileName}.zip`));
+    }
+
+    getAttachments(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<Attachment[]> {
+        return Promise.resolve(pullRequestAttachments);
+    }
+
+    createLike(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _threadId: number,
+        _commentId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    deleteLike(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _threadId: number,
+        _commentId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getLikes(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _threadId: number,
+        commentId: number,
+        _project?: string
+    ): Promise<IdentityRef[]> {
+        const found = likedComments.find(comment => comment.id === commentId);
+        return Promise.resolve(found ? found.usersLiked : []);
     }
 }
 
