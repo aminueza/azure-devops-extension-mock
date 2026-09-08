@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-09-08
 
 First release on npm.
 
@@ -28,9 +28,12 @@ First release on npm.
 - `azure-devops-extension-sdk` peer range now accepts v4 and v5.
 - `MockExtensionDataManager.setValue` returns the value it was given, and `queryCollections` echoes the collections passed in.
 - `MockBoardsRestClient`, `MockCoreRestClient`, `MockDashboardRestClient` and `MockWikiRestClient` now implement the full real client surface with the real signatures. The old Boards preview methods (`createBoard`, `addBoardItem`, …), `MockWikiRestClient.getPage/deletePage/createOrUpdatePage`, `MockCoreRestClient.getProjectsPaged` and `MockTaskAgentRestClient.getVariableGroupsPaged` did not exist on the real clients and were removed.
+- `MockReleaseRestClient`, `MockTestRestClient` and `MockWorkItemTrackingRestClient` are complete, and `MockBuildRestClient`, `MockGitRestClient` and `MockTaskAgentRestClient` cover most of their surface. See the table in the readme for the current counts; the remaining methods still resolve to `undefined` and accept overrides.
 
 ### Fixed
 
 - `MockExtensionDataManager.getValue`, `setValue`, `getDocument`, `getDocuments`, `queryCollections`, `queryCollectionsByName` and `MockExtensionDataService.getExtensionDataManager` returned promises that never settled.
+- `mockClient` bound the real methods of an unregistered client class, so calling one issued a live HTTP request instead of resolving to `undefined`.
+- `MockTaskAgentRestClient.getAgentQueue` had its parameters reversed relative to the real client, and `MockBuildRestClient.getBuildLog` returned an `ArrayBuffer` where the real client returns a `string`.
 
 [1.0.0]: https://github.com/aminueza/azure-devops-extension-mock/releases/tag/v1.0.0
