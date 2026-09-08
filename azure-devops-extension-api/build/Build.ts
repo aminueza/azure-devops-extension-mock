@@ -15,20 +15,33 @@ import {
     BuildOptionDefinition,
     BuildReportMetadata,
     BuildResourceUsage,
+    BuildRetentionHistory,
     BuildSettings,
     DefinitionQueueStatus,
     DefinitionResourceReference,
+    DefinitionTriggerType,
     Folder,
     FolderQueryOrder,
+    MinimalRetentionLease,
+    NewRetentionLease,
     PipelineGeneralSettings,
+    ProjectRetentionSetting,
+    PullRequest,
+    RepositoryWebhook,
+    ResultSet,
+    RetentionLease,
+    RetentionLeaseUpdate,
+    SourceProviderAttributes,
+    SourceRepositories,
     SourceRepositoryItem,
     Timeline,
     Change,
+    UpdateProjectRetentionSettingModel,
     UpdateStageParameters,
     UpdateTagParameters,
     YamlBuild
 } from "azure-devops-extension-api/Build";
-import { JsonPatchDocument, PagedList } from "azure-devops-extension-api/WebApi";
+import { JsonPatchDocument, PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
 import {
     artifacts,
     attachments,
@@ -43,6 +56,7 @@ import {
     buildSettings,
     buildsPage,
     buildTags,
+    buildWorkItemRefs,
     changes,
     definitionProperties,
     definitionResources,
@@ -61,10 +75,22 @@ import {
     makeBuildReportMetadata,
     makeDefinitionResourceReference,
     makeFolder,
+    makeLeaseFromNew,
+    makePullRequest,
+    makeRetentionLease,
     makeStageTimeline,
+    makeUpdatedLease,
     optionDefinitions,
+    projectRetentionSetting,
     projectTags,
+    pullRequests,
+    repositoryWebhooks,
     resourceUsage,
+    retentionHistory,
+    retentionLeases,
+    sourceBranches,
+    sourceProviders,
+    sourceRepositories,
     sourceRepositoryItems,
     stageTimelines,
     timeline
@@ -662,5 +688,220 @@ export class MockBuildRestClient extends RestClientBase {
                 ? [...sourceRepositoryItems]
                 : sourceRepositoryItems.filter(item => item.path.startsWith(path))
         );
+    }
+
+    addRetentionLeases(
+        newLeases: NewRetentionLease[],
+        _project: string
+    ): Promise<RetentionLease[]> {
+        return Promise.resolve(newLeases.map(makeLeaseFromNew));
+    }
+
+    deleteRetentionLeasesById(_project: string, _ids: number[]): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getRetentionLease(_project: string, leaseId: number): Promise<RetentionLease> {
+        const found = retentionLeases.find(lease => lease.leaseId === leaseId);
+        return Promise.resolve(
+            found ?? makeRetentionLease(leaseId, "owner-unknown", 0, 0)
+        );
+    }
+
+    getRetentionLeasesByMinimalRetentionLeases(
+        _project: string,
+        leasesToFetch: MinimalRetentionLease[]
+    ): Promise<RetentionLease[]> {
+        return Promise.resolve(
+            retentionLeases.filter(lease =>
+                leasesToFetch.some(
+                    wanted =>
+                        wanted.ownerId === lease.ownerId &&
+                        wanted.definitionId === lease.definitionId &&
+                        wanted.runId === lease.runId
+                )
+            )
+        );
+    }
+
+    getRetentionLeasesByOwnerId(
+        _project: string,
+        ownerId?: string,
+        definitionId?: number,
+        runId?: number
+    ): Promise<RetentionLease[]> {
+        return Promise.resolve(
+            retentionLeases.filter(
+                lease =>
+                    lease.ownerId === (ownerId ?? lease.ownerId) &&
+                    lease.definitionId === (definitionId ?? lease.definitionId) &&
+                    lease.runId === (runId ?? lease.runId)
+            )
+        );
+    }
+
+    getRetentionLeasesByUserId(
+        _project: string,
+        userOwnerId: string,
+        definitionId?: number,
+        runId?: number
+    ): Promise<RetentionLease[]> {
+        return Promise.resolve(
+            retentionLeases.filter(
+                lease =>
+                    lease.ownerId === userOwnerId &&
+                    lease.definitionId === (definitionId ?? lease.definitionId) &&
+                    lease.runId === (runId ?? lease.runId)
+            )
+        );
+    }
+
+    getRetentionLeasesForBuild(_project: string, buildId: number): Promise<RetentionLease[]> {
+        return Promise.resolve(retentionLeases.filter(lease => lease.runId === buildId));
+    }
+
+    updateRetentionLease(
+        leaseUpdate: RetentionLeaseUpdate,
+        _project: string,
+        leaseId: number
+    ): Promise<RetentionLease> {
+        return Promise.resolve(makeUpdatedLease(leaseId, leaseUpdate));
+    }
+
+    getRetentionHistory(daysToLookback?: number): Promise<BuildRetentionHistory> {
+        const since = Date.now() - (daysToLookback ?? Number.MAX_SAFE_INTEGER) * 86_400_000;
+        return Promise.resolve({
+            buildRetentionSamples: retentionHistory.buildRetentionSamples.filter(
+                sample => sample.sampleTime.getTime() >= since
+            )
+        });
+    }
+
+    getRetentionSettings(_project: string): Promise<ProjectRetentionSetting> {
+        return Promise.resolve({ ...projectRetentionSetting });
+    }
+
+    updateRetentionSettings(
+        updateModel: UpdateProjectRetentionSettingModel,
+        _project: string
+    ): Promise<ProjectRetentionSetting> {
+        return Promise.resolve({
+            purgeArtifacts: {
+                ...projectRetentionSetting.purgeArtifacts,
+                value: updateModel.artifactsRetention.value
+            },
+            purgePullRequestRuns: {
+                ...projectRetentionSetting.purgePullRequestRuns,
+                value: updateModel.pullRequestRunRetention.value
+            },
+            purgeRuns: {
+                ...projectRetentionSetting.purgeRuns,
+                value: updateModel.runRetention.value
+            },
+            retainRunsPerProtectedBranch: {
+                ...projectRetentionSetting.retainRunsPerProtectedBranch,
+                value: updateModel.retainRunsPerProtectedBranch.value
+            }
+        });
+    }
+
+    getBuildWorkItemsRefs(
+        _project: string,
+        _buildId: number,
+        top?: number
+    ): Promise<ResourceRef[]> {
+        return Promise.resolve(buildWorkItemRefs.slice(0, top ?? buildWorkItemRefs.length));
+    }
+
+    getBuildWorkItemsRefsFromCommits(
+        commitIds: string[],
+        _project: string,
+        _buildId: number,
+        top?: number
+    ): Promise<ResourceRef[]> {
+        return Promise.resolve(buildWorkItemRefs.slice(0, top ?? commitIds.length));
+    }
+
+    getWorkItemsBetweenBuilds(
+        _project: string,
+        _fromBuildId: number,
+        _toBuildId: number,
+        top?: number
+    ): Promise<ResourceRef[]> {
+        return Promise.resolve(buildWorkItemRefs.slice(0, top ?? buildWorkItemRefs.length));
+    }
+
+    getChangesBetweenBuilds(
+        _project: string,
+        _fromBuildId?: number,
+        _toBuildId?: number,
+        top?: number
+    ): Promise<Change[]> {
+        return Promise.resolve(changes.slice(0, top ?? changes.length));
+    }
+
+    getPullRequest(
+        _project: string,
+        providerName: string,
+        pullRequestId: string,
+        _repositoryId?: string,
+        _serviceEndpointId?: string
+    ): Promise<PullRequest> {
+        const found = pullRequests.find(request => request.id === pullRequestId);
+        return Promise.resolve(found ?? makePullRequest(pullRequestId, providerName));
+    }
+
+    listBranches(
+        _project: string,
+        _providerName: string,
+        _serviceEndpointId?: string,
+        _repository?: string,
+        branchName?: string
+    ): Promise<string[]> {
+        return Promise.resolve(sourceBranches.filter(branch => branch === (branchName ?? branch)));
+    }
+
+    listRepositories(
+        _project: string,
+        _providerName: string,
+        _serviceEndpointId?: string,
+        repository?: string,
+        resultSet?: ResultSet,
+        pageResults?: boolean,
+        _continuationToken?: string
+    ): Promise<SourceRepositories> {
+        const named = sourceRepositories.filter(repo => repo.name === (repository ?? repo.name));
+        const scoped = resultSet === ResultSet.Top ? named.slice(0, 1) : named;
+        return Promise.resolve({
+            repositories: scoped,
+            pageLength: scoped.length,
+            totalPageCount: scoped.length === 0 ? 0 : 1,
+            continuationToken: pageResults === true ? "next-page" : ""
+        });
+    }
+
+    listSourceProviders(_project: string): Promise<SourceProviderAttributes[]> {
+        return Promise.resolve([...sourceProviders]);
+    }
+
+    listWebhooks(
+        _project: string,
+        _providerName: string,
+        _serviceEndpointId?: string,
+        repository?: string
+    ): Promise<RepositoryWebhook[]> {
+        return Promise.resolve(
+            repositoryWebhooks.filter(webhook => webhook.name === (repository ?? webhook.name))
+        );
+    }
+
+    restoreWebhooks(
+        _triggerTypes: DefinitionTriggerType[],
+        _project: string,
+        _providerName: string,
+        _serviceEndpointId?: string,
+        _repository?: string
+    ): Promise<void> {
+        return Promise.resolve();
     }
 }

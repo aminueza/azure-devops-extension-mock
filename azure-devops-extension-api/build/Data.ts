@@ -16,23 +16,38 @@ import {
     BuildReportMetadata,
     BuildResourceUsage,
     BuildResult,
+    BuildRetentionHistory,
+    BuildRetentionSample,
     BuildSettings,
     BuildStatus,
     BuildReason,
     ControllerStatus,
     DefinitionResourceReference,
+    DefinitionTriggerType,
     DefinitionType,
     DefinitionQuality,
     Folder,
+    MinimalRetentionLease,
+    NewRetentionLease,
     PipelineGeneralSettings,
+    ProjectRetentionSetting,
+    PullRequest,
+    RepositoryWebhook,
+    RetentionLease,
+    RetentionLeaseUpdate,
     RetentionPolicy,
+    RetentionSetting,
+    SourceProviderAttributes,
+    SourceRepository,
     SourceRepositoryItem,
+    SupportedTrigger,
+    SupportLevel,
     Timeline,
     TimelineRecord,
     TimelineRecordState,
     Change
 } from "azure-devops-extension-api/Build";
-import { PagedList } from "azure-devops-extension-api/WebApi";
+import { PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeBuildDefinition = (): BuildDefinition => ({
@@ -427,4 +442,185 @@ export const sourceRepositoryItems: SourceRepositoryItem[] = [
     makeSourceRepositoryItem("/src", true),
     makeSourceRepositoryItem("/src/index.ts", false),
     makeSourceRepositoryItem("/docs", true)
+];
+
+const LEASE_DAY_MS = 86_400_000;
+
+export const makeRetentionLease = (
+    leaseId: number,
+    ownerId: string,
+    definitionId: number,
+    runId: number
+): RetentionLease => ({
+    leaseId,
+    ownerId,
+    definitionId,
+    runId,
+    protectPipeline: fake.datatype.boolean(),
+    createdOn: fake.date.recent(),
+    validUntil: fake.date.future()
+});
+
+export const makeLeaseFromNew = (newLease: NewRetentionLease): RetentionLease => {
+    const createdOn = fake.date.recent();
+    return {
+        leaseId: fake.number.int({ min: 1, max: 100_000 }),
+        ownerId: newLease.ownerId,
+        definitionId: newLease.definitionId,
+        runId: newLease.runId,
+        protectPipeline: newLease.protectPipeline,
+        createdOn,
+        validUntil: new Date(createdOn.getTime() + newLease.daysValid * LEASE_DAY_MS)
+    };
+};
+
+export const makeUpdatedLease = (
+    leaseId: number,
+    update: RetentionLeaseUpdate
+): RetentionLease => {
+    const createdOn = fake.date.recent();
+    return {
+        leaseId,
+        ownerId: `owner-${fake.lorem.slug()}`,
+        definitionId: fake.number.int({ min: 1, max: 10_000 }),
+        runId: fake.number.int({ min: 1, max: 100_000 }),
+        protectPipeline: update.protectPipeline,
+        createdOn,
+        validUntil: new Date(createdOn.getTime() + update.daysValid * LEASE_DAY_MS)
+    };
+};
+
+export const makeMinimalRetentionLease = (
+    ownerId: string,
+    definitionId: number,
+    runId: number
+): MinimalRetentionLease => ({ ownerId, definitionId, runId });
+
+export const retentionLeases: RetentionLease[] = [
+    makeRetentionLease(9_000_001, "owner-alpha", 9_100_001, 9_200_001),
+    makeRetentionLease(9_000_002, "owner-alpha", 9_100_002, 9_200_002),
+    makeRetentionLease(9_000_003, "owner-beta", 9_100_001, 9_200_001),
+    makeRetentionLease(9_000_004, "owner-gamma", 9_100_003, 9_200_003)
+];
+
+export const makeBuildRetentionSample = (daysAgo: number): BuildRetentionSample => ({
+    sampleTime: new Date(Date.now() - daysAgo * LEASE_DAY_MS),
+    builds: `${fake.number.int({ min: 1, max: 500 })} builds retained`,
+    definitions: `${fake.number.int({ min: 1, max: 50 })} definitions`,
+    files: `${fake.number.int({ min: 1, max: 5_000 })} files`
+});
+
+export const retentionSampleDaysAgo: number[] = [1, 15, 60];
+
+export const retentionHistory: BuildRetentionHistory = {
+    buildRetentionSamples: retentionSampleDaysAgo.map(makeBuildRetentionSample)
+};
+
+export const makeRetentionSetting = (
+    min: number,
+    max: number,
+    value: number
+): RetentionSetting => ({ min, max, value });
+
+export const projectRetentionSetting: ProjectRetentionSetting = {
+    purgeArtifacts: makeRetentionSetting(1, 60, 30),
+    purgePullRequestRuns: makeRetentionSetting(1, 30, 10),
+    purgeRuns: makeRetentionSetting(30, 730, 365),
+    retainRunsPerProtectedBranch: makeRetentionSetting(0, 50, 3)
+};
+
+export const makeWorkItemRef = (id: string): ResourceRef => ({
+    id,
+    url: `${fake.internet.url()}/_apis/wit/workItems/${id}`
+});
+
+export const buildWorkItemRefs: ResourceRef[] = [
+    makeWorkItemRef("9300001"),
+    makeWorkItemRef("9300002"),
+    makeWorkItemRef("9300003"),
+    makeWorkItemRef("9300004")
+];
+
+export const makePullRequest = (id: string, providerName: string): PullRequest => ({
+    id,
+    providerName,
+    title: fake.lorem.sentence(),
+    description: fake.lorem.sentence(),
+    currentState: fake.helpers.arrayElement(["open", "merged", "closed"]),
+    draft: fake.datatype.boolean(),
+    author: makeIdentityRef(),
+    sourceBranchRef: "refs/heads/feature",
+    sourceRepositoryOwner: fake.internet.username(),
+    targetBranchRef: "refs/heads/main",
+    targetRepositoryOwner: fake.internet.username(),
+    _links: {}
+});
+
+export const pullRequests: PullRequest[] = [
+    makePullRequest("pr-9401", "TfsGit"),
+    makePullRequest("pr-9402", "GitHub")
+];
+
+export const sourceBranches: string[] = [
+    "refs/heads/main",
+    "refs/heads/release",
+    "refs/heads/feature"
+];
+
+export const makeSourceRepository = (
+    id: string,
+    name: string,
+    sourceProviderName: string
+): SourceRepository => ({
+    id,
+    name,
+    sourceProviderName,
+    fullName: `${fake.internet.username()}/${name}`,
+    defaultBranch: "refs/heads/main",
+    url: fake.internet.url(),
+    properties: { visibility: "private" }
+});
+
+export const sourceRepositories: SourceRepository[] = [
+    makeSourceRepository("repo-9501", "checkout", "TfsGit"),
+    makeSourceRepository("repo-9502", "billing", "TfsGit"),
+    makeSourceRepository("repo-9503", "website", "GitHub")
+];
+
+export const makeSupportedTrigger = (type: DefinitionTriggerType): SupportedTrigger => ({
+    type,
+    notificationType: "Webhook",
+    defaultPollingInterval: fake.number.int({ min: 60, max: 300 }),
+    supportedCapabilities: {
+        branchFilters: SupportLevel.Supported,
+        pathFilters: SupportLevel.Required
+    }
+});
+
+export const makeSourceProviderAttributes = (name: string): SourceProviderAttributes => ({
+    name,
+    supportedCapabilities: { queryFileContents: true, createLabel: false },
+    supportedTriggers: [
+        makeSupportedTrigger(DefinitionTriggerType.ContinuousIntegration),
+        makeSupportedTrigger(DefinitionTriggerType.PullRequest)
+    ]
+});
+
+export const sourceProviders: SourceProviderAttributes[] = [
+    makeSourceProviderAttributes("TfsGit"),
+    makeSourceProviderAttributes("GitHub"),
+    makeSourceProviderAttributes("Bitbucket")
+];
+
+export const makeRepositoryWebhook = (name: string): RepositoryWebhook => ({
+    name,
+    lastDeliveryStatus: fake.number.int({ min: 200, max: 204 }),
+    types: [DefinitionTriggerType.ContinuousIntegration, DefinitionTriggerType.PullRequest],
+    url: fake.internet.url()
+});
+
+export const repositoryWebhooks: RepositoryWebhook[] = [
+    makeRepositoryWebhook("checkout"),
+    makeRepositoryWebhook("billing"),
+    makeRepositoryWebhook("website")
 ];
