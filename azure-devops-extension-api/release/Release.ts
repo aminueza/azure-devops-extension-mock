@@ -37,7 +37,11 @@ import {
     OrgPipelineReleaseSettingsUpdateParameters,
     ProjectPipelineReleaseSettings,
     ProjectPipelineReleaseSettingsUpdateParameters,
-    ReleaseSettings
+    ReleaseSettings,
+    MailMessage,
+    ReleaseDefinitionUndeleteParameter,
+    ReleaseUpdateMetadata,
+    SummaryMailSection
 } from "azure-devops-extension-api/Release";
 import { InputValuesQuery } from "azure-devops-extension-api/FormInput";
 import { PagedList } from "azure-devops-extension-api/WebApi";
@@ -86,6 +90,7 @@ import {
     releaseWorkItemRefs,
     releases,
     sourceBranches,
+    summaryMailSections,
     tags,
     taskAttachments
 } from "./Data";
@@ -698,6 +703,59 @@ export class MockReleaseRestClient extends RestClientBase {
             ...makeOrgPipelineReleaseSettings(),
             orgEnforceJobAuthScope: newSettings.orgEnforceJobAuthScope
         });
+    }
+
+    undeleteReleaseDefinition(
+        releaseDefinitionUndeleteParameter: ReleaseDefinitionUndeleteParameter,
+        _project: string,
+        definitionId: number
+    ): Promise<ReleaseDefinition> {
+        const found = releaseDefinitions.find(definition => definition.id === definitionId);
+        return Promise.resolve({
+            ...(found ?? makeReleaseDefinition()),
+            id: definitionId,
+            comment: releaseDefinitionUndeleteParameter.comment,
+            isDeleted: false
+        });
+    }
+
+    deleteRelease(_project: string, _releaseId: number, _comment?: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    undeleteRelease(_project: string, _releaseId: number, _comment: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    updateReleaseResource(
+        releaseUpdateMetadata: ReleaseUpdateMetadata,
+        _project: string,
+        releaseId: number
+    ): Promise<Release> {
+        const found = releases.find(release => release.id === releaseId);
+        return Promise.resolve({
+            ...(found ?? makeRelease()),
+            id: releaseId,
+            comment: releaseUpdateMetadata.comment,
+            keepForever: releaseUpdateMetadata.keepForever,
+            name: releaseUpdateMetadata.name,
+            status: releaseUpdateMetadata.status
+        });
+    }
+
+    getSummaryMailSections(
+        _project: string,
+        _releaseId: number
+    ): Promise<SummaryMailSection[]> {
+        return Promise.resolve([...summaryMailSections]);
+    }
+
+    sendSummaryMail(
+        _mailMessage: MailMessage,
+        _project: string,
+        _releaseId: number
+    ): Promise<void> {
+        return Promise.resolve();
     }
 }
 

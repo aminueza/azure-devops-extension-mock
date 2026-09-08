@@ -8,7 +8,9 @@ import {
     AuditAction,
     Change,
     EnvironmentRetentionPolicy,
+    MailSectionType,
     Metric,
+    SummaryMailSection,
     OrgPipelineReleaseSettings,
     ProjectPipelineReleaseSettings,
     ReleaseSettings,
@@ -566,4 +568,21 @@ export const metrics = [
     makeMetric("TotalReleases", 42),
     makeMetric("ActiveReleases", 7),
     makeMetric("FailedDeployments", 3)
+];
+
+export const makeSummaryMailSection = (
+    sectionType: MailSectionType,
+    rank: number,
+    title: string
+): SummaryMailSection => ({
+    htmlContent: `<p>${fake.lorem.sentence()}</p>`,
+    rank,
+    sectionType,
+    title
+});
+
+export const summaryMailSections = [
+    makeSummaryMailSection(MailSectionType.Details, 1, "Details"),
+    makeSummaryMailSection(MailSectionType.Environments, 2, "Environments"),
+    makeSummaryMailSection(MailSectionType.WorkItems, 3, "Work items")
 ];

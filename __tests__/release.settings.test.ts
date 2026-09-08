@@ -1,4 +1,9 @@
-import { DeploymentStatus, ReleaseRestClient } from "azure-devops-extension-api/Release";
+import {
+    DeploymentStatus,
+    MailSectionType,
+    ReleaseRestClient,
+    ReleaseStatus
+} from "azure-devops-extension-api/Release";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -11,10 +16,12 @@ import {
     releaseChanges,
     releaseDefinitionEnvironmentSummaries,
     releaseDefinitionRevisions,
+    releaseDefinitions,
     releaseProjects,
     releaseRevisions,
     releaseWorkItemRefs,
-    releases
+    releases,
+    summaryMailSections
 } from "../azure-devops-extension-api/release/Data";
 
 const client = getClient(ReleaseRestClient);
@@ -93,11 +100,50 @@ describe("ReleaseRestClient history, summaries and settings", () => {
         [
             "updateOrgPipelineReleaseSettings",
             () => client.updateOrgPipelineReleaseSettings({ orgEnforceJobAuthScope: false })
-        ]
+        ],
+        [
+            "undeleteReleaseDefinition",
+            () => client.undeleteReleaseDefinition({ comment: "restore" }, "proj", 11)
+        ],
+        [
+            "updateReleaseResource",
+            () =>
+                client.updateReleaseResource(
+                    {
+                        comment: "retag",
+                        keepForever: true,
+                        manualEnvironments: ["Production"],
+                        name: "Release-9",
+                        status: ReleaseStatus.Active
+                    },
+                    "proj",
+                    releases[0].id
+                )
+        ],
+        ["getSummaryMailSections", () => client.getSummaryMailSections("proj", 1)]
     ];
 
     it.each(cases)("%s resolves", async (_name, call) => {
         await expect(call()).resolves.toBeDefined();
+    });
+
+    const voidCases: Array<[string, () => Promise<void>]> = [
+        ["deleteRelease", () => client.deleteRelease("proj", 1)],
+        ["deleteReleaseWithComment", () => client.deleteRelease("proj", 1, "obsolete")],
+        ["undeleteRelease", () => client.undeleteRelease("proj", 1, "restore")],
+        [
+            "sendSummaryMail",
+            () =>
+                client.sendSummaryMail(
+                    { sections: [MailSectionType.Details], subject: "Release summary" } as any,
+                    "proj",
+                    1
+                )
+        ]
+    ];
+
+    it.each(voidCases)("%s resolves to undefined", async (_name, call) => {
+        await expect(call()).resolves.toBeUndefined();
     });
 
     it("returns the seeded approval for a known step id", async () => {
@@ -313,5 +359,77 @@ describe("ReleaseRestClient history, summaries and settings", () => {
         });
         expect(result.orgEnforceJobAuthScope).toBe(false);
         expect(result.hasManagePipelinePoliciesPermission).toBe(true);
+    });
+
+    it("undeletes a seeded release definition", async () => {
+        const seeded = releaseDefinitions[0];
+        const result = await client.undeleteReleaseDefinition(
+            { comment: "brought back" },
+            "proj",
+            seeded.id
+        );
+        expect(result.id).toBe(seeded.id);
+        expect(result.name).toBe(seeded.name);
+        expect(result.comment).toBe("brought back");
+        expect(result.isDeleted).toBe(false);
+    });
+
+    it("undeletes an unknown release definition", async () => {
+        const result = await client.undeleteReleaseDefinition(
+            { comment: "fabricated" },
+            "proj",
+            UNMATCHED_ID
+        );
+        expect(result.id).toBe(UNMATCHED_ID);
+        expect(result.comment).toBe("fabricated");
+    });
+
+    it("maps the update metadata onto a seeded release", async () => {
+        const seeded = releases[1];
+        const result = await client.updateReleaseResource(
+            {
+                comment: "patched",
+                keepForever: true,
+                manualEnvironments: ["Production"],
+                name: "Release-42",
+                status: ReleaseStatus.Abandoned
+            },
+            "proj",
+            seeded.id
+        );
+        expect(result.id).toBe(seeded.id);
+        expect(result.description).toBe(seeded.description);
+        expect(result.comment).toBe("patched");
+        expect(result.keepForever).toBe(true);
+        expect(result.name).toBe("Release-42");
+        expect(result.status).toBe(ReleaseStatus.Abandoned);
+    });
+
+    it("maps the update metadata onto a fabricated release", async () => {
+        const result = await client.updateReleaseResource(
+            {
+                comment: "created",
+                keepForever: false,
+                manualEnvironments: [],
+                name: "Release-99",
+                status: ReleaseStatus.Draft
+            },
+            "proj",
+            UNMATCHED_ID
+        );
+        expect(result.id).toBe(UNMATCHED_ID);
+        expect(result.name).toBe("Release-99");
+        expect(result.status).toBe(ReleaseStatus.Draft);
+    });
+
+    it("lists the seeded summary mail sections", async () => {
+        const result = await client.getSummaryMailSections("proj", 1);
+        expect(result).toHaveLength(summaryMailSections.length);
+        expect(result.map(section => section.sectionType)).toEqual([
+            MailSectionType.Details,
+            MailSectionType.Environments,
+            MailSectionType.WorkItems
+        ]);
+        expect(result.map(section => section.rank)).toEqual([1, 2, 3]);
     });
 });
