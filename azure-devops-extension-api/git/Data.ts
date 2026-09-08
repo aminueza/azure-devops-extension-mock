@@ -157,7 +157,7 @@ export const makePush = (): GitPush => ({
 } as unknown as GitPush);
 
 export const makeCommentThread = (): GitPullRequestCommentThread => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     pullRequestThreadContext: {
         iterationContext: {
             firstComparingIteration: 1,

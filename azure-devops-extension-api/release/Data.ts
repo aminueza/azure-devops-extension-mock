@@ -54,7 +54,7 @@ import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     releaseId: fake.number.int(),
     name,
     status: EnvironmentStatus.Succeeded,
@@ -72,7 +72,7 @@ export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
 } as unknown as ReleaseEnvironment);
 
 export const makeReleaseDefinition = (): ReleaseDefinition => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     name: fake.lorem.slug(),
     path: "\\",
     revision: fake.number.int({ min: 1, max: 30 }),
@@ -92,7 +92,7 @@ export const makeReleaseDefinition = (): ReleaseDefinition => ({
 } as unknown as ReleaseDefinition);
 
 export const makeRelease = (): Release => ({
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     name: `Release-${fake.number.int({ min: 1, max: 999 })}`,
     status: ReleaseStatus.Active,
     createdOn: fake.date.recent(),
@@ -103,7 +103,7 @@ export const makeRelease = (): Release => ({
     variables: {},
     variableGroups: [],
     artifacts: [],
-    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
+    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
     description: fake.lorem.sentence(),
     reason: 1 as any,
     releaseNameFormat: "Release-$(rev:r)",
@@ -117,10 +117,10 @@ export const makeRelease = (): Release => ({
 } as unknown as Release);
 
 export const makeDeployment = (): Deployment => ({
-    id: fake.number.int(),
-    release: { id: fake.number.int(), name: `Release-${fake.number.int()}` } as any,
-    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
-    releaseEnvironment: { id: fake.number.int(), name: "Production" } as any,
+    id: fake.number.id(),
+    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` } as any,
+    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
+    releaseEnvironment: { id: fake.number.id(), name: "Production" } as any,
     deploymentStatus: DeploymentStatus.Succeeded,
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
@@ -133,10 +133,10 @@ export const makeDeployment = (): Deployment => ({
 } as unknown as Deployment);
 
 export const makeApproval = (): ReleaseApproval => ({
-    id: fake.number.int(),
-    release: { id: fake.number.int(), name: `Release-${fake.number.int()}` } as any,
-    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() } as any,
-    releaseEnvironment: { id: fake.number.int(), name: "Production" } as any,
+    id: fake.number.id(),
+    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` } as any,
+    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
+    releaseEnvironment: { id: fake.number.id(), name: "Production" } as any,
     approver: makeIdentityRef(),
     approvedBy: makeIdentityRef(),
     status: ApprovalStatus.Pending,
@@ -295,7 +295,7 @@ export const makeReleaseTask = (): ReleaseTask => ({
     dateEnded: fake.date.recent(),
     dateStarted: fake.date.recent(),
     finishTime: fake.date.recent(),
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     issues: [],
     lineCount: fake.number.int({ min: 1, max: 500 }),
     logUrl: fake.internet.url(),
@@ -328,13 +328,13 @@ export const makeManualIntervention = (): ManualIntervention => ({
     approver: makeIdentityRef(),
     comments: fake.lorem.sentence(),
     createdOn: fake.date.recent(),
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     instructions: fake.lorem.paragraph(),
     modifiedOn: fake.date.recent(),
     name: fake.lorem.slug(2),
-    release: { id: fake.number.int(), name: `Release-${fake.number.int()}` },
-    releaseDefinition: { id: fake.number.int(), name: fake.lorem.slug() },
-    releaseEnvironment: { id: fake.number.int(), name: "Production" },
+    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` },
+    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() },
+    releaseEnvironment: { id: fake.number.id(), name: "Production" },
     status: ManualInterventionStatus.Pending,
     taskInstanceId: fake.string.uuid(),
     type: ManualInterventionType.Task,
@@ -363,7 +363,7 @@ export const makeAutoTriggerIssue = (): AutoTriggerIssue => ({
     project: makeProjectReference(),
     releaseDefinitionReference: {
         _links: {},
-        id: fake.number.int({ min: 1, max: 10_000 }),
+        id: fake.number.id(),
         name: fake.lorem.slug(),
         path: "\\",
         projectReference: makeProjectReference(),

@@ -36,7 +36,7 @@ import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef } from "../core/Data";
 
 export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
-    id: fake.number.int({ min: 1, max: 1000 }),
+    id: fake.number.id(),
     name,
     scope: fake.string.uuid(),
     isHosted: name.startsWith("Azure"),
@@ -55,7 +55,7 @@ export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
 } as unknown as TaskAgentPool);
 
 export const makeAgent = (name?: string): TaskAgent => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     name: name ?? `agent-${fake.lorem.slug()}`,
     version: `${fake.number.int({ min: 2, max: 3 })}.218.0`,
     status: TaskAgentStatus.Online,
@@ -79,11 +79,11 @@ export const makeAgent = (name?: string): TaskAgent => ({
 } as unknown as TaskAgent);
 
 export const makeAgentQueue = (name = "Default"): TaskAgentQueue => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     name,
     projectId: fake.string.uuid(),
     pool: {
-        id: fake.number.int(),
+        id: fake.number.id(),
         name,
         isHosted: name.startsWith("Azure"),
         poolType: TaskAgentPoolType.Automation
@@ -110,7 +110,7 @@ export const makeTaskGroup = (): TaskGroup => ({
 } as unknown as TaskGroup);
 
 export const makeVariableGroup = (name?: string): VariableGroup => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     name: name ?? fake.lorem.slug(),
     description: fake.lorem.sentence(),
     type: "Vsts",
@@ -127,7 +127,7 @@ export const makeVariableGroup = (name?: string): VariableGroup => ({
 } as unknown as VariableGroup);
 
 export const makeDeploymentGroup = (): DeploymentGroup => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     name: fake.lorem.slug(),
     description: fake.lorem.sentence(),
     project: { id: fake.string.uuid(), name: fake.company.name() } as any,
@@ -244,7 +244,7 @@ export const deploymentGroupsPage: PagedList<DeploymentGroup> =
 
 export const makeOrchestrationOwner = (): TaskOrchestrationOwner => ({
     _links: {},
-    id: fake.number.int({ min: 1, max: 5000 }),
+    id: fake.number.id(),
     name: fake.lorem.slug()
 });
 
@@ -330,7 +330,7 @@ export const vstsAadTenantId: string = fake.string.uuid();
 
 export const makeMaintenanceDefinition = (): TaskAgentPoolMaintenanceDefinition => ({
     enabled: true,
-    id: fake.number.int({ min: 1, max: 1000 }),
+    id: fake.number.id(),
     jobTimeoutInMinutes: fake.number.int({ min: 30, max: 240 }),
     maxConcurrentAgentsPercentage: fake.number.int({ min: 10, max: 100 }),
     options: { workingDirectoryExpirationInDays: fake.number.int({ min: 1, max: 30 }) },
@@ -401,7 +401,7 @@ export const makeDeploymentPoolSummary = (): DeploymentPoolSummary => ({
     onlineAgentsCount: fake.number.int({ min: 1, max: 20 }),
     pool: makeAgentPool(),
     resource: {
-        id: fake.number.int({ min: 1, max: 1000 }),
+        id: fake.number.id(),
         name: fake.lorem.slug(),
         tags: [fake.lorem.word()],
         type: EnvironmentResourceType.VirtualMachine
@@ -410,13 +410,13 @@ export const makeDeploymentPoolSummary = (): DeploymentPoolSummary => ({
 
 export const makeDeploymentMachine = (): DeploymentMachine => ({
     agent: makeAgent(),
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     properties: { region: fake.lorem.word() },
     tags: [fake.lorem.word(), fake.lorem.word()]
 });
 
 export const makeDeploymentMachineGroup = (): DeploymentMachineGroup => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     machines: [makeDeploymentMachine()],
     name: fake.lorem.slug(),
     pool: makeAgentPool(),

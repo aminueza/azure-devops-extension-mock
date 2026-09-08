@@ -51,7 +51,7 @@ import { PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeBuildDefinition = (): BuildDefinition => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     name: fake.lorem.slug(),
     path: "\\",
     revision: fake.number.int({ min: 1, max: 50 }),
@@ -63,10 +63,10 @@ export const makeBuildDefinition = (): BuildDefinition => ({
     quality: DefinitionQuality.Definition,
     authoredBy: makeIdentityRef(),
     queue: {
-        id: fake.number.int(),
+        id: fake.number.id(),
         name: "Azure Pipelines",
         url: fake.internet.url(),
-        pool: { id: fake.number.int(), name: "Azure Pipelines", isHosted: true }
+        pool: { id: fake.number.id(), name: "Azure Pipelines", isHosted: true }
     },
     process: { type: 2, yamlFilename: "azure-pipelines.yml" } as any,
     repository: {
@@ -81,7 +81,7 @@ export const makeBuildDefinition = (): BuildDefinition => ({
 } as unknown as BuildDefinition);
 
 export const makeBuild = (): Build => ({
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     buildNumber: `${fake.date.recent().getFullYear()}.${fake.number.int({ min: 1, max: 999 })}`,
     status: BuildStatus.Completed,
     result: BuildResult.Succeeded,
@@ -100,7 +100,7 @@ export const makeBuild = (): Build => ({
     lastChangedBy: makeIdentityRef(),
     lastChangedDate: fake.date.recent(),
     logs: {
-        id: fake.number.int(),
+        id: fake.number.id(),
         type: "Container",
         url: fake.internet.url()
     } as any,
@@ -112,7 +112,7 @@ export const makeBuild = (): Build => ({
 } as unknown as Build);
 
 export const makeArtifact = (name = "drop"): BuildArtifact => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     name,
     source: fake.string.uuid(),
     resource: {
@@ -135,7 +135,7 @@ export const makeTimelineRecord = (): TimelineRecord => ({
     result: 0 as any,
     workerName: fake.lorem.slug(),
     order: fake.number.int(),
-    log: { id: fake.number.int(), type: "Container", url: fake.internet.url() } as any,
+    log: { id: fake.number.id(), type: "Container", url: fake.internet.url() } as any,
     changeId: fake.number.int(),
     url: fake.internet.url()
 } as unknown as TimelineRecord);
@@ -164,7 +164,7 @@ export const makeBuildBadge = (): BuildBadge => ({
 });
 
 export const makeBuildController = (): BuildController => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     name: fake.lorem.slug(),
     url: fake.internet.url(),
     uri: fake.internet.url(),

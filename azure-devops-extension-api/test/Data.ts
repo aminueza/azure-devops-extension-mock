@@ -121,7 +121,7 @@ export const makeTestCaseResult = (id?: number): TestCaseResult => ({
 } as unknown as TestCaseResult);
 
 export const makeShallowResult = (): ShallowTestCaseResult => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     runId: fake.number.int(),
     refId: fake.number.int(),
     testCaseTitle: fake.lorem.sentence(),
@@ -134,7 +134,7 @@ export const makeShallowResult = (): ShallowTestCaseResult => ({
 } as unknown as ShallowTestCaseResult);
 
 export const makeAttachment = (): TestAttachment => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     fileName: fake.system.fileName(),
     comment: fake.lorem.sentence(),
     attachmentType: "GeneralAttachment" as any,
@@ -144,7 +144,7 @@ export const makeAttachment = (): TestAttachment => ({
 } as unknown as TestAttachment);
 
 export const makeAttachmentRef = (): TestAttachmentReference => ({
-    id: fake.number.int(),
+    id: fake.number.id(),
     url: fake.internet.url()
 } as unknown as TestAttachmentReference);
 
@@ -180,7 +180,7 @@ export const makeTestPoint = (): TestPoint => ({
     comment: fake.lorem.sentence(),
     configuration: makeShallowReference(),
     failureType: "None",
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     lastResetToActive: fake.date.recent(),
     lastResolutionStateId: fake.number.int({ min: 0, max: 10 }),
     lastResult: makeShallowReference(),
@@ -279,7 +279,7 @@ export const makeTestActionResult = (): TestActionResultModel => ({
     iterationId: fake.number.int({ min: 1, max: 20 }),
     outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
     sharedStepModel: {
-        id: fake.number.int({ min: 1, max: 1_000 }),
+        id: fake.number.id(),
         revision: fake.number.int({ min: 1, max: 10 })
     },
     startedDate: fake.date.recent(),
@@ -298,7 +298,7 @@ export const makeTestResultParameter = (): TestResultParameterModel => ({
 
 export const makeTestCaseResultAttachment = (): TestCaseResultAttachmentModel => ({
     actionPath: fake.string.alphanumeric(8),
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     iterationId: fake.number.int({ min: 1, max: 20 }),
     name: fake.system.fileName(),
     size: fake.number.int({ min: 1, max: 1_000_000 }),
@@ -312,7 +312,7 @@ export const makeTestIterationDetails = (): TestIterationDetailsModel => ({
     completedDate: fake.date.recent(),
     durationInMs: fake.number.int({ min: 1, max: 10_000 }),
     errorMessage: fake.lorem.sentence(),
-    id: fake.number.int({ min: 1, max: 20 }),
+    id: fake.number.id(),
     outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
     parameters: [makeTestResultParameter()],
     startedDate: fake.date.recent(),
@@ -367,7 +367,7 @@ export const makeTestSession = (): TestSession => ({
     area: makeShallowReference(),
     comment: fake.lorem.sentence(),
     endDate: fake.date.recent(),
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     lastUpdatedBy: makeIdentityRef(),
     lastUpdatedDate: fake.date.recent(),
     owner: makeIdentityRef(),
@@ -430,7 +430,7 @@ export const makeBuildConfiguration = (): BuildConfiguration => ({
     buildSystem: "Azure Pipelines",
     creationDate: fake.date.recent(),
     flavor: fake.helpers.arrayElement(["Debug", "Release"]),
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     number: fake.system.semver(),
     platform: fake.helpers.arrayElement(["x64", "x86", "ARM64"]),
     project: makeShallowReference(),
@@ -490,7 +490,7 @@ export const makeRunStatistic = (): RunStatistic => ({
     count: fake.number.int({ min: 1, max: 500 }),
     outcome: "Passed",
     resolutionState: {
-        id: fake.number.int({ min: 1, max: 10 }),
+        id: fake.number.id(),
         name: fake.lorem.word(),
         project: makeShallowReference()
     },

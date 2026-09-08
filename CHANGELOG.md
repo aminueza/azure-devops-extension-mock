@@ -35,5 +35,6 @@ First release on npm.
 - `MockExtensionDataManager.getValue`, `setValue`, `getDocument`, `getDocuments`, `queryCollections`, `queryCollectionsByName` and `MockExtensionDataService.getExtensionDataManager` returned promises that never settled.
 - `mockClient` bound the real methods of an unregistered client class, so calling one issued a live HTTP request instead of resolving to `undefined`.
 - `MockTaskAgentRestClient.getAgentQueue` had its parameters reversed relative to the real client, and `MockBuildRestClient.getBuildLog` returned an `ArrayBuffer` where the real client returns a `string`.
+- Fixture ids were drawn at random from a small range, so two entries in a seeded list could collide and a lookup by id would return the wrong entry. Ids now come from a sequential generator (`fake.number.id()`) and cannot repeat.
 
 [1.0.0]: https://github.com/aminueza/azure-devops-extension-mock/releases/tag/v1.0.0

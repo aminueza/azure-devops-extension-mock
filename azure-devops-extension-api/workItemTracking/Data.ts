@@ -45,7 +45,7 @@ const states = ["New", "Active", "Resolved", "Closed", "Removed"];
 const types = ["Bug", "Task", "User Story", "Feature", "Epic"];
 
 export const makeWorkItemReference = (): WorkItemReference => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     url: fake.internet.url()
 });
 

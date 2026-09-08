@@ -40,7 +40,7 @@ export const makeWiki = (): WikiV2 => ({
 });
 
 export const makeWikiPage = (path: string): WikiPage => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     path,
     url: fake.internet.url(),
     remoteUrl: fake.internet.url(),
@@ -58,7 +58,7 @@ export const makeWikiPageStat = (): WikiPageStat => ({
 });
 
 export const makeWikiPageDetail = (): WikiPageDetail => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     path: `/${fake.lorem.slug()}`,
     viewStats: Array.from({ length: 7 }, makeWikiPageStat)
 });
@@ -87,7 +87,7 @@ export const makeCommentReaction = (commentId: number, type: CommentReactionType
 });
 
 export const makeComment = (): Comment => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     artifactId: fake.string.uuid(),
     parentId: 0,
     text: fake.lorem.sentence(),
