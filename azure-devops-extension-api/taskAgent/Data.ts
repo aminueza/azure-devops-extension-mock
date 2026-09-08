@@ -458,3 +458,19 @@ export const deploymentMachineGroups: DeploymentMachineGroup[] = Array.from(
         name: `machine-group-${900 + index}`
     })
 );
+
+export const deploymentMachines: DeploymentMachine[] = Array.from(
+    { length: 4 },
+    (_value, index) => ({
+        ...makeDeploymentMachine(),
+        id: 900 + index,
+        agent: {
+            ...makeAgent(`target-${900 + index}`),
+            id: 950 + index,
+            enabled: index !== 3,
+            status: index === 3 ? TaskAgentStatus.Offline : TaskAgentStatus.Online
+        },
+        properties: { region: `region-${900 + index}` },
+        tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
+    })
+);

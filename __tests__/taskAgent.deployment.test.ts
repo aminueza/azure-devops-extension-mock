@@ -390,7 +390,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
     it("fabricates a machine group for an unknown id", async () => {
         const group = await client.getDeploymentMachineGroup("proj", unmatchedId);
         expect(group.id).toBe(unmatchedId);
-        expect(deploymentMachineGroups.map(g => g.name)).not.toContain(group.name);
+        expect(group.name).not.toMatch(/^machine-group-/);
     });
 
     it("returns every machine group when no name is given", async () => {

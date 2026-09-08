@@ -29,10 +29,17 @@ import {
     DeploymentGroupCreateParameter,
     DeploymentGroupUpdateParameter,
     DeploymentGroupMetrics,
+    DeploymentMachine,
+    DeploymentMachineExpands,
     DeploymentMachineGroup,
     DeploymentPoolSummary,
     DeploymentPoolSummaryExpands,
+    DeploymentTargetExpands,
+    DeploymentTargetUpdateParameter,
     MachineGroupActionFilter,
+    TaskAgentJobResultFilter,
+    TaskAgentStatus,
+    TaskAgentStatusFilter,
     TaskResult
 } from "azure-devops-extension-api/TaskAgent";
 import { PagedList } from "azure-devops-extension-api/WebApi";
@@ -48,6 +55,7 @@ import {
     deploymentGroups,
     deploymentGroupsPage,
     deploymentMachineGroups,
+    deploymentMachines,
     deploymentPoolSummaries,
     makeAgent,
     makeAgentCloud,
@@ -57,6 +65,7 @@ import {
     makeAgentQueue,
     makeAgentSession,
     makeDeploymentGroup,
+    makeDeploymentMachine,
     makeDeploymentMachineGroup,
     makeMaintenanceDefinition,
     makeMaintenanceJob,
@@ -83,6 +92,87 @@ const encode = (value: string): ArrayBuffer => {
     const buffer = new ArrayBuffer(value.length);
     new Uint8Array(buffer).set(Array.from(value, character => character.charCodeAt(0)));
     return buffer;
+};
+
+const stampMachine = (
+    machine: DeploymentMachine,
+    project: string,
+    deploymentGroupId: number
+): DeploymentMachine => {
+    return { ...machine, properties: { ...machine.properties, project, deploymentGroupId } };
+};
+
+const machineById = (machineId: number): DeploymentMachine => {
+    const found = deploymentMachines.find(m => m.id === machineId);
+    return found ?? { ...makeDeploymentMachine(), id: machineId };
+};
+
+const byTags = (machines: DeploymentMachine[], tags?: string[]): DeploymentMachine[] => {
+    return tags === undefined
+        ? machines
+        : machines.filter(m => tags.every(tag => m.tags.includes(tag)));
+};
+
+const stampGroupMachine = (
+    machine: DeploymentMachine,
+    project: string,
+    machineGroupId: number
+): DeploymentMachine => {
+    return { ...machine, properties: { ...machine.properties, project, machineGroupId } };
+};
+
+const byMachineName = (
+    machines: DeploymentMachine[],
+    name?: string,
+    partialNameMatch?: boolean
+): DeploymentMachine[] => {
+    return name === undefined
+        ? machines
+        : machines.filter(m =>
+              partialNameMatch === true ? m.agent.name.includes(name) : m.agent.name === name
+          );
+};
+
+const byEnabled = (machines: DeploymentMachine[], enabled?: boolean): DeploymentMachine[] => {
+    return enabled === undefined ? machines : machines.filter(m => m.agent.enabled === enabled);
+};
+
+const requestsForMachine = (
+    deploymentGroupId: number,
+    machineId: number,
+    completedRequestCount?: number
+): TaskAgentJobRequest[] => {
+    const matched = take(agentRequests, completedRequestCount);
+    return matched.map(request => ({
+        ...request,
+        data: {
+            ...request.data,
+            deploymentGroupId: `${deploymentGroupId}`,
+            machineId: `${machineId}`
+        }
+    }));
+};
+
+const requestsForMachines = (
+    deploymentGroupId: number,
+    machineIds?: number[],
+    completedRequestCount?: number
+): TaskAgentJobRequest[] => {
+    const ids = machineIds ?? deploymentMachines.map(m => m.id);
+    return ids.flatMap(id => requestsForMachine(deploymentGroupId, id, completedRequestCount));
+};
+
+const statusMatches = (
+    machine: DeploymentMachine,
+    agentStatus?: TaskAgentStatusFilter
+): boolean => {
+    if (agentStatus === TaskAgentStatusFilter.Online) {
+        return machine.agent.status === TaskAgentStatus.Online;
+    }
+    if (agentStatus === TaskAgentStatusFilter.Offline) {
+        return machine.agent.status === TaskAgentStatus.Offline;
+    }
+    return true;
 };
 
 export class MockTaskAgentRestClient extends RestClientBase {
@@ -745,6 +835,223 @@ export class MockTaskAgentRestClient extends RestClientBase {
         machineGroupId: number
     ): Promise<string> {
         return Promise.resolve(`${project}-machine-group-${machineGroupId}-token`);
+    }
+
+    addDeploymentMachine(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number
+    ): Promise<DeploymentMachine> {
+        const created = { ...makeDeploymentMachine(), ...machine };
+        return Promise.resolve(stampMachine(created, project, deploymentGroupId));
+    }
+
+    deleteDeploymentMachine(
+        _project: string,
+        _deploymentGroupId: number,
+        _machineId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getDeploymentMachine(
+        project: string,
+        deploymentGroupId: number,
+        machineId: number,
+        _expand?: DeploymentMachineExpands
+    ): Promise<DeploymentMachine> {
+        return Promise.resolve(stampMachine(machineById(machineId), project, deploymentGroupId));
+    }
+
+    getDeploymentMachines(
+        project: string,
+        deploymentGroupId: number,
+        tags?: string[],
+        name?: string,
+        _expand?: DeploymentMachineExpands
+    ): Promise<DeploymentMachine[]> {
+        const matched = byMachineName(byTags(deploymentMachines, tags), name);
+        return Promise.resolve(matched.map(m => stampMachine(m, project, deploymentGroupId)));
+    }
+
+    replaceDeploymentMachine(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number,
+        machineId: number
+    ): Promise<DeploymentMachine> {
+        const replaced = { ...makeDeploymentMachine(), ...machine, id: machineId };
+        return Promise.resolve(stampMachine(replaced, project, deploymentGroupId));
+    }
+
+    updateDeploymentMachine(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number,
+        machineId: number
+    ): Promise<DeploymentMachine> {
+        const updated = { ...makeDeploymentMachine(), ...machine, id: machineId };
+        return Promise.resolve(stampMachine(updated, project, deploymentGroupId));
+    }
+
+    updateDeploymentMachines(
+        machines: DeploymentMachine[],
+        project: string,
+        deploymentGroupId: number
+    ): Promise<DeploymentMachine[]> {
+        const updated = machines.map(m => ({ ...makeDeploymentMachine(), ...m }));
+        return Promise.resolve(updated.map(m => stampMachine(m, project, deploymentGroupId)));
+    }
+
+    refreshDeploymentMachines(_project: string, _deploymentGroupId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getDeploymentMachineGroupMachines(
+        project: string,
+        machineGroupId: number,
+        tagFilters?: string[]
+    ): Promise<DeploymentMachine[]> {
+        const matched = byTags(deploymentMachines, tagFilters);
+        return Promise.resolve(matched.map(m => stampGroupMachine(m, project, machineGroupId)));
+    }
+
+    updateDeploymentMachineGroupMachines(
+        machines: DeploymentMachine[],
+        project: string,
+        machineGroupId: number
+    ): Promise<DeploymentMachine[]> {
+        const updated = machines.map(m => ({ ...makeDeploymentMachine(), ...m }));
+        return Promise.resolve(updated.map(m => stampGroupMachine(m, project, machineGroupId)));
+    }
+
+    addDeploymentTarget(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number
+    ): Promise<DeploymentMachine> {
+        const created = { ...makeDeploymentMachine(), ...machine };
+        return Promise.resolve(stampMachine(created, project, deploymentGroupId));
+    }
+
+    deleteDeploymentTarget(
+        _project: string,
+        _deploymentGroupId: number,
+        _targetId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getDeploymentTarget(
+        project: string,
+        deploymentGroupId: number,
+        targetId: number,
+        _expand?: DeploymentTargetExpands
+    ): Promise<DeploymentMachine> {
+        return Promise.resolve(stampMachine(machineById(targetId), project, deploymentGroupId));
+    }
+
+    getDeploymentTargets(
+        project: string,
+        deploymentGroupId: number,
+        tags?: string[],
+        name?: string,
+        partialNameMatch?: boolean,
+        _expand?: DeploymentTargetExpands,
+        agentStatus?: TaskAgentStatusFilter,
+        _agentJobResult?: TaskAgentJobResultFilter,
+        continuationToken?: string,
+        top?: number,
+        enabled?: boolean,
+        _propertyFilters?: string[]
+    ): Promise<PagedList<DeploymentMachine>> {
+        const named = byMachineName(byTags(deploymentMachines, tags), name, partialNameMatch);
+        const matched = byEnabled(named, enabled).filter(m => statusMatches(m, agentStatus));
+        const items = take(matched, top).map(m => stampMachine(m, project, deploymentGroupId));
+        return Promise.resolve(page(items, continuationToken ?? null));
+    }
+
+    replaceDeploymentTarget(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number,
+        targetId: number
+    ): Promise<DeploymentMachine> {
+        const replaced = { ...makeDeploymentMachine(), ...machine, id: targetId };
+        return Promise.resolve(stampMachine(replaced, project, deploymentGroupId));
+    }
+
+    updateDeploymentTarget(
+        machine: DeploymentMachine,
+        project: string,
+        deploymentGroupId: number,
+        targetId: number
+    ): Promise<DeploymentMachine> {
+        const updated = { ...makeDeploymentMachine(), ...machine, id: targetId };
+        return Promise.resolve(stampMachine(updated, project, deploymentGroupId));
+    }
+
+    updateDeploymentTargets(
+        machines: DeploymentTargetUpdateParameter[],
+        project: string,
+        deploymentGroupId: number
+    ): Promise<DeploymentMachine[]> {
+        const updated = machines.map(m => ({
+            ...makeDeploymentMachine(),
+            id: m.id,
+            tags: m.tags
+        }));
+        return Promise.resolve(updated.map(m => stampMachine(m, project, deploymentGroupId)));
+    }
+
+    refreshDeploymentTargets(_project: string, _deploymentGroupId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getAgentRequestsForDeploymentMachine(
+        _project: string,
+        deploymentGroupId: number,
+        machineId: number,
+        completedRequestCount?: number
+    ): Promise<TaskAgentJobRequest[]> {
+        return Promise.resolve(
+            requestsForMachine(deploymentGroupId, machineId, completedRequestCount)
+        );
+    }
+
+    getAgentRequestsForDeploymentMachines(
+        _project: string,
+        deploymentGroupId: number,
+        machineIds?: number[],
+        completedRequestCount?: number
+    ): Promise<TaskAgentJobRequest[]> {
+        return Promise.resolve(
+            requestsForMachines(deploymentGroupId, machineIds, completedRequestCount)
+        );
+    }
+
+    getAgentRequestsForDeploymentTarget(
+        _project: string,
+        deploymentGroupId: number,
+        targetId: number,
+        completedRequestCount?: number
+    ): Promise<TaskAgentJobRequest[]> {
+        return Promise.resolve(
+            requestsForMachine(deploymentGroupId, targetId, completedRequestCount)
+        );
+    }
+
+    getAgentRequestsForDeploymentTargets(
+        _project: string,
+        deploymentGroupId: number,
+        targetIds?: number[],
+        _ownerId?: number,
+        _completedOn?: Date,
+        completedRequestCount?: number
+    ): Promise<TaskAgentJobRequest[]> {
+        return Promise.resolve(
+            requestsForMachines(deploymentGroupId, targetIds, completedRequestCount)
+        );
     }
 }
 
