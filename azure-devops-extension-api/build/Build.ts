@@ -1,6 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import {
+    Attachment,
     BuildRestClient,
     Build,
     BuildBadge,
@@ -11,23 +12,35 @@ import {
     BuildDefinitionTemplate,
     BuildArtifact,
     BuildMetric,
+    BuildOptionDefinition,
+    BuildReportMetadata,
     BuildResourceUsage,
+    BuildSettings,
     DefinitionQueueStatus,
     DefinitionResourceReference,
     Folder,
     FolderQueryOrder,
+    PipelineGeneralSettings,
+    SourceRepositoryItem,
     Timeline,
     Change,
+    UpdateStageParameters,
     UpdateTagParameters,
     YamlBuild
 } from "azure-devops-extension-api/Build";
 import { JsonPatchDocument, PagedList } from "azure-devops-extension-api/WebApi";
 import {
     artifacts,
+    attachments,
+    attachmentType,
     buildControllers,
     buildDefinitions,
     buildList,
+    buildLogLines,
     buildMetrics,
+    buildProperties,
+    buildReports,
+    buildSettings,
     buildsPage,
     buildTags,
     changes,
@@ -37,18 +50,34 @@ import {
     definitionTags,
     definitionTemplates,
     folders,
+    generalSettings,
     makeArtifact,
+    makeAttachment,
     makeBuild,
     makeBuildBadge,
     makeBuildController,
     makeBuildDefinition,
     makeBuildDefinitionTemplate,
+    makeBuildReportMetadata,
     makeDefinitionResourceReference,
     makeFolder,
+    makeStageTimeline,
+    optionDefinitions,
     projectTags,
     resourceUsage,
+    sourceRepositoryItems,
+    stageTimelines,
     timeline
 } from "./Data";
+
+const encode = (value: string): ArrayBuffer => {
+    const buffer = new ArrayBuffer(value.length);
+    const view = new Uint8Array(buffer);
+    for (let index = 0; index < value.length; index += 1) {
+        view[index] = value.charCodeAt(index) & 0xff;
+    }
+    return buffer;
+};
 
 export class MockBuildRestClient extends RestClientBase {
     public TYPE = BuildRestClient;
@@ -457,5 +486,181 @@ export class MockBuildRestClient extends RestClientBase {
 
     getResourceUsage(): Promise<BuildResourceUsage> {
         return Promise.resolve({ ...resourceUsage });
+    }
+
+    getAttachments(_project: string, _buildId: number, type: string): Promise<Attachment[]> {
+        return Promise.resolve(type === attachmentType ? [...attachments] : [makeAttachment(type)]);
+    }
+
+    getAttachment(
+        _project: string,
+        _buildId: number,
+        _timelineId: string,
+        _recordId: string,
+        type: string,
+        name: string
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`${type}:${name}`));
+    }
+
+    getBuildLogLines(
+        _project: string,
+        _buildId: number,
+        _logId: number,
+        startLine?: number,
+        endLine?: number
+    ): Promise<string[]> {
+        return Promise.resolve(
+            buildLogLines.slice(startLine ?? 0, endLine ?? buildLogLines.length)
+        );
+    }
+
+    getBuildLogZip(
+        _project: string,
+        _buildId: number,
+        logId: number,
+        startLine?: number,
+        endLine?: number
+    ): Promise<ArrayBuffer> {
+        const range = [logId, startLine, endLine].filter(value => value !== undefined).join("-");
+        return Promise.resolve(encode(`log-${range}`));
+    }
+
+    getBuildLogsZip(_project: string, buildId: number): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`logs-${buildId}`));
+    }
+
+    getBuildProperties(_project: string, _buildId: number, filter?: string[]): Promise<any> {
+        const properties: Record<string, unknown> = { ...buildProperties };
+        const keys = filter ?? Object.keys(properties);
+        return Promise.resolve(Object.fromEntries(keys.map(key => [key, properties[key]])));
+    }
+
+    updateBuildProperties(
+        document: JsonPatchDocument,
+        _project: string,
+        _buildId: number
+    ): Promise<any> {
+        const operations = document as unknown as Array<{ path: string; value: unknown }>;
+        const properties: Record<string, unknown> = { ...buildProperties };
+        for (const operation of operations) {
+            properties[operation.path.slice(1)] = operation.value;
+        }
+        return Promise.resolve(properties);
+    }
+
+    getBuildReport(
+        _project: string,
+        buildId: number,
+        type?: string
+    ): Promise<BuildReportMetadata> {
+        const found = buildReports.find(report => report.buildId === buildId);
+        const report = found ?? makeBuildReportMetadata(buildId, "build");
+        return Promise.resolve(type === undefined ? report : { ...report, type });
+    }
+
+    getBuildReportHtmlContent(_project: string, buildId: number, type?: string): Promise<any> {
+        const found = buildReports.find(report => report.buildId === buildId);
+        const label = type ?? (found === undefined ? "build" : found.type);
+        return Promise.resolve(`<html><body><h1>${label} report ${buildId}</h1></body></html>`);
+    }
+
+    getBuildStageLatestTimeline(
+        _project: string,
+        _buildId: number,
+        stageName: string,
+        changeId?: number,
+        _planId?: string
+    ): Promise<Timeline> {
+        const found = stageTimelines.find(candidate => candidate.records[0].name === stageName);
+        const stage = found ?? makeStageTimeline(`stage-${stageName}`, stageName);
+        return Promise.resolve(changeId === undefined ? stage : { ...stage, changeId });
+    }
+
+    getBuildStageTimeline(
+        _project: string,
+        _buildId: number,
+        timelineId: string,
+        stageName: string,
+        changeId?: number,
+        _planId?: string
+    ): Promise<Timeline> {
+        const found = stageTimelines.find(candidate => candidate.id === timelineId);
+        const stage = found ?? makeStageTimeline(timelineId, stageName);
+        return Promise.resolve(
+            changeId === undefined ? { ...stage } : { ...stage, changeId }
+        );
+    }
+
+    updateStage(
+        _updateParameters: UpdateStageParameters,
+        _buildId: number,
+        _stageRefName: string,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getBuildOptionDefinitions(_project?: string): Promise<BuildOptionDefinition[]> {
+        return Promise.resolve([...optionDefinitions]);
+    }
+
+    getBuildGeneralSettings(_project: string): Promise<PipelineGeneralSettings> {
+        return Promise.resolve({ ...generalSettings });
+    }
+
+    updateBuildGeneralSettings(
+        newSettings: PipelineGeneralSettings,
+        _project: string
+    ): Promise<PipelineGeneralSettings> {
+        return Promise.resolve({ ...generalSettings, ...newSettings });
+    }
+
+    getBuildSettings(_project?: string): Promise<BuildSettings> {
+        return Promise.resolve({ ...buildSettings });
+    }
+
+    updateBuildSettings(settings: BuildSettings, _project?: string): Promise<BuildSettings> {
+        return Promise.resolve({ ...buildSettings, ...settings });
+    }
+
+    getFile(
+        _project: string,
+        _buildId: number,
+        artifactName: string,
+        fileId: string,
+        fileName: string
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`${artifactName}/${fileId}/${fileName}`));
+    }
+
+    getFileContents(
+        _project: string,
+        providerName: string,
+        serviceEndpointId?: string,
+        repository?: string,
+        commitOrBranch?: string,
+        path?: string
+    ): Promise<string> {
+        return Promise.resolve(
+            [providerName, serviceEndpointId, repository, commitOrBranch, path]
+                .filter(Boolean)
+                .join("/")
+        );
+    }
+
+    getPathContents(
+        _project: string,
+        _providerName: string,
+        _serviceEndpointId?: string,
+        _repository?: string,
+        _commitOrBranch?: string,
+        path?: string
+    ): Promise<SourceRepositoryItem[]> {
+        return Promise.resolve(
+            path === undefined
+                ? [...sourceRepositoryItems]
+                : sourceRepositoryItems.filter(item => item.path.startsWith(path))
+        );
     }
 }

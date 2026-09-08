@@ -1,5 +1,6 @@
 import { fake } from "../common/fixtures";
 import {
+    Attachment,
     AuditAction,
     Build,
     BuildBadge,
@@ -10,8 +11,12 @@ import {
     BuildDefinitionTemplate,
     BuildArtifact,
     BuildMetric,
+    BuildOptionDefinition,
+    BuildOptionInputType,
+    BuildReportMetadata,
     BuildResourceUsage,
     BuildResult,
+    BuildSettings,
     BuildStatus,
     BuildReason,
     ControllerStatus,
@@ -19,8 +24,12 @@ import {
     DefinitionType,
     DefinitionQuality,
     Folder,
+    PipelineGeneralSettings,
+    RetentionPolicy,
+    SourceRepositoryItem,
     Timeline,
     TimelineRecord,
+    TimelineRecordState,
     Change
 } from "azure-devops-extension-api/Build";
 import { PagedList } from "azure-devops-extension-api/WebApi";
@@ -264,3 +273,158 @@ export const definitionProperties: Record<string, unknown> = {
     stage: "canary",
     retentionDays: 30
 };
+
+export const makeAttachment = (name: string): Attachment => ({
+    name,
+    _links: { self: { href: fake.internet.url() } }
+});
+
+export const attachmentType = "logs";
+
+export const attachments: Attachment[] = [
+    makeAttachment("build.log"),
+    makeAttachment("coverage.xml")
+];
+
+export const buildLogLines: string[] = [
+    "Starting: Checkout",
+    "Checking out refs/heads/main",
+    "Finishing: Checkout",
+    "Starting: Build",
+    "npm ci",
+    "Finishing: Build"
+];
+
+export const buildProperties: Record<string, unknown> = {
+    owner: fake.person.fullName(),
+    channel: "nightly",
+    attempts: 2
+};
+
+export const makeBuildReportMetadata = (buildId: number, type: string): BuildReportMetadata => ({
+    buildId,
+    type,
+    content: `<html><body><h1>${type} report ${buildId}</h1></body></html>`
+});
+
+export const buildReports: BuildReportMetadata[] = [
+    makeBuildReportMetadata(4242, "codecoverage"),
+    makeBuildReportMetadata(4343, "testresults")
+];
+
+export const makeStageTimeline = (id: string, stageName: string): Timeline => ({
+    id,
+    changeId: fake.number.int({ min: 1, max: 500 }),
+    lastChangedBy: fake.string.uuid(),
+    lastChangedOn: fake.date.recent(),
+    url: fake.internet.url(),
+    records: [
+        {
+            ...makeTimelineRecord(),
+            type: "Stage",
+            name: stageName,
+            state: TimelineRecordState.Completed
+        }
+    ]
+} as unknown as Timeline);
+
+export const stageTimelines: Timeline[] = [
+    makeStageTimeline("timeline-build", "Build"),
+    makeStageTimeline("timeline-deploy", "Deploy")
+];
+
+export const makeBuildOptionDefinition = (
+    id: string,
+    name: string
+): BuildOptionDefinition => ({
+    id,
+    name,
+    description: fake.lorem.sentence(),
+    ordinal: fake.number.int({ min: 1, max: 10 }),
+    groups: [
+        {
+            name: fake.lorem.slug(),
+            displayName: fake.lorem.words(),
+            isExpanded: true
+        }
+    ],
+    inputs: [
+        {
+            name: fake.lorem.slug(),
+            label: fake.lorem.words(),
+            defaultValue: "",
+            groupName: fake.lorem.slug(),
+            help: {},
+            options: {},
+            required: false,
+            type: BuildOptionInputType.String,
+            visibleRule: ""
+        }
+    ]
+});
+
+export const optionDefinitions: BuildOptionDefinition[] = [
+    makeBuildOptionDefinition("option-autolink", "AutoLinkWorkItems"),
+    makeBuildOptionDefinition("option-gates", "ReleaseGates")
+];
+
+export const makePipelineGeneralSettings = (): PipelineGeneralSettings => ({
+    auditEnforceSettableVar: true,
+    buildsEnabledForForks: true,
+    disableClassicBuildPipelineCreation: false,
+    disableClassicPipelineCreation: false,
+    disableClassicReleasePipelineCreation: false,
+    disableImpliedYAMLCiTrigger: true,
+    enableShellTasksArgsSanitizing: true,
+    enableShellTasksArgsSanitizingAudit: false,
+    enforceJobAuthScope: true,
+    enforceJobAuthScopeForForks: true,
+    enforceJobAuthScopeForReleases: true,
+    enforceNoAccessToSecretsFromForks: true,
+    enforceReferencedGitHubRepoScopedToken: false,
+    enforceReferencedRepoScopedToken: false,
+    enforceSettableVar: true,
+    forkProtectionEnabled: true,
+    isCommentRequiredForPullRequest: false,
+    publishPipelineMetadata: false,
+    requireCommentsForNonTeamMemberAndNonContributors: false,
+    requireCommentsForNonTeamMembersOnly: false,
+    statusBadgesArePrivate: true
+});
+
+export const generalSettings: PipelineGeneralSettings = makePipelineGeneralSettings();
+
+export const makeRetentionPolicy = (daysToKeep: number, minimumToKeep: number): RetentionPolicy => ({
+    daysToKeep,
+    minimumToKeep,
+    artifacts: ["drop"],
+    artifactTypesToDelete: ["FilePath", "SymbolStore"],
+    branches: ["+refs/heads/main"],
+    deleteBuildRecord: true,
+    deleteTestResults: true
+});
+
+export const makeBuildSettings = (): BuildSettings => ({
+    daysToKeepDeletedBuildsBeforeDestroy: 30,
+    defaultRetentionPolicy: makeRetentionPolicy(10, 1),
+    maximumRetentionPolicy: makeRetentionPolicy(365, 10)
+});
+
+export const buildSettings: BuildSettings = makeBuildSettings();
+
+export const makeSourceRepositoryItem = (
+    path: string,
+    isContainer: boolean
+): SourceRepositoryItem => ({
+    path,
+    isContainer,
+    type: isContainer ? "tree" : "blob",
+    url: fake.internet.url()
+});
+
+export const sourceRepositoryItems: SourceRepositoryItem[] = [
+    makeSourceRepositoryItem("/", true),
+    makeSourceRepositoryItem("/src", true),
+    makeSourceRepositoryItem("/src/index.ts", false),
+    makeSourceRepositoryItem("/docs", true)
+];
