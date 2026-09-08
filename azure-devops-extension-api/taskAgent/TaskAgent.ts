@@ -751,11 +751,3 @@ export class MockTaskAgentRestClient extends RestClientBase {
 
 
 
-const _check: Pick<
-    TaskAgentRestClient,
-    | "deleteDeploymentMachineGroup"
-    | "getDeploymentMachineGroup"
-    | "getDeploymentMachineGroups"
-    | "updateDeploymentMachineGroup"
-    | "generateDeploymentMachineGroupAccessToken"
-> = new MockTaskAgentRestClient({} as any);
