@@ -1,5 +1,10 @@
 import { fake } from "../common/fixtures";
 import {
+    Comment,
+    CommentThreadStatus,
+    CommentType,
+    GitConflictUpdateResult,
+    GitConflictUpdateStatus,
     GitRepository,
     GitRepositoryRef,
     GitPullRequest,
@@ -17,6 +22,8 @@ import {
     GitAsyncOperationStatus,
     GitChange,
     GitCommitDiffs,
+    GitConflict,
+    GitConflictType,
     GitDeletedRepository,
     GitForkSyncRequest,
     GitImportRequest,
@@ -24,6 +31,8 @@ import {
     GitRefUpdate,
     GitRefUpdateResult,
     GitRefUpdateStatus,
+    GitResolutionError,
+    GitResolutionStatus,
     GitStatus,
     GitStatusState,
     GitSuggestion,
@@ -32,8 +41,13 @@ import {
     GitUserDate,
     IdentityRefWithVote,
     FileDiff,
+    FileDiffDetail,
     FileDiffParams,
+    GitPullRequestChange,
+    GitPullRequestIteration,
+    GitPushRef,
     ItemContentType,
+    IterationReason,
     LineDiffBlockChangeType,
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
@@ -470,3 +484,167 @@ export const pullRequestProperties: Record<string, any> = {
     riskLevel: "low",
     reviewedBy: "release-team"
 };
+
+export const makePushRef = (pushId: number): GitPushRef => ({
+    _links: {},
+    date: fake.date.recent(),
+    pushCorrelationId: fake.string.uuid(),
+    pushedBy: makeIdentityRef(),
+    pushId,
+    url: fake.internet.url()
+});
+
+export const makePullRequestChange = (
+    path: string,
+    changeTrackingId: number
+): GitPullRequestChange => ({
+    ...makeGitChange(path),
+    changeTrackingId
+});
+
+export const makePullRequestIteration = (
+    id: number,
+    reason: IterationReason
+): GitPullRequestIteration => ({
+    _links: {},
+    author: makeIdentityRef(),
+    changeList: [
+        makePullRequestChange("/README.md", id),
+        makePullRequestChange("/src/index.ts", id),
+        makePullRequestChange("/package.json", id)
+    ],
+    commits: [makeCommit(), makeCommit(), makeCommit()],
+    commonRefCommit: makeCommit(),
+    createdDate: fake.date.recent(),
+    description: fake.lorem.sentence(),
+    hasMoreCommits: false,
+    id,
+    newTargetRefName: "refs/heads/main",
+    oldTargetRefName: "refs/heads/release",
+    push: makePushRef(id),
+    reason,
+    sourceRefCommit: makeCommit(),
+    targetRefCommit: makeCommit(),
+    updatedDate: fake.date.recent()
+});
+
+export const makeFileDiffDetail = (path: string): FileDiffDetail => ({
+    changeType: VersionControlChangeType.Edit,
+    isFolder: path.endsWith("/"),
+    isLinuxExecutable: false,
+    isSymbolicLink: false,
+    lineDiffBlocks: [
+        {
+            changeType: LineDiffBlockChangeType.Edit,
+            modifiedLineNumberStart: 1,
+            modifiedLines: [fake.lorem.sentence()],
+            modifiedLinesCount: 1,
+            originalLineNumberStart: 1,
+            originalLines: [fake.lorem.sentence()],
+            originalLinesCount: 1
+        }
+    ],
+    originalPath: path,
+    path
+});
+
+export const pullRequestIterations: GitPullRequestIteration[] = [
+    makePullRequestIteration(5001, IterationReason.Create),
+    makePullRequestIteration(5002, IterationReason.Push),
+    makePullRequestIteration(5003, IterationReason.Retarget)
+];
+
+export const pullRequestFileDiffDetails: FileDiffDetail[] = [
+    makeFileDiffDetail("/README.md"),
+    makeFileDiffDetail("/src/index.ts"),
+    makeFileDiffDetail("/package.json"),
+    makeFileDiffDetail("/src/")
+];
+
+export const pullRequestIterationStatuses: GitPullRequestStatus[] = [
+    makePullRequestStatus(5101, GitStatusState.Succeeded, 5001),
+    makePullRequestStatus(5102, GitStatusState.Failed, 5001),
+    makePullRequestStatus(5103, GitStatusState.Pending, 5002)
+];
+
+export const makeGitConflict = (
+    conflictId: number,
+    conflictPath: string,
+    resolutionStatus: GitResolutionStatus
+): GitConflict => ({
+    _links: {},
+    conflictId,
+    conflictPath,
+    conflictType: GitConflictType.EditEdit,
+    mergeBaseCommit: makeCommit(),
+    mergeOrigin: {
+        cherryPickId: 0,
+        pullRequestId: fake.number.int({ min: 1, max: 10_000 }),
+        revertId: 0
+    },
+    mergeSourceCommit: makeCommit(),
+    mergeTargetCommit: makeCommit(),
+    resolutionError: GitResolutionError.None,
+    resolutionStatus,
+    resolvedBy: makeIdentityRef(),
+    resolvedDate: fake.date.recent(),
+    url: fake.internet.url()
+});
+
+export const pullRequestConflicts: GitConflict[] = [
+    makeGitConflict(5201, "/README.md", GitResolutionStatus.Unresolved),
+    makeGitConflict(5202, "/src/index.ts", GitResolutionStatus.Resolved),
+    makeGitConflict(5203, "/package.json", GitResolutionStatus.PartiallyResolved),
+    makeGitConflict(5204, "/src/git/Data.ts", GitResolutionStatus.Resolved)
+];
+
+export const makeConflictUpdateResult = (conflict: GitConflict): GitConflictUpdateResult => ({
+    conflictId: conflict.conflictId,
+    customMessage: "",
+    updatedConflict: {
+        ...makeGitConflict(
+            conflict.conflictId,
+            conflict.conflictPath,
+            GitResolutionStatus.Resolved
+        ),
+        ...conflict,
+        resolutionStatus: GitResolutionStatus.Resolved
+    },
+    updateStatus: GitConflictUpdateStatus.Succeeded
+});
+
+export const makeComment = (id: number): Comment => ({
+    _links: {},
+    author: makeIdentityRef(),
+    commentType: CommentType.Text,
+    content: fake.lorem.sentence(),
+    id,
+    isDeleted: false,
+    lastContentUpdatedDate: fake.date.recent(),
+    lastUpdatedDate: fake.date.recent(),
+    parentCommentId: 0,
+    publishedDate: fake.date.recent(),
+    usersLiked: []
+});
+
+export const makePullRequestThread = (
+    id: number,
+    status: CommentThreadStatus,
+    comments: Comment[]
+): GitPullRequestCommentThread => ({
+    ...makeCommentThread(),
+    comments,
+    id,
+    status
+});
+
+export const pullRequestThreadComments: Comment[] = [
+    makeComment(5401),
+    makeComment(5402),
+    makeComment(5403)
+];
+
+export const pullRequestThreads: GitPullRequestCommentThread[] = [
+    makePullRequestThread(5301, CommentThreadStatus.Active, pullRequestThreadComments),
+    makePullRequestThread(5302, CommentThreadStatus.Fixed, [makeComment(5411)])
+];

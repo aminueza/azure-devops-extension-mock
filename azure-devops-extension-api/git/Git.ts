@@ -11,6 +11,8 @@ import {
     GitItem,
     GitPush,
     Comment,
+    CommentThreadStatus,
+    GitConflictUpdateResult,
     GitPullRequestSearchCriteria,
     GetAccessibleRepositoriesRequest,
     GetAccessibleRepositoriesResponse,
@@ -30,12 +32,18 @@ import {
     GitBaseVersionDescriptor,
     GitCommitChanges,
     GitCommitDiffs,
+    GitConflict,
     GitItemRequestData,
     GitMerge,
     GitMergeParameters,
+    GitPullRequestFilesDiff,
+    GitPullRequestIteration,
+    GitPullRequestIterationChanges,
     GitPullRequestQuery,
     GitPullRequestQueryType,
     GitPullRequestStatus,
+    GitResolutionStatus,
+    IterationReason,
     GitStatus,
     GitStatusState,
     GitTargetVersionDescriptor,
@@ -68,11 +76,14 @@ import {
     items,
     makeAnnotatedTag,
     makeBranchStats,
+    makeComment,
     makeCommentThread,
     makeCommit,
     makeCommitDiffs,
+    makeConflictUpdateResult,
     makeFileDiff,
     makeForkSyncRequest,
+    makeGitConflict,
     makeGitItem,
     makeGitMerge,
     makeGitRef,
@@ -83,18 +94,24 @@ import {
     makeIdentityRefWithVote,
     makeItemText,
     makePullRequest,
+    makePullRequestIteration,
     makePullRequestLabel,
     makePullRequestStatus,
-    makePullRequestWorkItemRef,
+    makePullRequestThread,
     makePush,
     makeRefUpdateResult,
     makeTreeArchive,
     makeTreeRef,
     merges,
+    pullRequestConflicts,
+    pullRequestFileDiffDetails,
+    pullRequestIterationStatuses,
+    pullRequestIterations,
     pullRequestLabels,
     pullRequestProperties,
     pullRequestReviewers,
     pullRequestStatuses,
+    pullRequestThreads,
     pullRequestWorkItemRefs,
     pullRequests,
     refs,
@@ -1055,14 +1072,313 @@ export class MockGitRestClient extends RestClientBase {
 
     getPullRequestWorkItemRefs(
         _repositoryId: string,
-        pullRequestId: number,
+        _pullRequestId: number,
         _project?: string
     ): Promise<ResourceRef[]> {
+        return Promise.resolve(pullRequestWorkItemRefs);
+    }
+
+    getPullRequestIteration(
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        _project?: string
+    ): Promise<GitPullRequestIteration> {
+        const found = pullRequestIterations.find(i => i.id === iterationId);
+        return Promise.resolve(
+            found ?? makePullRequestIteration(iterationId, IterationReason.Unknown)
+        );
+    }
+
+    getPullRequestIterations(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string,
+        includeCommits?: boolean
+    ): Promise<GitPullRequestIteration[]> {
+        if (includeCommits) return Promise.resolve(pullRequestIterations);
+        return Promise.resolve(
+            pullRequestIterations.map(iteration => ({ ...iteration, commits: [] }))
+        );
+    }
+
+    getPullRequestIterationChanges(
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        _project?: string,
+        top?: number,
+        skip?: number,
+        compareTo?: number
+    ): Promise<GitPullRequestIterationChanges> {
+        const found = pullRequestIterations.find(i => i.id === iterationId);
+        const entries = (
+            found ?? makePullRequestIteration(iterationId, IterationReason.Unknown)
+        ).changeList;
+        const start = skip ?? 0;
+        const size = top ?? entries.length;
+        const page = entries.slice(start, start + size);
+        const end = start + page.length;
+        const exhausted = end >= entries.length;
+        return Promise.resolve({
+            changeEntries:
+                compareTo === undefined
+                    ? page
+                    : page.map(entry => ({ ...entry, changeTrackingId: compareTo })),
+            nextSkip: exhausted ? 0 : end,
+            nextTop: exhausted ? 0 : size
+        });
+    }
+
+    getPullRequestIterationCommits(
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        _project?: string,
+        top?: number,
+        skip?: number
+    ): Promise<GitCommitRef[]> {
+        const found = pullRequestIterations.find(i => i.id === iterationId);
+        const iterationCommits = (
+            found ?? makePullRequestIteration(iterationId, IterationReason.Unknown)
+        ).commits;
+        const start = skip ?? 0;
+        return Promise.resolve(
+            iterationCommits.slice(start, start + (top ?? iterationCommits.length))
+        );
+    }
+
+    getPullRequestCommits(
+        _repositoryId: string,
+        pullRequestId: number,
+        _project?: string
+    ): Promise<PagedList<GitCommitRef>> {
         const found = pullRequests.find(p => p.pullRequestId === pullRequestId);
-        if (!found) return Promise.resolve(pullRequestWorkItemRefs);
-        return Promise.resolve([
-            ...pullRequestWorkItemRefs,
-            makePullRequestWorkItemRef(String(pullRequestId))
-        ]);
+        const page: PagedList<GitCommitRef> = Object.assign(commits.slice(), {
+            continuationToken: found ? null : String(pullRequestId)
+        });
+        return Promise.resolve(page);
+    }
+
+    getPullRequestFilesDiff(
+        _repositoryId: string,
+        pullRequestId: number,
+        _project?: string,
+        _iteration?: number,
+        _baseIteration?: number,
+        top?: number,
+        skip?: number
+    ): Promise<GitPullRequestFilesDiff> {
+        const found = pullRequests.find(p => p.pullRequestId === pullRequestId);
+        const pullRequest = found ?? { ...makePullRequest(), pullRequestId };
+        const start = skip ?? 0;
+        return Promise.resolve({
+            fileDiffs: pullRequestFileDiffDetails.slice(
+                start,
+                start + (top ?? pullRequestFileDiffDetails.length)
+            ),
+            pullRequestDescription: pullRequest.description,
+            pullRequestTitle: pullRequest.title
+        });
+    }
+
+    getPullRequestIterationStatuses(
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus[]> {
+        return Promise.resolve(
+            pullRequestIterationStatuses.filter(status => status.iterationId === iterationId)
+        );
+    }
+
+    getPullRequestIterationStatus(
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        statusId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus> {
+        const found = pullRequestIterationStatuses.find(
+            status => status.id === statusId && status.iterationId === iterationId
+        );
+        return Promise.resolve(
+            found ?? makePullRequestStatus(statusId, GitStatusState.NotSet, iterationId)
+        );
+    }
+
+    createPullRequestIterationStatus(
+        status: GitPullRequestStatus,
+        _repositoryId: string,
+        _pullRequestId: number,
+        iterationId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus> {
+        return Promise.resolve({
+            ...makePullRequestStatus(status.id, GitStatusState.Pending, iterationId),
+            ...status,
+            iterationId
+        });
+    }
+
+    deletePullRequestIterationStatus(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _iterationId: number,
+        _statusId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    updatePullRequestIterationStatuses(
+        _patchDocument: JsonPatchDocument,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _iterationId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestConflict(
+        _repositoryId: string,
+        _pullRequestId: number,
+        conflictId: number,
+        _project?: string
+    ): Promise<GitConflict> {
+        const found = pullRequestConflicts.find(c => c.conflictId === conflictId);
+        return Promise.resolve(
+            found ?? makeGitConflict(conflictId, "/README.md", GitResolutionStatus.Unresolved)
+        );
+    }
+
+    getPullRequestConflicts(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string,
+        skip?: number,
+        top?: number,
+        _includeObsolete?: boolean,
+        excludeResolved?: boolean,
+        onlyResolved?: boolean
+    ): Promise<GitConflict[]> {
+        const start = skip ?? 0;
+        const page = pullRequestConflicts.slice(
+            start,
+            start + (top ?? pullRequestConflicts.length)
+        );
+        if (onlyResolved) {
+            return Promise.resolve(
+                page.filter(c => c.resolutionStatus === GitResolutionStatus.Resolved)
+            );
+        }
+        if (excludeResolved) {
+            return Promise.resolve(
+                page.filter(c => c.resolutionStatus !== GitResolutionStatus.Resolved)
+            );
+        }
+        return Promise.resolve(page);
+    }
+
+    updatePullRequestConflict(
+        conflict: GitConflict,
+        repositoryId: string,
+        pullRequestId: number,
+        conflictId: number,
+        project?: string
+    ): Promise<GitConflict> {
+        return this.getPullRequestConflict(
+            repositoryId,
+            pullRequestId,
+            conflictId,
+            project
+        ).then(existing => ({ ...existing, ...conflict, conflictId }));
+    }
+
+    updatePullRequestConflicts(
+        conflictUpdates: GitConflict[],
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<GitConflictUpdateResult[]> {
+        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+    }
+
+    getPullRequestThread(
+        _repositoryId: string,
+        _pullRequestId: number,
+        threadId: number,
+        _project?: string,
+        _iteration?: number,
+        _baseIteration?: number
+    ): Promise<GitPullRequestCommentThread> {
+        const found = pullRequestThreads.find(thread => thread.id === threadId);
+        return Promise.resolve(
+            found ??
+                makePullRequestThread(threadId, CommentThreadStatus.Unknown, [
+                    makeComment(threadId)
+                ])
+        );
+    }
+
+    updateThread(
+        commentThread: GitPullRequestCommentThread,
+        repositoryId: string,
+        pullRequestId: number,
+        threadId: number,
+        project?: string
+    ): Promise<GitPullRequestCommentThread> {
+        return this.getPullRequestThread(repositoryId, pullRequestId, threadId, project).then(
+            existing => ({ ...existing, ...commentThread, id: threadId })
+        );
+    }
+
+    getComments(
+        _repositoryId: string,
+        _pullRequestId: number,
+        threadId: number,
+        _project?: string
+    ): Promise<Comment[]> {
+        const found = pullRequestThreads.find(thread => thread.id === threadId);
+        return Promise.resolve(found ? found.comments : [makeComment(threadId)]);
+    }
+
+    getComment(
+        _repositoryId: string,
+        _pullRequestId: number,
+        threadId: number,
+        commentId: number,
+        _project?: string
+    ): Promise<Comment> {
+        const thread = pullRequestThreads.find(item => item.id === threadId);
+        const found = thread?.comments.find(comment => comment.id === commentId);
+        return Promise.resolve(found ?? makeComment(commentId));
+    }
+
+    updateComment(
+        comment: Comment,
+        repositoryId: string,
+        pullRequestId: number,
+        threadId: number,
+        commentId: number,
+        project?: string
+    ): Promise<Comment> {
+        return this.getComment(repositoryId, pullRequestId, threadId, commentId, project).then(
+            existing => ({ ...existing, ...comment, id: commentId })
+        );
+    }
+
+    deleteComment(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _threadId: number,
+        _commentId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
     }
 }
+
+
