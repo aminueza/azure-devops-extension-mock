@@ -68,6 +68,10 @@ seed(Math.floor(Math.random() * 4_294_967_296));
 const int = ({ min = 0, max = 1_000_000 }: IntRange = {}): number =>
     min + Math.floor(random() * (max - min + 1));
 
+let lastId = 1_000;
+
+const id = (): number => (lastId += 1);
+
 const arrayElement = <T>(values: readonly T[]): T => values[int({ min: 0, max: values.length - 1 })];
 
 const chars = (alphabet: string, length: number): string =>
@@ -106,7 +110,7 @@ const future = ({ years = 1 }: DateSpan = {}): Date => new Date(Date.now() + ran
 
 export const fake = {
     seed,
-    number: { int },
+    number: { int, id },
     string: {
         uuid,
         alphanumeric: (length = 10): string => chars(ALPHANUMERIC, length),

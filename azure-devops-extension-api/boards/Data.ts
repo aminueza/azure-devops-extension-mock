@@ -80,8 +80,8 @@ export const makeWorkItemTypeReference = (name = fake.helpers.arrayElement(WORK_
 
 export const makeWorkItemLink = (): WorkItemLink => ({
     rel: "System.LinkTypes.Hierarchy-Forward",
-    source: { id: fake.number.int({ min: 1, max: 10_000 }), url: fake.internet.url() },
-    target: { id: fake.number.int({ min: 1, max: 10_000 }), url: fake.internet.url() }
+    source: { id: fake.number.id(), url: fake.internet.url() },
+    target: { id: fake.number.id(), url: fake.internet.url() }
 });
 
 export const makeBacklogColumn = (): BacklogColumn => ({
@@ -172,7 +172,7 @@ export const makeBoardSuggestedValue = (name = fake.lorem.word()): BoardSuggeste
 
 export const makeParentChildWIMap = (): ParentChildWIMap => ({
     childWorkItemIds: Array.from({ length: 3 }, () => fake.number.int({ min: 1, max: 10_000 })),
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     teamProject: makeProjectReference().name,
     title: fake.lorem.sentence(),
     workItemTypeName: fake.helpers.arrayElement(WORK_ITEM_TYPES)

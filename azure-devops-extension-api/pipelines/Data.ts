@@ -11,7 +11,7 @@ import {
 } from "azure-devops-extension-api/Pipelines";
 
 export const makePipeline = (): Pipeline => ({
-    id: fake.number.int({ min: 1, max: 10_000 }),
+    id: fake.number.id(),
     name: fake.lorem.slug(),
     folder: "\\",
     revision: fake.number.int({ min: 1, max: 20 }),
@@ -29,7 +29,7 @@ export const makePipeline = (): Pipeline => ({
 } as unknown as Pipeline);
 
 export const makeRun = (pipelineId = 1): Run => ({
-    id: fake.number.int({ min: 1, max: 100_000 }),
+    id: fake.number.id(),
     name: `${fake.date.recent().getFullYear()}.${fake.number.int()}`,
     state: RunState.Completed,
     result: RunResult.Succeeded,
@@ -70,6 +70,6 @@ export const logCollection: LogCollection = {
 
 export const makePreviewRun = (): PreviewRun => ({
     finalYaml: "stages:\n- stage: Build\n  jobs:\n  - job: Build\n    steps:\n    - script: echo Hello",
-    id: fake.number.int(),
+    id: fake.number.id(),
     name: `preview-${fake.lorem.slug()}`
 } as unknown as PreviewRun);
