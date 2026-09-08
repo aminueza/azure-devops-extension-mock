@@ -23,7 +23,21 @@ import {
     ManualInterventionUpdateMetadata,
     ReleaseGates,
     ReleaseTask,
-    ReleaseTaskAttachment
+    ReleaseTaskAttachment,
+    DefinitionEnvironmentReference,
+    ReleaseDefinitionRevision,
+    ReleaseDefinitionSummary,
+    Change,
+    DeploymentQueryParameters,
+    ProjectReference,
+    ReleaseRevision,
+    ReleaseWorkItemRef,
+    Metric,
+    OrgPipelineReleaseSettings,
+    OrgPipelineReleaseSettingsUpdateParameters,
+    ProjectPipelineReleaseSettings,
+    ProjectPipelineReleaseSettingsUpdateParameters,
+    ReleaseSettings
 } from "azure-devops-extension-api/Release";
 import { InputValuesQuery } from "azure-devops-extension-api/FormInput";
 import { PagedList } from "azure-devops-extension-api/WebApi";
@@ -34,6 +48,7 @@ import {
     artifactTypeDefinitions,
     artifactVersions,
     autoTriggerIssues,
+    definitionEnvironmentReferences,
     definitionTags,
     deployments,
     deploymentsPage,
@@ -52,12 +67,23 @@ import {
     makeManualIntervention,
     makeRelease,
     makeReleaseDefinition,
+    makeReleaseDefinitionShallowReference,
     makeReleaseGates,
+    makeReleaseSettings,
+    makeOrgPipelineReleaseSettings,
+    makeProjectPipelineReleaseSettings,
     manualInterventions,
+    metrics,
+    releaseChanges,
+    releaseDefinitionEnvironmentSummaries,
+    releaseDefinitionRevisions,
     releaseDefinitions,
     releaseDefinitionsPage,
+    releaseProjects,
+    releaseRevisions,
     releaseTags,
     releaseTasks,
+    releaseWorkItemRefs,
     releases,
     sourceBranches,
     tags,
@@ -503,4 +529,175 @@ export class MockReleaseRestClient extends RestClientBase {
     getInputValues(query: InputValuesQuery, _project: string): Promise<InputValuesQuery> {
         return Promise.resolve({ ...makeInputValuesQuery(), ...query });
     }
+
+    getApprovalHistory(_project: string, approvalStepId: number): Promise<ReleaseApproval> {
+        const found = approvals.find(approval => approval.id === approvalStepId);
+        return Promise.resolve(found ?? { ...makeApproval(), id: approvalStepId });
+    }
+
+    updateReleaseApprovals(
+        approvals: ReleaseApproval[],
+        _project: string
+    ): Promise<ReleaseApproval[]> {
+        return Promise.resolve(approvals.map(approval => ({ ...makeApproval(), ...approval })));
+    }
+
+    getDefinitionEnvironments(
+        _project: string,
+        _taskGroupId?: string,
+        _propertyFilters?: string[]
+    ): Promise<DefinitionEnvironmentReference[]> {
+        return Promise.resolve([...definitionEnvironmentReferences]);
+    }
+
+    getDefinitionRevision(
+        _project: string,
+        definitionId: number,
+        revision: number
+    ): Promise<string> {
+        return Promise.resolve(`definition ${definitionId} revision ${revision}`);
+    }
+
+    getReleaseDefinitionHistory(
+        _project: string,
+        definitionId: number
+    ): Promise<ReleaseDefinitionRevision[]> {
+        const matched = releaseDefinitionRevisions.filter(
+            revision => revision.definitionId === definitionId
+        );
+        return Promise.resolve(matched.length > 0 ? matched : [...releaseDefinitionRevisions]);
+    }
+
+    getReleaseDefinitionRevision(
+        _project: string,
+        definitionId: number,
+        revision: number
+    ): Promise<string> {
+        return Promise.resolve(`release definition ${definitionId} revision ${revision}`);
+    }
+
+    getReleaseDefinitionSummary(
+        _project: string,
+        definitionId: number,
+        releaseCount: number,
+        _includeArtifact?: boolean,
+        definitionEnvironmentIdsFilter?: number[]
+    ): Promise<ReleaseDefinitionSummary> {
+        const environments = definitionEnvironmentIdsFilter
+            ? releaseDefinitionEnvironmentSummaries.filter(environment =>
+                  definitionEnvironmentIdsFilter.includes(environment.id)
+              )
+            : [...releaseDefinitionEnvironmentSummaries];
+        return Promise.resolve({
+            environments,
+            releaseDefinition: makeReleaseDefinitionShallowReference(definitionId),
+            releases: releases.slice(0, releaseCount)
+        });
+    }
+
+    getReleaseHistory(_project: string, releaseId: number): Promise<ReleaseRevision[]> {
+        const matched = releaseRevisions.filter(revision => revision.releaseId === releaseId);
+        return Promise.resolve(matched.length > 0 ? matched : [...releaseRevisions]);
+    }
+
+    getReleaseRevision(
+        _project: string,
+        releaseId: number,
+        definitionSnapshotRevision: number
+    ): Promise<string> {
+        return Promise.resolve(`release ${releaseId} revision ${definitionSnapshotRevision}`);
+    }
+
+    getReleaseChanges(
+        _project: string,
+        _releaseId: number,
+        _baseReleaseId?: number,
+        top?: number,
+        _artifactAlias?: string
+    ): Promise<Change[]> {
+        return Promise.resolve(top ? releaseChanges.slice(0, top) : [...releaseChanges]);
+    }
+
+    getReleaseProjects(
+        _artifactType: string,
+        _artifactSourceId: string
+    ): Promise<ProjectReference[]> {
+        return Promise.resolve([...releaseProjects]);
+    }
+
+    getReleaseWorkItemsRefs(
+        _project: string,
+        _releaseId: number,
+        _baseReleaseId?: number,
+        top?: number,
+        _artifactAlias?: string
+    ): Promise<ReleaseWorkItemRef[]> {
+        return Promise.resolve(top ? releaseWorkItemRefs.slice(0, top) : [...releaseWorkItemRefs]);
+    }
+
+    getDeploymentsForMultipleEnvironments(
+        queryParameters: DeploymentQueryParameters,
+        _project: string
+    ): Promise<Deployment[]> {
+        return Promise.resolve(
+            deployments.filter(
+                deployment => deployment.deploymentStatus === queryParameters.deploymentStatus
+            )
+        );
+    }
+
+    getDeploymentBadge(
+        projectId: string,
+        releaseDefinitionId: number,
+        environmentId: number,
+        branchName?: string
+    ): Promise<string> {
+        const scope = branchName
+            ? `${projectId}/${releaseDefinitionId}/${environmentId}/${branchName}`
+            : `${projectId}/${releaseDefinitionId}/${environmentId}`;
+        return Promise.resolve(`${scope} succeeded`);
+    }
+
+    getMetrics(_project: string, _minMetricsTime?: Date): Promise<Metric[]> {
+        return Promise.resolve([...metrics]);
+    }
+
+    getReleaseSettings(_project: string): Promise<ReleaseSettings> {
+        return Promise.resolve(makeReleaseSettings());
+    }
+
+    updateReleaseSettings(
+        releaseSettings: ReleaseSettings,
+        _project: string
+    ): Promise<ReleaseSettings> {
+        return Promise.resolve({ ...makeReleaseSettings(), ...releaseSettings });
+    }
+
+    getPipelineReleaseSettings(_project: string): Promise<ProjectPipelineReleaseSettings> {
+        return Promise.resolve(makeProjectPipelineReleaseSettings());
+    }
+
+    updatePipelineReleaseSettings(
+        newSettings: ProjectPipelineReleaseSettingsUpdateParameters,
+        _project: string
+    ): Promise<ProjectPipelineReleaseSettings> {
+        return Promise.resolve({
+            ...makeProjectPipelineReleaseSettings(),
+            enforceJobAuthScope: newSettings.enforceJobAuthScope
+        });
+    }
+
+    getOrgPipelineReleaseSettings(): Promise<OrgPipelineReleaseSettings> {
+        return Promise.resolve(makeOrgPipelineReleaseSettings());
+    }
+
+    updateOrgPipelineReleaseSettings(
+        newSettings: OrgPipelineReleaseSettingsUpdateParameters
+    ): Promise<OrgPipelineReleaseSettings> {
+        return Promise.resolve({
+            ...makeOrgPipelineReleaseSettings(),
+            orgEnforceJobAuthScope: newSettings.orgEnforceJobAuthScope
+        });
+    }
 }
+

@@ -33,16 +33,28 @@ import {
     GitItemRequestData,
     GitMerge,
     GitMergeParameters,
+    GitPullRequestQuery,
+    GitPullRequestQueryType,
+    GitPullRequestStatus,
     GitStatus,
     GitStatusState,
     GitTargetVersionDescriptor,
     GitVersionDescriptor,
+    IdentityRefWithVote,
+    ShareNotificationContext,
     FileDiff,
     FileDiffsCriteria,
     VersionControlChangeType,
     VersionControlRecursionType
 } from "azure-devops-extension-api/Git";
-import { PagedList } from "azure-devops-extension-api/WebApi";
+import { WebApiCreateTagRequestData, WebApiTagDefinition } from "azure-devops-extension-api/Core";
+import {
+    IdentityRef,
+    JsonPatchDocument,
+    JsonPatchOperation,
+    PagedList,
+    ResourceRef
+} from "azure-devops-extension-api/WebApi";
 import {
     annotatedTags,
     branches,
@@ -68,19 +80,42 @@ import {
     makeGitRepositoryRef,
     makeGitStatus,
     makeImportRequest,
+    makeIdentityRefWithVote,
     makeItemText,
     makePullRequest,
+    makePullRequestLabel,
+    makePullRequestStatus,
+    makePullRequestWorkItemRef,
     makePush,
     makeRefUpdateResult,
     makeTreeArchive,
     makeTreeRef,
     merges,
+    pullRequestLabels,
+    pullRequestProperties,
+    pullRequestReviewers,
+    pullRequestStatuses,
+    pullRequestWorkItemRefs,
     pullRequests,
     refs,
     repositories,
     suggestions,
     trees
 } from "./Data";
+
+const applyPropertyPatch = (
+    base: Record<string, any>,
+    patchDocument: JsonPatchDocument
+): Record<string, any> => {
+    const operations: JsonPatchOperation[] = Array.isArray(patchDocument) ? patchDocument : [];
+    return operations.reduce(
+        (properties, operation) => ({
+            ...properties,
+            [operation.path.replace(/^\//, "")]: operation.value
+        }),
+        { ...base }
+    );
+};
 
 export class MockGitRestClient extends RestClientBase {
     public TYPE = GitRestClient;
@@ -787,5 +822,247 @@ export class MockGitRestClient extends RestClientBase {
             ...makeGitStatus(gitCommitStatusToCreate.id, GitStatusState.Pending),
             ...gitCommitStatusToCreate
         });
+    }
+
+    getPullRequestReviewers(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<IdentityRefWithVote[]> {
+        return Promise.resolve(pullRequestReviewers);
+    }
+
+    getPullRequestReviewer(
+        _repositoryId: string,
+        _pullRequestId: number,
+        reviewerId: string,
+        _project?: string
+    ): Promise<IdentityRefWithVote> {
+        const found = pullRequestReviewers.find(r => r.id === reviewerId);
+        return Promise.resolve(found ?? makeIdentityRefWithVote(reviewerId, 0));
+    }
+
+    createPullRequestReviewer(
+        reviewer: IdentityRefWithVote,
+        _repositoryId: string,
+        _pullRequestId: number,
+        reviewerId: string,
+        _project?: string
+    ): Promise<IdentityRefWithVote> {
+        return Promise.resolve({
+            ...makeIdentityRefWithVote(reviewerId, 0),
+            ...reviewer,
+            id: reviewerId
+        });
+    }
+
+    createPullRequestReviewers(
+        reviewers: IdentityRef[],
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<IdentityRefWithVote[]> {
+        return Promise.resolve(
+            reviewers.map(reviewer => ({
+                ...makeIdentityRefWithVote(reviewer.id, 0),
+                ...reviewer
+            }))
+        );
+    }
+
+    createUnmaterializedPullRequestReviewer(
+        reviewer: IdentityRefWithVote,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<IdentityRefWithVote> {
+        return Promise.resolve({
+            ...makeIdentityRefWithVote(reviewer.id, reviewer.vote),
+            ...reviewer,
+            reviewerUrl: ""
+        });
+    }
+
+    updatePullRequestReviewer(
+        reviewer: IdentityRefWithVote,
+        _repositoryId: string,
+        _pullRequestId: number,
+        reviewerId: string,
+        _project?: string
+    ): Promise<IdentityRefWithVote> {
+        const found = pullRequestReviewers.find(r => r.id === reviewerId);
+        return Promise.resolve({
+            ...(found ?? makeIdentityRefWithVote(reviewerId, 0)),
+            ...reviewer,
+            id: reviewerId
+        });
+    }
+
+    updatePullRequestReviewers(
+        _patchVotes: IdentityRefWithVote[],
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    deletePullRequestReviewer(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _reviewerId: string,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestLabels(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string,
+        _projectId?: string
+    ): Promise<WebApiTagDefinition[]> {
+        return Promise.resolve(pullRequestLabels);
+    }
+
+    getPullRequestLabel(
+        _repositoryId: string,
+        _pullRequestId: number,
+        labelIdOrName: string,
+        _project?: string,
+        _projectId?: string
+    ): Promise<WebApiTagDefinition> {
+        const found = pullRequestLabels.find(
+            l => l.id === labelIdOrName || l.name === labelIdOrName
+        );
+        return Promise.resolve(found ?? makePullRequestLabel(labelIdOrName, labelIdOrName));
+    }
+
+    createPullRequestLabel(
+        label: WebApiCreateTagRequestData,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string,
+        _projectId?: string
+    ): Promise<WebApiTagDefinition> {
+        const found = pullRequestLabels.find(l => l.name === label.name);
+        return Promise.resolve(found ?? makePullRequestLabel(`label-${label.name}`, label.name));
+    }
+
+    deletePullRequestLabels(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _labelIdOrName: string,
+        _project?: string,
+        _projectId?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestStatus(
+        _repositoryId: string,
+        _pullRequestId: number,
+        statusId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus> {
+        const found = pullRequestStatuses.find(s => s.id === statusId);
+        return Promise.resolve(found ?? makePullRequestStatus(statusId, GitStatusState.NotSet, 1));
+    }
+
+    createPullRequestStatus(
+        status: GitPullRequestStatus,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus> {
+        return Promise.resolve({
+            ...makePullRequestStatus(status.id, GitStatusState.Pending, status.iterationId),
+            ...status
+        });
+    }
+
+    deletePullRequestStatus(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _statusId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestStatuses(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<GitPullRequestStatus[]> {
+        return Promise.resolve(pullRequestStatuses);
+    }
+
+    updatePullRequestStatuses(
+        _patchDocument: JsonPatchDocument,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestProperties(
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<any> {
+        return Promise.resolve({ ...pullRequestProperties });
+    }
+
+    updatePullRequestProperties(
+        patchDocument: JsonPatchDocument,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<any> {
+        return Promise.resolve(applyPropertyPatch(pullRequestProperties, patchDocument));
+    }
+
+    sharePullRequest(
+        _userMessage: ShareNotificationContext,
+        _repositoryId: string,
+        _pullRequestId: number,
+        _project?: string
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getPullRequestQuery(
+        queries: GitPullRequestQuery,
+        _repositoryId: string,
+        _project?: string
+    ): Promise<GitPullRequestQuery> {
+        return Promise.resolve({
+            queries: queries.queries,
+            results: queries.queries.map(input =>
+                Object.fromEntries(
+                    input.items.map(item =>
+                        [
+                            item,
+                            input.type === GitPullRequestQueryType.NotSet ? [] : pullRequests
+                        ] as [string, GitPullRequest[]]
+                    )
+                )
+            )
+        });
+    }
+
+    getPullRequestWorkItemRefs(
+        _repositoryId: string,
+        pullRequestId: number,
+        _project?: string
+    ): Promise<ResourceRef[]> {
+        const found = pullRequests.find(p => p.pullRequestId === pullRequestId);
+        if (!found) return Promise.resolve(pullRequestWorkItemRefs);
+        return Promise.resolve([
+            ...pullRequestWorkItemRefs,
+            makePullRequestWorkItemRef(String(pullRequestId))
+        ]);
     }
 }

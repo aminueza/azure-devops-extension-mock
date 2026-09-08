@@ -6,6 +6,11 @@ import {
     TaskGroup,
     VariableGroup,
     DeploymentGroup,
+    DeploymentGroupMetrics,
+    DeploymentMachine,
+    DeploymentMachineGroup,
+    DeploymentPoolSummary,
+    EnvironmentResourceType,
     TaskAgentStatus,
     TaskAgentPoolType,
     VariableGroupProviderData,
@@ -19,6 +24,11 @@ import {
     TaskAgentJobRequest,
     TaskAgentMessage,
     TaskAgentSession,
+    TaskAgentPoolMaintenanceDefinition,
+    TaskAgentPoolMaintenanceJob,
+    TaskAgentPoolMaintenanceJobResult,
+    TaskAgentPoolMaintenanceJobStatus,
+    TaskAgentPoolMaintenanceScheduleDays,
     TaskOrchestrationOwner,
     TaskResult
 } from "azure-devops-extension-api/TaskAgent";
@@ -317,3 +327,134 @@ export const messages: TaskAgentMessage[] = Array.from(
 );
 
 export const vstsAadTenantId: string = fake.string.uuid();
+
+export const makeMaintenanceDefinition = (): TaskAgentPoolMaintenanceDefinition => ({
+    enabled: true,
+    id: fake.number.int({ min: 1, max: 1000 }),
+    jobTimeoutInMinutes: fake.number.int({ min: 30, max: 240 }),
+    maxConcurrentAgentsPercentage: fake.number.int({ min: 10, max: 100 }),
+    options: { workingDirectoryExpirationInDays: fake.number.int({ min: 1, max: 30 }) },
+    pool: makeAgentPool(),
+    retentionPolicy: { numberOfHistoryRecordsToKeep: fake.number.int({ min: 1, max: 50 }) },
+    scheduleSetting: {
+        daysToBuild: TaskAgentPoolMaintenanceScheduleDays.Sunday,
+        scheduleJobId: fake.string.uuid(),
+        startHours: fake.number.int({ min: 0, max: 23 }),
+        startMinutes: fake.number.int({ min: 0, max: 59 }),
+        timeZoneId: "UTC"
+    }
+});
+
+export const makeMaintenanceJob = (): TaskAgentPoolMaintenanceJob => ({
+    definitionId: fake.number.int({ min: 1, max: 1000 }),
+    errorCount: 0,
+    finishTime: fake.date.recent(),
+    jobId: fake.number.int({ min: 1, max: 10_000 }),
+    logsDownloadUrl: fake.internet.url(),
+    orchestrationId: fake.string.uuid(),
+    pool: makeAgentPool(),
+    queueTime: fake.date.past(),
+    requestedBy: makeIdentityRef(),
+    result: TaskAgentPoolMaintenanceJobResult.Succeeded,
+    startTime: fake.date.recent(),
+    status: TaskAgentPoolMaintenanceJobStatus.Completed,
+    targetAgents: [
+        {
+            agent: makeAgent(),
+            jobId: fake.number.int({ min: 1, max: 10_000 }),
+            result: TaskAgentPoolMaintenanceJobResult.Succeeded,
+            status: TaskAgentPoolMaintenanceJobStatus.Completed
+        }
+    ],
+    warningCount: 0
+});
+
+export const maintenanceDefinitions: TaskAgentPoolMaintenanceDefinition[] = Array.from(
+    { length: 2 },
+    (_value, index) => ({ ...makeMaintenanceDefinition(), id: 900 + index })
+);
+
+export const maintenanceJobs: TaskAgentPoolMaintenanceJob[] = Array.from(
+    { length: 3 },
+    (_value, index) => ({
+        ...makeMaintenanceJob(),
+        jobId: 900 + index,
+        definitionId: 950 + (index % 2)
+    })
+);
+
+export const makeDeploymentGroupMetrics = (): DeploymentGroupMetrics => ({
+    columnsHeader: {
+        dimensions: [{ columnName: "TargetState", columnValueType: "String" }],
+        metrics: [{ columnName: "TotalCount", columnValueType: "Number" }]
+    },
+    deploymentGroup: makeDeploymentGroup(),
+    rows: [
+        { dimensions: ["online"], metrics: [`${fake.number.int({ min: 0, max: 50 })}`] },
+        { dimensions: ["offline"], metrics: [`${fake.number.int({ min: 0, max: 50 })}`] }
+    ]
+});
+
+export const makeDeploymentPoolSummary = (): DeploymentPoolSummary => ({
+    deploymentGroups: [makeDeploymentGroup()],
+    offlineAgentsCount: fake.number.int({ min: 0, max: 10 }),
+    onlineAgentsCount: fake.number.int({ min: 1, max: 20 }),
+    pool: makeAgentPool(),
+    resource: {
+        id: fake.number.int({ min: 1, max: 1000 }),
+        name: fake.lorem.slug(),
+        tags: [fake.lorem.word()],
+        type: EnvironmentResourceType.VirtualMachine
+    }
+});
+
+export const makeDeploymentMachine = (): DeploymentMachine => ({
+    agent: makeAgent(),
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    properties: { region: fake.lorem.word() },
+    tags: [fake.lorem.word(), fake.lorem.word()]
+});
+
+export const makeDeploymentMachineGroup = (): DeploymentMachineGroup => ({
+    id: fake.number.int({ min: 1, max: 10_000 }),
+    machines: [makeDeploymentMachine()],
+    name: fake.lorem.slug(),
+    pool: makeAgentPool(),
+    project: { id: fake.string.uuid(), name: fake.company.name() },
+    size: fake.number.int({ min: 1, max: 20 })
+});
+
+export const deploymentGroupMetrics: DeploymentGroupMetrics[] = Array.from(
+    { length: 3 },
+    (_value, index) => {
+        const metrics = makeDeploymentGroupMetrics();
+        return {
+            ...metrics,
+            deploymentGroup: {
+                ...metrics.deploymentGroup,
+                id: 900 + index,
+                name: `group-${900 + index}`
+            }
+        };
+    }
+);
+
+export const deploymentPoolSummaries: DeploymentPoolSummary[] = Array.from(
+    { length: 3 },
+    (_value, index) => {
+        const summary = makeDeploymentPoolSummary();
+        return {
+            ...summary,
+            pool: { ...summary.pool, id: 900 + index, name: `pool-${900 + index}` }
+        };
+    }
+);
+
+export const deploymentMachineGroups: DeploymentMachineGroup[] = Array.from(
+    { length: 3 },
+    (_value, index) => ({
+        ...makeDeploymentMachineGroup(),
+        id: 900 + index,
+        name: `machine-group-${900 + index}`
+    })
+);

@@ -5,6 +5,21 @@ import {
     ReleaseEnvironment,
     Deployment,
     ReleaseApproval,
+    AuditAction,
+    Change,
+    EnvironmentRetentionPolicy,
+    Metric,
+    OrgPipelineReleaseSettings,
+    ProjectPipelineReleaseSettings,
+    ReleaseSettings,
+    ProjectReference,
+    ReleaseRevision,
+    ReleaseWorkItemRef,
+    DefinitionEnvironmentReference,
+    ReleaseDefinitionEnvironmentSummary,
+    ReleaseDefinitionRevision,
+    ReleaseDefinitionShallowReference,
+    ReleaseShallowReference,
     EnvironmentStatus,
     ReleaseStatus,
     DeploymentStatus,
@@ -391,3 +406,164 @@ export const taskAttachments = [
 ];
 
 export const sourceBranches = ["refs/heads/main", "refs/heads/develop", "refs/heads/release"];
+
+export const makeDefinitionEnvironmentReference = (
+    definitionEnvironmentId: number,
+    releaseDefinitionId: number
+): DefinitionEnvironmentReference => ({
+    definitionEnvironmentId,
+    definitionEnvironmentName: fake.lorem.slug(2),
+    releaseDefinitionId,
+    releaseDefinitionName: fake.lorem.slug()
+});
+
+export const makeReleaseDefinitionRevision = (
+    definitionId: number,
+    revision: number
+): ReleaseDefinitionRevision => ({
+    apiVersion: "7.1",
+    changedBy: makeIdentityRef(),
+    changedDate: fake.date.recent(),
+    changeType: AuditAction.Update,
+    comment: fake.lorem.sentence(),
+    definitionId,
+    definitionUrl: fake.internet.url(),
+    revision
+});
+
+export const makeReleaseShallowReference = (id: number): ReleaseShallowReference => ({
+    _links: {},
+    id,
+    name: `Release-${id}`,
+    url: fake.internet.url()
+});
+
+export const makeReleaseDefinitionShallowReference = (
+    id: number
+): ReleaseDefinitionShallowReference => ({
+    _links: {},
+    id,
+    name: fake.lorem.slug(),
+    path: "\\",
+    projectReference: makeProjectReference(),
+    url: fake.internet.url()
+});
+
+export const makeReleaseDefinitionEnvironmentSummary = (
+    id: number
+): ReleaseDefinitionEnvironmentSummary => ({
+    id,
+    lastReleases: [makeReleaseShallowReference(id * 10), makeReleaseShallowReference(id * 10 + 1)],
+    name: fake.lorem.slug(2)
+});
+
+export const definitionEnvironmentReferences = [
+    makeDefinitionEnvironmentReference(101, 11),
+    makeDefinitionEnvironmentReference(102, 11),
+    makeDefinitionEnvironmentReference(103, 12)
+];
+
+export const releaseDefinitionRevisions = [
+    makeReleaseDefinitionRevision(11, 1),
+    makeReleaseDefinitionRevision(11, 2),
+    makeReleaseDefinitionRevision(12, 1)
+];
+
+export const releaseDefinitionEnvironmentSummaries = [
+    makeReleaseDefinitionEnvironmentSummary(101),
+    makeReleaseDefinitionEnvironmentSummary(102),
+    makeReleaseDefinitionEnvironmentSummary(103)
+];
+
+export const makeReleaseRevision = (
+    releaseId: number,
+    definitionSnapshotRevision: number
+): ReleaseRevision => ({
+    changedBy: makeIdentityRef(),
+    changedDate: fake.date.recent(),
+    changeDetails: fake.lorem.sentence(),
+    changeType: "Update",
+    comment: fake.lorem.sentence(),
+    definitionSnapshotRevision,
+    releaseId
+});
+
+export const makeChange = (id: string): Change => ({
+    author: makeIdentityRef(),
+    changeType: "TfsGit",
+    displayUri: fake.internet.url(),
+    id,
+    location: fake.internet.url(),
+    message: fake.git.commitMessage(),
+    pushedBy: makeIdentityRef(),
+    pusher: fake.person.fullName(),
+    timestamp: fake.date.recent()
+});
+
+export const makeReleaseWorkItemRef = (id: string): ReleaseWorkItemRef => ({
+    assignee: fake.person.fullName(),
+    id,
+    provider: "TfsWorkItemTracking",
+    state: "Active",
+    title: fake.lorem.sentence(),
+    type: "Bug",
+    url: fake.internet.url()
+});
+
+export const releaseRevisions = [
+    makeReleaseRevision(2001, 1),
+    makeReleaseRevision(2001, 2),
+    makeReleaseRevision(2002, 1)
+];
+
+export const releaseChanges = [
+    makeChange("change-1"),
+    makeChange("change-2"),
+    makeChange("change-3")
+];
+
+export const releaseWorkItemRefs = [
+    makeReleaseWorkItemRef("501"),
+    makeReleaseWorkItemRef("502"),
+    makeReleaseWorkItemRef("503")
+];
+
+export const releaseProjects: ProjectReference[] = Array.from({ length: 3 }, makeProjectReference);
+
+export const makeMetric = (name: string, value: number): Metric => ({ name, value });
+
+export const makeEnvironmentRetentionPolicy = (
+    daysToKeep: number,
+    releasesToKeep: number
+): EnvironmentRetentionPolicy => ({
+    daysToKeep,
+    releasesToKeep,
+    retainBuild: true
+});
+
+export const makeReleaseSettings = (): ReleaseSettings => ({
+    complianceSettings: { checkForCredentialsAndOtherSecrets: true },
+    retentionSettings: {
+        daysToKeepDeletedReleases: 30,
+        defaultEnvironmentRetentionPolicy: makeEnvironmentRetentionPolicy(30, 3),
+        maximumEnvironmentRetentionPolicy: makeEnvironmentRetentionPolicy(365, 100)
+    }
+});
+
+export const makeProjectPipelineReleaseSettings = (): ProjectPipelineReleaseSettings => ({
+    enforceJobAuthScope: true,
+    hasManageSettingsPermission: true,
+    orgEnforceJobAuthScope: true,
+    publicProject: false
+});
+
+export const makeOrgPipelineReleaseSettings = (): OrgPipelineReleaseSettings => ({
+    hasManagePipelinePoliciesPermission: true,
+    orgEnforceJobAuthScope: true
+});
+
+export const metrics = [
+    makeMetric("TotalReleases", 42),
+    makeMetric("ActiveReleases", 7),
+    makeMetric("FailedDeployments", 3)
+];

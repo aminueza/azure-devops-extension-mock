@@ -23,6 +23,16 @@ import {
     TaskAgentMessage,
     TaskAgentRequestUpdateOptions,
     TaskAgentSession,
+    TaskAgentPoolMaintenanceDefinition,
+    TaskAgentPoolMaintenanceJob,
+    TaskAgentPoolMaintenanceJobStatus,
+    DeploymentGroupCreateParameter,
+    DeploymentGroupUpdateParameter,
+    DeploymentGroupMetrics,
+    DeploymentMachineGroup,
+    DeploymentPoolSummary,
+    DeploymentPoolSummaryExpands,
+    MachineGroupActionFilter,
     TaskResult
 } from "azure-devops-extension-api/TaskAgent";
 import { PagedList } from "azure-devops-extension-api/WebApi";
@@ -34,8 +44,11 @@ import {
     agentQueues,
     agentRequests,
     agents,
+    deploymentGroupMetrics,
     deploymentGroups,
     deploymentGroupsPage,
+    deploymentMachineGroups,
+    deploymentPoolSummaries,
     makeAgent,
     makeAgentCloud,
     makeAgentJobRequest,
@@ -44,6 +57,11 @@ import {
     makeAgentQueue,
     makeAgentSession,
     makeDeploymentGroup,
+    makeDeploymentMachineGroup,
+    makeMaintenanceDefinition,
+    makeMaintenanceJob,
+    maintenanceDefinitions,
+    maintenanceJobs,
     makeQueueRestrictions,
     makeResourceUsage,
     makeTaskGroup,
@@ -60,6 +78,12 @@ const page = <T>(items: T[], continuationToken: string | null): PagedList<T> =>
     Object.assign([...items], { continuationToken }) as PagedList<T>;
 
 const take = <T>(items: T[], count?: number): T[] => items.slice(0, count ?? items.length);
+
+const encode = (value: string): ArrayBuffer => {
+    const buffer = new ArrayBuffer(value.length);
+    new Uint8Array(buffer).set(Array.from(value, character => character.charCodeAt(0)));
+    return buffer;
+};
 
 export class MockTaskAgentRestClient extends RestClientBase {
     public TYPE = TaskAgentRestClient;
@@ -473,4 +497,265 @@ export class MockTaskAgentRestClient extends RestClientBase {
     createTeamProject(_project?: string): Promise<void> {
         return Promise.resolve();
     }
+
+    createAgentPoolMaintenanceDefinition(
+        definition: TaskAgentPoolMaintenanceDefinition,
+        poolId: number
+    ): Promise<TaskAgentPoolMaintenanceDefinition> {
+        const base = makeMaintenanceDefinition();
+        return Promise.resolve({
+            ...base,
+            ...definition,
+            pool: { ...base.pool, id: poolId }
+        });
+    }
+
+    deleteAgentPoolMaintenanceDefinition(
+        _poolId: number,
+        _definitionId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getAgentPoolMaintenanceDefinition(
+        _poolId: number,
+        definitionId: number
+    ): Promise<TaskAgentPoolMaintenanceDefinition> {
+        const found = maintenanceDefinitions.find(d => d.id === definitionId);
+        return Promise.resolve(found ?? { ...makeMaintenanceDefinition(), id: definitionId });
+    }
+
+    getAgentPoolMaintenanceDefinitions(
+        poolId: number
+    ): Promise<TaskAgentPoolMaintenanceDefinition[]> {
+        return Promise.resolve(
+            maintenanceDefinitions.map(d => ({ ...d, pool: { ...d.pool, id: poolId } }))
+        );
+    }
+
+    updateAgentPoolMaintenanceDefinition(
+        definition: TaskAgentPoolMaintenanceDefinition,
+        poolId: number,
+        definitionId: number
+    ): Promise<TaskAgentPoolMaintenanceDefinition> {
+        const base = makeMaintenanceDefinition();
+        return Promise.resolve({
+            ...base,
+            ...definition,
+            id: definitionId,
+            pool: { ...base.pool, id: poolId }
+        });
+    }
+
+    deleteAgentPoolMaintenanceJob(_poolId: number, _jobId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getAgentPoolMaintenanceJob(
+        poolId: number,
+        jobId: number
+    ): Promise<TaskAgentPoolMaintenanceJob> {
+        const found = maintenanceJobs.find(j => j.jobId === jobId);
+        const base = found ?? makeMaintenanceJob();
+        return Promise.resolve({ ...base, jobId, pool: { ...base.pool, id: poolId } });
+    }
+
+    getAgentPoolMaintenanceJobLogs(poolId: number, jobId: number): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`pool-${poolId}-maintenance-job-${jobId}`));
+    }
+
+    getAgentPoolMaintenanceJobs(
+        poolId: number,
+        definitionId?: number
+    ): Promise<TaskAgentPoolMaintenanceJob[]> {
+        const matched =
+            definitionId === undefined
+                ? maintenanceJobs
+                : maintenanceJobs.filter(j => j.definitionId === definitionId);
+        return Promise.resolve(matched.map(j => ({ ...j, pool: { ...j.pool, id: poolId } })));
+    }
+
+    queueAgentPoolMaintenanceJob(
+        job: TaskAgentPoolMaintenanceJob,
+        poolId: number
+    ): Promise<TaskAgentPoolMaintenanceJob> {
+        const base = makeMaintenanceJob();
+        return Promise.resolve({
+            ...base,
+            ...job,
+            status: TaskAgentPoolMaintenanceJobStatus.Queued,
+            pool: { ...base.pool, id: poolId }
+        });
+    }
+
+    updateAgentPoolMaintenanceJob(
+        job: TaskAgentPoolMaintenanceJob,
+        poolId: number,
+        jobId: number
+    ): Promise<TaskAgentPoolMaintenanceJob> {
+        const base = makeMaintenanceJob();
+        return Promise.resolve({
+            ...base,
+            ...job,
+            jobId,
+            pool: { ...base.pool, id: poolId }
+        });
+    }
+
+    addDeploymentGroup(
+        deploymentGroup: DeploymentGroupCreateParameter,
+        project: string
+    ): Promise<DeploymentGroup> {
+        const base = makeDeploymentGroup();
+        return Promise.resolve({
+            ...base,
+            name: deploymentGroup.name,
+            description: deploymentGroup.description,
+            pool: { ...base.pool, id: deploymentGroup.poolId },
+            project: { ...base.project, name: project }
+        });
+    }
+
+    deleteDeploymentGroup(_project: string, _deploymentGroupId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    updateDeploymentGroup(
+        deploymentGroup: DeploymentGroupUpdateParameter,
+        project: string,
+        deploymentGroupId: number
+    ): Promise<DeploymentGroup> {
+        const base = makeDeploymentGroup();
+        return Promise.resolve({
+            ...base,
+            id: deploymentGroupId,
+            name: deploymentGroup.name,
+            description: deploymentGroup.description,
+            project: { ...base.project, name: project }
+        });
+    }
+
+    getDeploymentGroupsMetrics(
+        project: string,
+        deploymentGroupName?: string,
+        continuationToken?: string,
+        top?: number
+    ): Promise<PagedList<DeploymentGroupMetrics>> {
+        const matched =
+            deploymentGroupName === undefined
+                ? deploymentGroupMetrics
+                : deploymentGroupMetrics.filter(
+                      m => m.deploymentGroup.name === deploymentGroupName
+                  );
+        const items = take(matched, top).map(m => ({
+            ...m,
+            deploymentGroup: {
+                ...m.deploymentGroup,
+                project: { ...m.deploymentGroup.project, name: project }
+            }
+        }));
+        return Promise.resolve(page(items, continuationToken ?? null));
+    }
+
+    generateDeploymentGroupAccessToken(
+        project: string,
+        deploymentGroupId: number
+    ): Promise<string> {
+        return Promise.resolve(`${project}-deployment-group-${deploymentGroupId}-token`);
+    }
+
+    generateDeploymentPoolAccessToken(poolId: number): Promise<string> {
+        return Promise.resolve(`deployment-pool-${poolId}-token`);
+    }
+
+    getDeploymentPoolsSummary(
+        poolName?: string,
+        _expands?: DeploymentPoolSummaryExpands,
+        poolIds?: number[]
+    ): Promise<DeploymentPoolSummary[]> {
+        const byName =
+            poolName === undefined
+                ? deploymentPoolSummaries
+                : deploymentPoolSummaries.filter(s => s.pool.name === poolName);
+        const byId =
+            poolIds === undefined ? byName : byName.filter(s => poolIds.includes(s.pool.id));
+        return Promise.resolve(byId);
+    }
+
+    addDeploymentMachineGroup(
+        machineGroup: DeploymentMachineGroup,
+        project: string
+    ): Promise<DeploymentMachineGroup> {
+        const base = makeDeploymentMachineGroup();
+        return Promise.resolve({
+            ...base,
+            ...machineGroup,
+            project: { ...base.project, name: project }
+        });
+    }
+
+    deleteDeploymentMachineGroup(_project: string, _machineGroupId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getDeploymentMachineGroup(
+        project: string,
+        machineGroupId: number,
+        _actionFilter?: MachineGroupActionFilter
+    ): Promise<DeploymentMachineGroup> {
+        const found = deploymentMachineGroups.find(g => g.id === machineGroupId);
+        const base = found ?? makeDeploymentMachineGroup();
+        return Promise.resolve({
+            ...base,
+            id: machineGroupId,
+            project: { ...base.project, name: project }
+        });
+    }
+
+    getDeploymentMachineGroups(
+        project: string,
+        machineGroupName?: string,
+        _actionFilter?: MachineGroupActionFilter
+    ): Promise<DeploymentMachineGroup[]> {
+        const matched =
+            machineGroupName === undefined
+                ? deploymentMachineGroups
+                : deploymentMachineGroups.filter(g => g.name === machineGroupName);
+        return Promise.resolve(
+            matched.map(g => ({ ...g, project: { ...g.project, name: project } }))
+        );
+    }
+
+    updateDeploymentMachineGroup(
+        machineGroup: DeploymentMachineGroup,
+        project: string,
+        machineGroupId: number
+    ): Promise<DeploymentMachineGroup> {
+        const base = makeDeploymentMachineGroup();
+        return Promise.resolve({
+            ...base,
+            ...machineGroup,
+            id: machineGroupId,
+            project: { ...base.project, name: project }
+        });
+    }
+
+    generateDeploymentMachineGroupAccessToken(
+        project: string,
+        machineGroupId: number
+    ): Promise<string> {
+        return Promise.resolve(`${project}-machine-group-${machineGroupId}-token`);
+    }
 }
+
+
+
+
+const _check: Pick<
+    TaskAgentRestClient,
+    | "deleteDeploymentMachineGroup"
+    | "getDeploymentMachineGroup"
+    | "getDeploymentMachineGroups"
+    | "updateDeploymentMachineGroup"
+    | "generateDeploymentMachineGroupAccessToken"
+> = new MockTaskAgentRestClient({} as any);

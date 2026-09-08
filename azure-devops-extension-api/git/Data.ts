@@ -11,6 +11,7 @@ import {
     GitVersionType,
     PullRequestStatus,
     GitObjectType,
+    GitPullRequestStatus,
     GitPush,
     GitAnnotatedTag,
     GitAsyncOperationStatus,
@@ -29,16 +30,20 @@ import {
     GitTreeEntryRef,
     GitTreeRef,
     GitUserDate,
+    IdentityRefWithVote,
     FileDiff,
     FileDiffParams,
     ItemContentType,
     LineDiffBlockChangeType,
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
+import { WebApiTagDefinition } from "azure-devops-extension-api/Core";
+import { ResourceRef } from "azure-devops-extension-api/WebApi";
 import {
     makeIdentityRef,
     makeProjectCollectionReference,
-    makeProjectReference
+    makeProjectReference,
+    makeTagDefinition
 } from "../core/Data";
 
 export const makeGitRepository = (): GitRepository => ({
@@ -403,3 +408,65 @@ export const merges: GitMerge[] = [
     { ...makeGitMerge("merge main into develop"), mergeOperationId: 201 },
     { ...makeGitMerge("merge develop into main"), mergeOperationId: 202 }
 ];
+
+export const makeIdentityRefWithVote = (id: string, vote: number): IdentityRefWithVote => ({
+    ...makeIdentityRef(),
+    id,
+    hasDeclined: false,
+    isFlagged: false,
+    isReapprove: false,
+    isRequired: false,
+    reviewerUrl: fake.internet.url(),
+    vote,
+    votedFor: []
+});
+
+export const pullRequestReviewers: IdentityRefWithVote[] = [
+    makeIdentityRefWithVote("reviewer-approved", 10),
+    makeIdentityRefWithVote("reviewer-waiting", -5),
+    { ...makeIdentityRefWithVote("reviewer-required", 0), isRequired: true }
+];
+
+export const makePullRequestLabel = (id: string, name: string): WebApiTagDefinition => ({
+    ...makeTagDefinition(),
+    id,
+    name
+});
+
+export const makePullRequestStatus = (
+    id: number,
+    state: GitStatusState,
+    iterationId: number
+): GitPullRequestStatus => ({
+    ...makeGitStatus(id, state),
+    iterationId,
+    properties: { source: fake.lorem.slug() }
+});
+
+export const pullRequestLabels: WebApiTagDefinition[] = [
+    makePullRequestLabel("label-bug", "bug"),
+    makePullRequestLabel("label-docs", "documentation"),
+    { ...makePullRequestLabel("label-stale", "stale"), active: false }
+];
+
+export const pullRequestStatuses: GitPullRequestStatus[] = [
+    makePullRequestStatus(301, GitStatusState.Succeeded, 1),
+    makePullRequestStatus(302, GitStatusState.Failed, 2),
+    makePullRequestStatus(303, GitStatusState.Pending, 3)
+];
+
+export const makePullRequestWorkItemRef = (id: string): ResourceRef => ({
+    id,
+    url: `https://dev.azure.com/_apis/wit/workItems/${id}`
+});
+
+export const pullRequestWorkItemRefs: ResourceRef[] = [
+    makePullRequestWorkItemRef("4001"),
+    makePullRequestWorkItemRef("4002"),
+    makePullRequestWorkItemRef("4003")
+];
+
+export const pullRequestProperties: Record<string, any> = {
+    riskLevel: "low",
+    reviewedBy: "release-team"
+};
