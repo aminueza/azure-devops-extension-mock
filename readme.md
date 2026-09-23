@@ -18,7 +18,9 @@ Peer dependencies (you almost certainly already have them):
 
 - `azure-devops-extension-api` ≥ 4
 - `azure-devops-extension-sdk` ≥ 4 (v5 supported)
-- `jest` ≥ 29 (optional — only if you're testing with jest)
+
+The mocks themselves do not depend on any test framework. The Jest helpers
+under `jest-helpers/` target Jest 29 and 30.
 
 ## Quick start
 
