@@ -1,51 +1,59 @@
-// Jest transformer: wrap azure-devops-extension-api AMD modules in a CommonJS
-// shim that provides a local `define` closing over the file's own require.
-//
-// Register in jest.config.js via:
-//   transform: {
-//     'node_modules[\\\\/]azure-devops-extension-api[\\\\/].+\\.js$':
-//       'azure-devops-extension-mock/jest-helpers/amd-transformer',
-//   },
-//   transformIgnorePatterns: ['node_modules/(?!azure-devops-extension-api)'],
-module.exports = {
-    process(source, filename) {
-        const path = require("path");
-        const dir = path.dirname(filename).replace(/\\/g, "/");
-        const basename = path.basename(filename);
-        const wrapped = `
-var __amdDir = ${JSON.stringify(dir)};
-var __amdFile = ${JSON.stringify(basename)};
-var __amdPath = require("path");
-var define = function(deps, factory) {
-    var resolved = deps.map(function (dep) {
-        if (dep === "require") return require;
-        if (dep === "exports") return module.exports;
-        if (dep === "module") return module;
-        if (dep.charAt(0) === ".") {
-            var absolute = __amdPath.join(__amdDir, dep);
-            if (!/\\.js$/.test(absolute)) absolute += ".js";
-            return require(absolute);
-        }
-        return require(dep);
-    });
-    var result = factory.apply(null, resolved);
+const crypto = require("crypto");
+
+const CACHE_SALT = "azure-devops-extension-mock/amd-transformer@2";
+const DEFINE_PATTERN = /^define\(\s*(\[[^\]]*\])\s*,/m;
+
+const LOCAL_BINDINGS = {
+    require: "require",
+    exports: "exports",
+    module: "module"
+};
+
+const toModuleId = (dependency) => {
+    if (!dependency.startsWith(".") || dependency.endsWith(".js")) {
+        return dependency;
+    }
+    return `${dependency}.js`;
+};
+
+const toExpression = (dependency) =>
+    LOCAL_BINDINGS[dependency] ?? `require(${JSON.stringify(toModuleId(dependency))})`;
+
+const readDependencies = (source) => {
+    const match = DEFINE_PATTERN.exec(source);
+    if (!match) {
+        return undefined;
+    }
+    const dependencies = JSON.parse(match[1]);
+    if (!dependencies.every((dependency) => typeof dependency === "string")) {
+        throw new Error("amd-transformer: define() dependencies must be string literals");
+    }
+    return dependencies;
+};
+
+const wrap = (source, dependencies) => `var __amdDependencies = [${dependencies.map(toExpression).join(", ")}];
+var define = function (_ids, factory) {
+    var result = factory.apply(null, __amdDependencies);
     if (result !== undefined) {
         module.exports = result;
     }
 };
 define.amd = {};
 ${source}`;
-        return { code: wrapped };
+
+module.exports = {
+    process(source) {
+        const dependencies = readDependencies(source);
+        return { code: dependencies === undefined ? source : wrap(source, dependencies) };
     },
     getCacheKey(source, filename) {
-        const crypto = require("crypto");
         return crypto
-            .createHash("md5")
-            .update("azure-devops-extension-mock/amd-transformer@1")
+            .createHash("sha256")
+            .update(CACHE_SALT)
             .update("\0")
             .update(filename)
             .update("\0")
             .update(source)
             .digest("hex");
-    },
+    }
 };

@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-09-23
+
+### Fixed
+
+- `jest-helpers/amd-transformer` no longer injects a `define` shim that calls `require()` with a computed path. It reads the dependency list of the AMD `define([...])` call at transform time and emits one string-literal `require()` per dependency, so neither the helper nor the code it generates contains a dynamic require. Modules that do not call `define`, which includes every module of `azure-devops-extension-api` v5, are returned unchanged instead of being wrapped in an unused shim. The cache key changes, so Jest re-transforms on the first run after upgrading.
+- The shipped Jest helpers no longer carry comments; their usage is documented in the readme.
+
 ## [1.0.0] - 2026-09-08
 
 First release on npm.
@@ -37,4 +44,5 @@ First release on npm.
 - `MockTaskAgentRestClient.getAgentQueue` had its parameters reversed relative to the real client, and `MockBuildRestClient.getBuildLog` returned an `ArrayBuffer` where the real client returns a `string`.
 - Fixture ids were drawn at random from a small range, so two entries in a seeded list could collide and a lookup by id would return the wrong entry. Ids now come from a sequential generator (`fake.number.id()`) and cannot repeat.
 
+[1.0.1]: https://github.com/aminueza/azure-devops-extension-mock/releases/tag/v1.0.1
 [1.0.0]: https://github.com/aminueza/azure-devops-extension-mock/releases/tag/v1.0.0

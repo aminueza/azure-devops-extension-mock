@@ -21,6 +21,7 @@ module.exports = {
     collectCoverageFrom: [
         'azure-devops-extension-api/**/*.ts',
         'azure-devops-extension-sdk/**/*.ts',
+        'jest-helpers/**/*.js',
         '!**/*.d.ts',
     ],
     coverageThreshold: {
