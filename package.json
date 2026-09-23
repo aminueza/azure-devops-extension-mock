@@ -1,6 +1,6 @@
 {
   "name": "azure-devops-extension-mock",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Jest mock for the Azure DevOps Extension SDK and REST API clients — no live Azure DevOps instance required.",
   "main": "dist/azure-devops-extension-api/index.js",
   "types": "dist/azure-devops-extension-api/index.d.ts",
@@ -61,13 +61,7 @@
   "homepage": "https://github.com/aminueza/azure-devops-extension-mock#readme",
   "peerDependencies": {
     "azure-devops-extension-api": "^4.0.0 || ^5.272.3",
-    "azure-devops-extension-sdk": "^4.0.0 || ^5.0.0",
-    "jest": "^29.0.0 || ^30.0.0"
-  },
-  "peerDependenciesMeta": {
-    "jest": {
-      "optional": true
-    }
+    "azure-devops-extension-sdk": "^4.0.0 || ^5.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.0",
