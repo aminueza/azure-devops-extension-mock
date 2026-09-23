@@ -136,9 +136,12 @@ beforeEach(() => fake.seed(1234));
 Two things to wire up when testing an extension:
 
 1. Redirect the SDK import in `jest.config.js` (`moduleNameMapper`).
-2. If your tests import from `azure-devops-extension-api/*` directly, add
-   the AMD transformer that ships with this repo. The real package is
-   published as AMD-only and jest needs help loading it under Node.
+2. If you use `azure-devops-extension-api` v4 and your tests import from
+   `azure-devops-extension-api/*` directly, add the AMD transformer that
+   ships with this repo: v4 is published as AMD-only and jest needs help
+   loading it under Node. v5 is CommonJS and needs no transform; the
+   transformer returns v5 modules unchanged, so keeping it configured
+   across an upgrade is harmless.
 
 A ready-to-copy configuration:
 

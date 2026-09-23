@@ -1,6 +1,6 @@
 {
   "name": "azure-devops-extension-mock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Jest mock for the Azure DevOps Extension SDK and REST API clients — no live Azure DevOps instance required.",
   "main": "dist/azure-devops-extension-api/index.js",
   "types": "dist/azure-devops-extension-api/index.d.ts",
