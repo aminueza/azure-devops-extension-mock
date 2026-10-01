@@ -1,4 +1,10 @@
-import { BuildRestClient, BuildStatus, BuildResult, DefinitionType } from "azure-devops-extension-api/Build";
+import {
+    BuildDefinitionPriority,
+    BuildRestClient,
+    BuildStatus,
+    BuildResult,
+    DefinitionType
+} from "azure-devops-extension-api/Build";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -57,6 +63,11 @@ describe("BuildRestClient mock definitions", () => {
         expect(def.id).toBe(999_999);
         expect(def).toHaveProperty("name");
         expect(def).toHaveProperty("repository");
+    });
+
+    it("seeds definitions with normal priority", async () => {
+        const def = await client.getDefinition("proj", buildDefinitions[0].id);
+        expect(def.priority).toBe(BuildDefinitionPriority.Normal);
     });
 
     it("creates a definition merging the caller's fields", async () => {

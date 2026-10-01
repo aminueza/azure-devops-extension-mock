@@ -5,6 +5,7 @@ import {
     WikiV2,
     WikiPage,
     WikiPageDetail,
+    WikiPageRef,
     WikiPageViewStats,
     WikiPagesBatchRequest,
     WikiCreateParametersV2,
@@ -211,6 +212,14 @@ export class MockWikiRestClient extends RestClientBase {
             continuationToken: null
         });
         return Promise.resolve(batch);
+    }
+
+    getPagePaths(
+        _project: string,
+        _wikiIdentifier: string,
+        _versionDescriptor?: GitVersionDescriptor
+    ): Promise<WikiPageRef[]> {
+        return Promise.resolve(pages.map(({ id, isParentPage, path }) => ({ id, isParentPage, path })));
     }
 
     getPageData(

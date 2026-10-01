@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `WikiRestClient.getPagePaths`, new in `azure-devops-extension-api` 5.279, returns the `id`, `path` and `isParentPage` of every seeded wiki page.
+- Seeded build definitions carry `priority: BuildDefinitionPriority.Normal`, the field 5.279 added to `BuildDefinition`.
+
 ### Fixed
 
 - The seeded `PipelineGeneralSettings` sets `enforceEvenStricterJobAuthScopeInRunRelatedApis` to `false`, the field `azure-devops-extension-api` 5.279 made required, so the package builds against that release.
