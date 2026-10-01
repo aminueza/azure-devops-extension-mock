@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `WikiRestClient.getPagePaths`, new in `azure-devops-extension-api` 5.279, returns the `id`, `path` and `isParentPage` of every seeded wiki page.
 - Seeded build definitions carry `priority: BuildDefinitionPriority.Normal`, the field 5.279 added to `BuildDefinition`.
+- Seeded build definitions carry a continuous integration trigger and a pull request trigger with `suppressPipelineStatusComments: false`, the field 5.279 added to `PullRequestTrigger`.
 
 ### Fixed
 
+- `makeBuildDefinition` fills every field of `BuildDefinition` without a type cast, so a field a future `azure-devops-extension-api` release makes required fails the build instead of going missing from the fixture. `Build.definition` is now a plain `DefinitionReference`, matching the real type.
 - The seeded `PipelineGeneralSettings` sets `enforceEvenStricterJobAuthScopeInRunRelatedApis` to `false`, the field `azure-devops-extension-api` 5.279 made required, so the package builds against that release.
 
 ## [1.0.2] - 2026-09-23

@@ -3,7 +3,10 @@ import {
     BuildRestClient,
     BuildStatus,
     BuildResult,
-    DefinitionType
+    ContinuousIntegrationTrigger,
+    DefinitionTriggerType,
+    DefinitionType,
+    PullRequestTrigger
 } from "azure-devops-extension-api/Build";
 
 import { getClient } from "../azure-devops-extension-api";
@@ -68,6 +71,30 @@ describe("BuildRestClient mock definitions", () => {
     it("seeds definitions with normal priority", async () => {
         const def = await client.getDefinition("proj", buildDefinitions[0].id);
         expect(def.priority).toBe(BuildDefinitionPriority.Normal);
+    });
+
+    it("seeds a CI trigger and a PR trigger that keeps status comments", async () => {
+        const def = await client.getDefinition("proj", buildDefinitions[0].id);
+        expect(def.triggers.map(t => t.triggerType)).toEqual([
+            DefinitionTriggerType.ContinuousIntegration,
+            DefinitionTriggerType.PullRequest
+        ]);
+        const ci = def.triggers[0] as ContinuousIntegrationTrigger;
+        expect(ci.branchFilters).toEqual(["+refs/heads/main"]);
+        const pr = def.triggers[1] as PullRequestTrigger;
+        expect(pr.suppressPipelineStatusComments).toBe(false);
+        expect(pr.forks.enabled).toBe(false);
+        expect(pr.pipelineTriggerSettings.forkProtectionEnabled).toBe(true);
+    });
+
+    it("seeds definitions with latest builds that point at a plain definition reference", async () => {
+        const def = await client.getDefinition("proj", buildDefinitions[0].id);
+        expect(def.latestBuild.status).toBe(BuildStatus.Completed);
+        expect(def.latestCompletedBuild.result).toBe(BuildResult.Succeeded);
+        expect(def.latestBuild.definition).not.toHaveProperty("latestBuild");
+        expect(def.draftOf).not.toHaveProperty("draftOf");
+        expect(def.repository.checkoutSubmodules).toBe(false);
+        expect(def.queue.pool.isHosted).toBe(true);
     });
 
     it("creates a definition merging the caller's fields", async () => {
