@@ -6,7 +6,7 @@ import {
     BuildBadge,
     BuildController,
     BuildDefinition,
-    BuildDefinitionReference,
+    BuildDefinitionPriority,
     BuildDefinitionRevision,
     BuildDefinitionTemplate,
     BuildArtifact,
@@ -45,40 +45,128 @@ import {
     Timeline,
     TimelineRecord,
     TimelineRecordState,
-    Change
+    Change,
+    BuildAuthorizationScope,
+    CommentTriggerOption,
+    ContinuousIntegrationTrigger,
+    DefinitionQueueStatus,
+    DefinitionReference,
+    PullRequestTrigger,
+    YamlProcess
 } from "azure-devops-extension-api/Build";
 import { PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
-export const makeBuildDefinition = (): BuildDefinition => ({
+export const makeDefinitionReference = (): DefinitionReference => ({
     id: fake.number.id(),
     name: fake.lorem.slug(),
     path: "\\",
     revision: fake.number.int({ min: 1, max: 50 }),
     type: DefinitionType.Build,
-    queueStatus: 0,
+    queueStatus: DefinitionQueueStatus.Enabled,
     uri: fake.internet.url(),
     url: fake.internet.url(),
-    project: makeProjectReference() as any,
-    quality: DefinitionQuality.Definition,
-    authoredBy: makeIdentityRef(),
-    queue: {
-        id: fake.number.id(),
-        name: "Azure Pipelines",
-        url: fake.internet.url(),
-        pool: { id: fake.number.id(), name: "Azure Pipelines", isHosted: true }
+    project: makeProjectReference(),
+    createdDate: fake.date.recent()
+});
+
+export const makeContinuousIntegrationTrigger = (): ContinuousIntegrationTrigger => ({
+    triggerType: DefinitionTriggerType.ContinuousIntegration,
+    batchChanges: false,
+    branchFilters: ["+refs/heads/main"],
+    maxConcurrentBuildsPerBranch: 1,
+    pathFilters: [],
+    pollingInterval: 0,
+    pollingJobId: fake.string.uuid(),
+    settingsSourceType: 2
+});
+
+export const makePullRequestTrigger = (): PullRequestTrigger => ({
+    triggerType: DefinitionTriggerType.PullRequest,
+    autoCancel: true,
+    branchFilters: ["+refs/heads/main"],
+    commentOptionForks: CommentTriggerOption.All,
+    commentOptionInternalRepos: CommentTriggerOption.None,
+    forks: { allowFullAccessToken: false, allowSecrets: false, enabled: false },
+    isCommentRequiredForForkedPullRequests: true,
+    isCommentRequiredForInternalRepoPRs: false,
+    isCommentRequiredForPullRequest: false,
+    pathFilters: [],
+    pipelineTriggerSettings: {
+        buildsEnabledForForks: false,
+        commentOptionForks: CommentTriggerOption.All,
+        commentOptionInternalRepos: CommentTriggerOption.None,
+        enforceJobAuthScopeForForks: true,
+        enforceNoAccessToSecretsFromForks: true,
+        forkProtectionEnabled: true,
+        isCommentRequiredForForkedPullRequests: true,
+        isCommentRequiredForInternalRepoPRs: false,
+        isCommentRequiredForPullRequest: false,
+        requireCommentsForNonTeamMemberAndNonContributors: false,
+        requireCommentsForNonTeamMembersOnly: false
     },
-    process: { type: 2, yamlFilename: "azure-pipelines.yml" } as any,
-    repository: {
-        id: fake.string.uuid(),
-        type: "TfsGit",
-        name: fake.lorem.slug(),
-        url: fake.internet.url(),
-        defaultBranch: "refs/heads/main"
-    } as any,
-    createdDate: fake.date.recent(),
-    _links: {} as any
-} as unknown as BuildDefinition);
+    requireCommentsForNonTeamMemberAndNonContributors: false,
+    requireCommentsForNonTeamMembersOnly: false,
+    settingsSourceType: 2,
+    suppressPipelineStatusComments: false
+});
+
+export const makeBuildDefinition = (): BuildDefinition => {
+    const process: YamlProcess = {
+        type: 2,
+        yamlFilename: "azure-pipelines.yml",
+        errors: [],
+        resources: { endpoints: [], files: [], queues: [], variableGroups: [] }
+    };
+    return {
+        ...makeDefinitionReference(),
+        _links: {},
+        authoredBy: makeIdentityRef(),
+        draftOf: makeDefinitionReference(),
+        drafts: [],
+        latestBuild: makeBuild(),
+        latestCompletedBuild: makeBuild(),
+        metrics: [],
+        quality: DefinitionQuality.Definition,
+        queue: {
+            _links: {},
+            id: fake.number.id(),
+            name: "Azure Pipelines",
+            url: fake.internet.url(),
+            pool: { id: fake.number.id(), name: "Azure Pipelines", isHosted: true }
+        },
+        badgeEnabled: false,
+        buildNumberFormat: "$(Date:yyyyMMdd)$(Rev:.r)",
+        comment: "",
+        demands: [],
+        description: fake.lorem.sentence(),
+        dropLocation: "",
+        jobAuthorizationScope: BuildAuthorizationScope.Project,
+        jobCancelTimeoutInMinutes: 5,
+        jobTimeoutInMinutes: 60,
+        options: [],
+        priority: BuildDefinitionPriority.Normal,
+        process,
+        processParameters: { dataSourceBindings: [], inputs: [], sourceDefinitions: [] },
+        properties: {},
+        repository: {
+            id: fake.string.uuid(),
+            type: "TfsGit",
+            name: fake.lorem.slug(),
+            url: fake.internet.url(),
+            defaultBranch: "refs/heads/main",
+            checkoutSubmodules: false,
+            clean: "false",
+            properties: {},
+            rootFolder: ""
+        },
+        retentionRules: [],
+        tags: [],
+        triggers: [makeContinuousIntegrationTrigger(), makePullRequestTrigger()],
+        variableGroups: [],
+        variables: { "system.debug": { allowOverride: true, isSecret: false, value: "false" } }
+    };
+};
 
 export const makeBuild = (): Build => ({
     id: fake.number.id(),
@@ -93,7 +181,7 @@ export const makeBuild = (): Build => ({
     sourceVersion: fake.git.commitSha(),
     url: fake.internet.url(),
     uri: fake.internet.url(),
-    definition: makeBuildDefinition() as BuildDefinitionReference,
+    definition: makeDefinitionReference(),
     project: makeProjectReference() as any,
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
