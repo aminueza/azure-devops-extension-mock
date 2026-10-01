@@ -392,6 +392,7 @@ export const makePipelineGeneralSettings = (): PipelineGeneralSettings => ({
     disableImpliedYAMLCiTrigger: true,
     enableShellTasksArgsSanitizing: true,
     enableShellTasksArgsSanitizingAudit: false,
+    enforceEvenStricterJobAuthScopeInRunRelatedApis: false,
     enforceJobAuthScope: true,
     enforceJobAuthScopeForForks: true,
     enforceJobAuthScopeForReleases: true,
