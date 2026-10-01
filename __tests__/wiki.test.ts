@@ -169,6 +169,17 @@ describe("WikiRestClient mock", () => {
         expect(decode(zip)).toContain("# Home");
     });
 
+    it("lists the path, id and parent flag of every seeded page", async () => {
+        const refs = await client.getPagePaths("proj", "wiki", version);
+        expect(refs.map(r => r.path)).toEqual(["/Home", "/Getting-Started", "/FAQ", "/API/Overview"]);
+        expect(refs[0].isParentPage).toBe(true);
+        expect(refs[1].isParentPage).toBe(false);
+        for (const ref of refs) {
+            expect(typeof ref.id).toBe("number");
+            expect(Object.keys(ref).sort()).toEqual(["id", "isParentPage", "path"]);
+        }
+    });
+
     it("gets a batch of page details limited by top", async () => {
         const batch = await client.getPagesBatch({ top: 2, continuationToken: "", pageViewsForDays: 7 }, "proj", "wiki", version);
         expect(batch.length).toBe(2);

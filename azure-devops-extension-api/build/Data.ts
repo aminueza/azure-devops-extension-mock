@@ -6,6 +6,7 @@ import {
     BuildBadge,
     BuildController,
     BuildDefinition,
+    BuildDefinitionPriority,
     BuildDefinitionReference,
     BuildDefinitionRevision,
     BuildDefinitionTemplate,
@@ -61,6 +62,7 @@ export const makeBuildDefinition = (): BuildDefinition => ({
     url: fake.internet.url(),
     project: makeProjectReference() as any,
     quality: DefinitionQuality.Definition,
+    priority: BuildDefinitionPriority.Normal,
     authoredBy: makeIdentityRef(),
     queue: {
         id: fake.number.id(),
