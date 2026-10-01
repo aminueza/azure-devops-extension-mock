@@ -5,7 +5,6 @@ import {
     WikiV2,
     WikiPage,
     WikiPageDetail,
-    WikiPageRef,
     WikiPageViewStats,
     WikiPagesBatchRequest,
     WikiCreateParametersV2,
@@ -218,7 +217,7 @@ export class MockWikiRestClient extends RestClientBase {
         _project: string,
         _wikiIdentifier: string,
         _versionDescriptor?: GitVersionDescriptor
-    ): Promise<WikiPageRef[]> {
+    ): Promise<{ id: number; isParentPage: boolean; path: string }[]> {
         return Promise.resolve(pages.map(({ id, isParentPage, path }) => ({ id, isParentPage, path })));
     }
 
