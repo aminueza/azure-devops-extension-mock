@@ -275,6 +275,15 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
         expect(result.enforceJobAuthScope).toBe(generalSettings.enforceJobAuthScope);
     });
 
+    it("echoes the stricter run-related job auth scope setting", async () => {
+        expect(generalSettings.enforceEvenStricterJobAuthScopeInRunRelatedApis).toBe(false);
+        const result = await client.updateBuildGeneralSettings(
+            { ...generalSettings, enforceEvenStricterJobAuthScopeInRunRelatedApis: true },
+            "proj"
+        );
+        expect(result.enforceEvenStricterJobAuthScopeInRunRelatedApis).toBe(true);
+    });
+
     it("returns the seeded build settings", async () => {
         await expect(client.getBuildSettings("proj")).resolves.toEqual(buildSettings);
     });
