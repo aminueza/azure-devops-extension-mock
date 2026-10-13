@@ -4,6 +4,7 @@ import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient } from "azure-devops-extension-api/Git";
+import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
@@ -26,6 +27,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     CoreRestClient,
     DashboardRestClient,
     GitRestClient,
+    GraphRestClient,
     PipelinesRestClient,
     PolicyRestClient,
     ReleaseRestClient,

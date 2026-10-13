@@ -5,6 +5,7 @@ import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient } from "azure-devops-extension-api/Git";
+import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
@@ -29,6 +30,7 @@ import { MockBuildRestClient } from "./build/Build";
 import { MockCoreRestClient } from "./core/Core";
 import { MockDashboardRestClient } from "./dashboard/Dashboard";
 import { MockGitRestClient } from "./git/Git";
+import { MockGraphRestClient } from "./graph/Graph";
 import { MockPipelinesRestClient } from "./pipelines/Pipelines";
 import { MockPolicyRestClient } from "./policy/Policy";
 import { MockReleaseRestClient } from "./release/Release";
@@ -53,6 +55,7 @@ registerMockClient(BuildRestClient, MockBuildRestClient as any);
 registerMockClient(CoreRestClient, MockCoreRestClient as any);
 registerMockClient(DashboardRestClient, MockDashboardRestClient as any);
 registerMockClient(GitRestClient, MockGitRestClient as any);
+registerMockClient(GraphRestClient, MockGraphRestClient as any);
 registerMockClient(PipelinesRestClient, MockPipelinesRestClient as any);
 registerMockClient(PolicyRestClient, MockPolicyRestClient as any);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
@@ -113,6 +116,7 @@ export {
     MockCoreRestClient,
     MockDashboardRestClient,
     MockGitRestClient,
+    MockGraphRestClient,
     MockPipelinesRestClient,
     MockPolicyRestClient,
     MockReleaseRestClient,
