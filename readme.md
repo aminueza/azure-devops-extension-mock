@@ -177,7 +177,7 @@ npm run audit:prod    # production dependency audit
 npm run compat floor  # installs the packed build next to the oldest supported peers
 ```
 
-CI runs tests on Node 22 and 24 and checks the packed build against the
+CI runs tests on Node 20, 22 and 24 and checks the packed build against the
 oldest and the latest supported peers (`node.js.yml`), weekly `npm audit` and
 Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
 scanning setup.

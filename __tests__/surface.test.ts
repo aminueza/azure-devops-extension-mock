@@ -98,4 +98,12 @@ describe("surface script", () => {
         expect(table).toContain("| **All** |");
         expect(table).toContain("`GitRestClient`");
     });
+
+    it("matches the table published in the readme", () => {
+        const readme = require("fs").readFileSync(require("path").join(__dirname, "..", "readme.md"), "utf8") as string;
+        const start = readme.indexOf("| Client | Hand-written | Stubbed | Total |");
+        const end = readme.indexOf("\n\n", start);
+        expect(start).toBeGreaterThan(0);
+        expect(readme.slice(start, end)).toBe(surface.markdown(surface.report()));
+    });
 });
