@@ -33,17 +33,17 @@ export function getRegisteredMockClient<T extends object>(
 export function mockClient<T extends object>(
     clientClass: Class<T>,
     overrides: MockOverrides<T> = {},
-    options: IVssRestClientOptions = {} as IVssRestClientOptions
+    options: IVssRestClientOptions = {}
 ): T {
     const registered = getRegisteredMockClient(clientClass);
-    const base: any = registered
+    const base: T = registered
         ? new registered(options)
         : new clientClass(options);
 
     return new Proxy(base, {
         get(target, prop, receiver) {
             if (prop in overrides) {
-                return (overrides as any)[prop];
+                return Reflect.get(overrides, prop);
             }
             const value = Reflect.get(target, prop, receiver);
             if (prop === "TYPE") {
@@ -57,5 +57,5 @@ export function mockClient<T extends object>(
             }
             return (..._args: unknown[]) => Promise.resolve(undefined);
         }
-    }) as T;
+    });
 }

@@ -166,9 +166,9 @@ export class MockCoreRestClient extends RestClientBase {
         const filtered = stateFilter === undefined ? projects : projects.filter(p => p.state === stateFilter);
         const start = (skip ?? 0) + (continuationToken ?? 0);
         const end = start + (top ?? filtered.length);
-        const list = Object.assign(filtered.slice(start, end), {
+        const list: PagedList<TeamProjectReference> = Object.assign(filtered.slice(start, end), {
             continuationToken: end < filtered.length ? String(end) : null
-        }) as PagedList<TeamProjectReference>;
+        });
         return Promise.resolve(list);
     }
 

@@ -1,4 +1,10 @@
-import { ConnectedServiceKind, CoreRestClient, ProcessType, ProjectVisibility } from "azure-devops-extension-api/Core";
+import {
+    ConnectedServiceKind,
+    CoreRestClient,
+    ProcessCustomizationType,
+    ProcessType,
+    ProjectVisibility
+} from "azure-devops-extension-api/Core";
 import { OperationStatus } from "azure-devops-extension-api/Operations";
 
 import { getClient } from "../azure-devops-extension-api";
@@ -11,6 +17,7 @@ import {
     makeOperationReference,
     makeProcess,
     makeProject,
+    makeProjectCollection,
     makeProjectCollectionReference,
     makeProjectInfo,
     makeProjectProperty,
@@ -291,5 +298,46 @@ describe("core data factories", () => {
         expect(info.properties.length).toBe(2);
         expect(makeProxy().authorization.publicKey.exponent).toEqual([1, 0, 1]);
         expect(teamContextOf("p").projectId).toBe("p");
+    });
+});
+
+describe("core fixtures checked by the compiler", () => {
+    it("fills the identity ref, project reference and project", () => {
+        expect(makeIdentityRef()._links).toEqual({});
+        const reference = makeProjectReference();
+        expect(reference.defaultTeamImageUrl).toMatch(/^https:/);
+        expect(reference.lastUpdateTime).toBeInstanceOf(Date);
+        const project = makeProject();
+        expect(project._links).toEqual({});
+        expect(project.defaultTeam.url).toMatch(/^https:/);
+        expect(project.capabilities.processTemplate.templateName).toBe("Agile");
+    });
+
+    it("fills the team identity as a full group identity", () => {
+        const team = makeTeam();
+        expect(team.identity.descriptor.identityType).toBe("Microsoft.TeamFoundation.Identity");
+        expect(team.identity.descriptor.identifier).toMatch(/^S-1-9-\d+$/);
+        expect(team.identity.isContainer).toBe(true);
+        expect(team.identity.isActive).toBe(true);
+        expect(team.identity.memberIds).toHaveLength(1);
+        expect(team.identity.memberOf).toEqual([]);
+        expect(team.identity.members[0].identityType).toBe("Microsoft.IdentityModel.Claims.ClaimsIdentity");
+        expect(team.identity.metaTypeId).toBe(255);
+        expect(team.identity.properties).toEqual({});
+        expect(team.identity.providerDisplayName).toMatch(/^\[.+\]\\.+ Team$/);
+        expect(team.identity.subjectDescriptor).toMatch(/^vssgp\./);
+        expect(team.identity.masterId).not.toBe(team.identity.id);
+        expect(team.identityUrl).toMatch(/^https:/);
+    });
+
+    it("fills processes and project collections", () => {
+        const process = makeProcess();
+        expect(process._links).toEqual({});
+        expect(typeof process.isDefault).toBe("boolean");
+        expect(makeProjectCollectionReference().url).toMatch(/^https:/);
+        const collection = makeProjectCollection();
+        expect(collection.processCustomizationType).toBe(ProcessCustomizationType.Inherited);
+        expect(collection.state).toBe("Started");
+        expect(collection._links).toEqual({});
     });
 });

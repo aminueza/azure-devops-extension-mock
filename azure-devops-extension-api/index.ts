@@ -109,7 +109,7 @@ export function getClient<T extends object>(
     clientClass: new (...args: any[]) => T,
     overrides: MockOverrides<T> = {}
 ): T {
-    return mockClient(clientClass as any, overrides) as unknown as T;
+    return mockClient(clientClass, overrides);
 }
 
 export { mockClient, registerMockClient, getRegisteredMockClient, MockOverrides };

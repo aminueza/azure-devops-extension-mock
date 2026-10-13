@@ -1,4 +1,10 @@
-import { PipelinesRestClient, RunResult, RunState } from "azure-devops-extension-api/Pipelines";
+import {
+    ConfigurationType,
+    PipelinesRestClient,
+    RepositoryType,
+    RunResult,
+    RunState
+} from "azure-devops-extension-api/Pipelines";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -197,5 +203,71 @@ describe("pipelines data factories", () => {
         const preview = makePreviewRun();
         expect(preview.finalYaml).toContain("- stage: Build");
         expect((preview as any).name).toMatch(/^preview-/);
+    });
+});
+
+describe("pipelines fixtures checked by the compiler", () => {
+    it("fills the pipeline configuration type and links", () => {
+        const pipeline = makePipeline();
+        expect(pipeline.configuration.type).toBe(ConfigurationType.Yaml);
+        expect(pipeline._links).toEqual({});
+        expect(pipeline.url).toMatch(/^https:/);
+    });
+
+    it("fills the run pipeline reference, resources and yaml details", () => {
+        const run = makeRun(4);
+        expect(run.pipeline).toEqual({
+            id: 4,
+            name: expect.any(String),
+            folder: "\\",
+            revision: expect.any(Number),
+            url: expect.stringMatching(/^https:/)
+        });
+        expect(run.resources.builds).toEqual({});
+        expect(run.resources.containers).toEqual({});
+        expect(run.resources.pipelines).toEqual({});
+        expect(run.resources.repositories.self.refName).toBe("refs/heads/main");
+        expect(run.resources.repositories.self.repository.type).toBe(RepositoryType.AzureReposGit);
+        expect(run.resources.repositories.self.version).toMatch(/^[0-9a-f]{40}$/);
+        expect(run.finalYaml).toBe("");
+        expect(run.tags).toEqual([]);
+        expect(run.templateParameters).toEqual({});
+        expect(run.yamlDetails.rootYamlFile).toEqual({
+            ref: "refs/heads/main",
+            repoAlias: "self",
+            yamlFile: "azure-pipelines.yml"
+        });
+        expect(run.yamlDetails.expandedYamlUrl).toMatch(/^https:/);
+        expect(run.yamlDetails.extendedTemplates).toEqual([]);
+        expect(run.yamlDetails.includedTemplates).toEqual([]);
+        expect(run._links).toEqual({});
+    });
+
+    it("fills artifacts, logs, the log collection and preview runs", () => {
+        expect(makeArtifact().signedContent.url).toMatch(/^https:/);
+        const log = makeLog(3);
+        expect(log.signedContent.signatureExpires).toBeInstanceOf(Date);
+        expect(log.createdOn).toBeInstanceOf(Date);
+        expect(logCollection.signedContent.url).toMatch(/^https:/);
+        expect(logCollection.signedContent.signatureExpires).toBeInstanceOf(Date);
+        expect(makePreviewRun()).toEqual({
+            finalYaml: expect.stringContaining("stages:"),
+            id: expect.any(Number),
+            name: expect.stringMatching(/^preview-/)
+        });
+    });
+
+    it("passes run variables and pipeline configuration through unchanged", async () => {
+        const client = getClient(PipelinesRestClient);
+        const variables = { "system.debug": { isSecret: false, value: "true" } };
+        const run = await client.runPipeline(
+            { previewRun: false, resources: {}, stagesToSkip: [], templateParameters: {}, variables, yamlOverride: "" } as any,
+            "proj",
+            2
+        );
+        expect(run.variables).toBe(variables);
+        const configuration = { type: ConfigurationType.Yaml };
+        const pipeline = await client.createPipeline({ name: "typed", folder: "\\", configuration }, "proj");
+        expect(pipeline.configuration).toBe(configuration);
     });
 });
