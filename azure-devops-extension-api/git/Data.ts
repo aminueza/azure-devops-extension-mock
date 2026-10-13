@@ -1,6 +1,10 @@
 import { fake } from "../common/fixtures";
 import {
+    AdvSecEnablementStatus,
     Attachment,
+    BillableCommitter,
+    BillableCommitterDetail,
+    BillablePusher,
     Comment,
     CommentThreadStatus,
     CommentType,
@@ -32,6 +36,7 @@ import {
     GitForkSyncRequest,
     GitImportRequest,
     GitMerge,
+    GitRefFavorite,
     GitRefUpdate,
     GitRefUpdateResult,
     GitRefUpdateStatus,
@@ -53,6 +58,7 @@ import {
     ItemContentType,
     IterationReason,
     LineDiffBlockChangeType,
+    RefFavoriteType,
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
 import { WebApiTagDefinition } from "azure-devops-extension-api/Core";
@@ -746,4 +752,99 @@ export const commentLikes: IdentityRef[] = [
 export const likedComments: Comment[] = [
     { ...makeComment(6501), usersLiked: commentLikes },
     { ...makeComment(6502), usersLiked: [{ ...makeIdentityRef(), id: "liker-observer" }] }
+];
+
+export const makeEnablementStatus = (
+    projectId: string,
+    repositoryId: string,
+    enabled: boolean
+): AdvSecEnablementStatus => ({
+    changedById: fake.string.uuid(),
+    changedOnDate: fake.date.recent(),
+    dependabotEnabled: enabled,
+    dependencyScanningInjectionEnabled: enabled,
+    enabled,
+    projectId,
+    repositoryId
+});
+
+export const advSecProjectIds: string[] = [fake.string.uuid(), fake.string.uuid()];
+
+export const enablementStatuses: AdvSecEnablementStatus[] = [
+    makeEnablementStatus(advSecProjectIds[0], repositories[0].id, true),
+    makeEnablementStatus(advSecProjectIds[0], repositories[1].id, true),
+    makeEnablementStatus(advSecProjectIds[0], repositories[2].id, false),
+    makeEnablementStatus(advSecProjectIds[1], repositories[3].id, false),
+    makeEnablementStatus(advSecProjectIds[1], repositories[4].id, false)
+];
+
+export const makeBillablePusher = (projectId: string, repoId: string): BillablePusher => ({
+    projectId,
+    repoId,
+    vsid: fake.string.uuid()
+});
+
+export const billablePushers: BillablePusher[] = [
+    makeBillablePusher(advSecProjectIds[0], repositories[0].id),
+    makeBillablePusher(advSecProjectIds[0], repositories[1].id),
+    makeBillablePusher(advSecProjectIds[1], repositories[3].id)
+];
+
+export const makeBillableCommitter = (repoId: string): BillableCommitter => ({
+    repoId,
+    vsid: fake.string.uuid()
+});
+
+export const billableCommitters: BillableCommitter[] = [
+    makeBillableCommitter(repositories[0].id),
+    makeBillableCommitter(repositories[0].id),
+    makeBillableCommitter(repositories[1].id),
+    makeBillableCommitter(repositories[1].id)
+];
+
+export const makeBillableCommitterDetail = (
+    projectId: string,
+    committer: BillableCommitter
+): BillableCommitterDetail => ({
+    ...committer,
+    commitId: fake.git.commitSha(),
+    committerEmail: fake.internet.email(),
+    commitTime: fake.date.recent(),
+    displayName: fake.person.fullName(),
+    mailNickName: fake.internet.username(),
+    projectId,
+    projectName: fake.lorem.slug(),
+    pushedTime: fake.date.recent(),
+    pusherId: fake.string.uuid(),
+    pushId: fake.number.id(),
+    repoName: fake.lorem.slug(),
+    samAccountName: fake.internet.username()
+});
+
+export const billableCommitterDetails: BillableCommitterDetail[] = billableCommitters.map(
+    committer => makeBillableCommitterDetail(advSecProjectIds[0], committer)
+);
+
+export const makeRefFavorite = (
+    name: string,
+    repositoryId: string,
+    identityId: string,
+    type: RefFavoriteType = RefFavoriteType.Ref
+): GitRefFavorite => ({
+    _links: {},
+    id: fake.number.id(),
+    identityId,
+    name,
+    repositoryId,
+    type,
+    url: fake.internet.url()
+});
+
+export const refFavoriteIdentityIds: string[] = [fake.string.uuid(), fake.string.uuid()];
+
+export const refFavorites: GitRefFavorite[] = [
+    makeRefFavorite("refs/heads/main", repositories[0].id, refFavoriteIdentityIds[0]),
+    makeRefFavorite("refs/heads/release", repositories[0].id, refFavoriteIdentityIds[1], RefFavoriteType.Folder),
+    makeRefFavorite("refs/heads/develop", repositories[1].id, refFavoriteIdentityIds[0]),
+    makeRefFavorite("refs/tags/v1.0.0", repositories[1].id, refFavoriteIdentityIds[1])
 ];

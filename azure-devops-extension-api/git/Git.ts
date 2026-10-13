@@ -1,7 +1,13 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import {
+    AdvSecEnablementStatus,
+    AdvSecEnablementUpdate,
     Attachment,
+    BillableCommitter,
+    BillableCommitterDetail,
+    BillablePusher,
+    GitRefFavorite,
     GitRestClient,
     GitRepository,
     GitPullRequest,
@@ -69,6 +75,9 @@ import {
 } from "azure-devops-extension-api/WebApi";
 import {
     annotatedTags,
+    billableCommitterDetails,
+    billableCommitters,
+    billablePushers,
     branches,
     changes,
     cherryPickConflicts,
@@ -76,6 +85,7 @@ import {
     commits,
     commitStatuses,
     deletedRepositories,
+    enablementStatuses,
     forks,
     forkSyncRequests,
     importRequests,
@@ -108,6 +118,7 @@ import {
     makePullRequestStatus,
     makePullRequestThread,
     makePush,
+    makeRefFavorite,
     makeRefUpdateResult,
     makeRevert,
     makeTreeArchive,
@@ -125,6 +136,7 @@ import {
     pullRequestThreads,
     pullRequestWorkItemRefs,
     pullRequests,
+    refFavorites,
     refs,
     repositories,
     revertConflicts,
@@ -1678,6 +1690,129 @@ export class MockGitRestClient extends RestClientBase {
         const found = likedComments.find(comment => comment.id === commentId);
         return Promise.resolve(found ? found.usersLiked : []);
     }
+
+    initializeConsolidationIdentity(_projectId?: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    initializeAutofixIdentity(_projectId?: string, _repositoryId?: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    deleteEnablementStatus(
+        _allProjects: boolean,
+        _includeBillableCommitters?: boolean,
+        _projectIds?: string[]
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getEnablementStatus(
+        projectIds?: string[],
+        _billingDate?: Date,
+        skip?: number,
+        take?: number
+    ): Promise<AdvSecEnablementStatus[]> {
+        const selected = projectIds && projectIds.length > 0
+            ? enablementStatuses.filter(s => projectIds.includes(s.projectId))
+            : enablementStatuses;
+        const start = skip ?? 0;
+        return Promise.resolve(selected.slice(start, start + (take ?? selected.length)));
+    }
+
+    getEnableOnCreateHost(enableOnCreateHost: boolean): Promise<boolean> {
+        return Promise.resolve(enableOnCreateHost);
+    }
+
+    getEnableOnCreateProject(enableOnCreateProjectId: string): Promise<boolean> {
+        return Promise.resolve(
+            enablementStatuses.some(s => s.projectId === enableOnCreateProjectId && s.enabled)
+        );
+    }
+
+    setEnableOnCreateHost(_enableOnCreateHost: boolean): Promise<void> {
+        return Promise.resolve();
+    }
+
+    setEnableOnCreateProject(
+        _enableOnCreateProjectId: string,
+        _enableOnStatus: boolean
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    updateEnablementStatus(_enablementUpdates: AdvSecEnablementUpdate[]): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getEstimatedBillablePushersOrg(): Promise<BillablePusher[]> {
+        return Promise.resolve(billablePushers);
+    }
+
+    getEstimatedBillablePushersProject(project: string): Promise<BillablePusher[]> {
+        return Promise.resolve(billablePushers.filter(p => p.projectId === project));
+    }
+
+    getEstimatedBillableCommittersRepo(
+        _project: string,
+        repositoryId: string
+    ): Promise<BillableCommitter[]> {
+        return Promise.resolve(billableCommitters.filter(c => c.repoId === repositoryId));
+    }
+
+    getBillableCommitters(
+        _project: string,
+        _billingDate?: Date,
+        skip?: number,
+        take?: number
+    ): Promise<BillableCommitter[]> {
+        const start = skip ?? 0;
+        return Promise.resolve(
+            billableCommitters.slice(start, start + (take ?? billableCommitters.length))
+        );
+    }
+
+    getBillableCommittersDetail(
+        _project: string,
+        _includeDetails: string,
+        _billingDate?: Date
+    ): Promise<BillableCommitterDetail[]> {
+        return Promise.resolve(billableCommitterDetails);
+    }
+
+    createFavorite(favorite: GitRefFavorite, _project: string): Promise<GitRefFavorite> {
+        return Promise.resolve({
+            ...makeRefFavorite(favorite.name, favorite.repositoryId, favorite.identityId),
+            ...favorite
+        });
+    }
+
+    deleteRefFavorite(_project: string, _favoriteId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getRefFavorite(_project: string, favoriteId: number): Promise<GitRefFavorite> {
+        const found = refFavorites.find(f => f.id === favoriteId);
+        return Promise.resolve(found ?? {
+            ...makeRefFavorite("refs/heads/main", repositories[0].id, refFavorites[0].identityId),
+            id: favoriteId
+        });
+    }
+
+    getRefFavorites(
+        _project: string,
+        repositoryId?: string,
+        identityId?: string
+    ): Promise<GitRefFavorite[]> {
+        return Promise.resolve(refFavorites.filter(f =>
+            (!repositoryId || f.repositoryId === repositoryId) &&
+            (!identityId || f.identityId === identityId)
+        ));
+    }
+
+    getRefFavoritesForProject(_project: string, identityId?: string): Promise<GitRefFavorite[]> {
+        return Promise.resolve(
+            identityId ? refFavorites.filter(f => f.identityId === identityId) : refFavorites
+        );
+    }
 }
-
-
