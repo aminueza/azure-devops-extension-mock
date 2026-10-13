@@ -5,26 +5,22 @@ import * as build from "../azure-devops-extension-api/build/Data";
 import * as contributions from "../azure-devops-extension-api/contributions/Data";
 import * as core from "../azure-devops-extension-api/core/Data";
 import * as dashboard from "../azure-devops-extension-api/dashboard/Data";
-import * as fileContainer from "../azure-devops-extension-api/fileContainer/Data";
 import * as extensionManagement from "../azure-devops-extension-api/extensionManagement/Data";
+import * as favorite from "../azure-devops-extension-api/favorite/Data";
 import * as featureAvailability from "../azure-devops-extension-api/featureAvailability/Data";
 import * as featureManagement from "../azure-devops-extension-api/featureManagement/Data";
+import * as fileContainer from "../azure-devops-extension-api/fileContainer/Data";
 import * as gallery from "../azure-devops-extension-api/gallery/Data";
-import * as git from "../azure-devops-extension-api/git/Data";
-import * as graph from "../azure-devops-extension-api/graph/Data";
-import * as operations from "../azure-devops-extension-api/operations/Data";
-import * as notification from "../azure-devops-extension-api/notification/Data";
-import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
-import * as policy from "../azure-devops-extension-api/policy/Data";
-import * as projectAnalysis from "../azure-devops-extension-api/projectAnalysis/Data";
-import * as favorite from "../azure-devops-extension-api/favorite/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
 import * as graph from "../azure-devops-extension-api/graph/Data";
 import * as locations from "../azure-devops-extension-api/locations/Data";
 import * as management from "../azure-devops-extension-api/management/Data";
+import * as notification from "../azure-devops-extension-api/notification/Data";
+import * as operations from "../azure-devops-extension-api/operations/Data";
 import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
 import * as policy from "../azure-devops-extension-api/policy/Data";
 import * as profile from "../azure-devops-extension-api/profile/Data";
+import * as projectAnalysis from "../azure-devops-extension-api/projectAnalysis/Data";
 import * as release from "../azure-devops-extension-api/release/Data";
 import * as resourceUsage from "../azure-devops-extension-api/resourceUsage/Data";
 import * as serviceEndpoint from "../azure-devops-extension-api/serviceEndpoint/Data";
@@ -36,8 +32,8 @@ import * as testResults from "../azure-devops-extension-api/testResults/Data";
 import * as tfvc from "../azure-devops-extension-api/tfvc/Data";
 import * as wiki from "../azure-devops-extension-api/wiki/Data";
 import * as workItemTracking from "../azure-devops-extension-api/workItemTracking/Data";
-import * as workItemTrackingProcessDefinitions from "../azure-devops-extension-api/workItemTrackingProcessDefinitions/Data";
 import * as workItemTrackingProcess from "../azure-devops-extension-api/workItemTrackingProcess/Data";
+import * as workItemTrackingProcessDefinitions from "../azure-devops-extension-api/workItemTrackingProcessDefinitions/Data";
 import { fake } from "../azure-devops-extension-api/common/fixtures";
 
 const MODULES: Array<[string, Record<string, unknown>]> = [
@@ -48,26 +44,22 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["contributions", contributions],
     ["core", core],
     ["dashboard", dashboard],
-    ["fileContainer", fileContainer],
     ["extensionManagement", extensionManagement],
+    ["favorite", favorite],
     ["featureAvailability", featureAvailability],
     ["featureManagement", featureManagement],
+    ["fileContainer", fileContainer],
     ["gallery", gallery],
-    ["git", git],
-    ["graph", graph],
-    ["operations", operations],
-    ["notification", notification],
-    ["pipelines", pipelines],
-    ["policy", policy],
-    ["projectAnalysis", projectAnalysis],
-    ["favorite", favorite],
     ["git", git],
     ["graph", graph],
     ["locations", locations],
     ["management", management],
+    ["notification", notification],
+    ["operations", operations],
     ["pipelines", pipelines],
     ["policy", policy],
     ["profile", profile],
+    ["projectAnalysis", projectAnalysis],
     ["release", release],
     ["resourceUsage", resourceUsage],
     ["serviceEndpoint", serviceEndpoint],
@@ -79,8 +71,8 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["tfvc", tfvc],
     ["wiki", wiki],
     ["workItemTracking", workItemTracking],
+    ["workItemTrackingProcess", workItemTrackingProcess],
     ["workItemTrackingProcessDefinitions", workItemTrackingProcessDefinitions]
-    ["workItemTrackingProcess", workItemTrackingProcess]
 ];
 
 const hasNumericId = (value: unknown): value is { id: number; rev?: number } =>

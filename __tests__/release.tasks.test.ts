@@ -37,6 +37,8 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
         ["getTaskLog", () => client.getTaskLog("proj", 1, 2, 3, 4)],
         ["getTaskLogWithRange", () => client.getTaskLog("proj", 1, 2, 3, 4, 1, 50)],
         ["getTasks", () => client.getTasks("proj", 1, 2)],
+        ["getTasks2", () => client.getTasks2("proj", 1, 2, 3, "timeline-9")],
+        ["getTaskLog2", () => client.getTaskLog2("proj", 1, 2, 3, "timeline-9", 4)],
         ["getTasksWithAttempt", () => client.getTasks("proj", 1, 2, 3)],
         ["getTasksForTaskGroup", () => client.getTasksForTaskGroup("proj", 1, 2, 3)],
         [
@@ -229,5 +231,7 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
         expect(await client.getLog("proj", 1, 2, 3)).toContain("task 3");
         expect(await client.getGateLog("proj", 1, 2, 5, 3)).toContain("gate 5");
         expect(await client.getTaskLog("proj", 1, 2, 6, 3)).toContain("phase 6");
+        const log = await client.getTaskLog2("proj", 1, 2, 4, "timeline-9", 3, 1, 50);
+        expect(log).toBe("release 1 env 2 attempt 4 timeline timeline-9 task 3 log");
     });
 });

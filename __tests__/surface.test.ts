@@ -1,44 +1,40 @@
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
-import { ReportingRestClient } from "azure-devops-extension-api/AdvancedSecurity.Reporting";
 import { AlertRestClient } from "azure-devops-extension-api/Alert";
-import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { ContributionsRestClient } from "azure-devops-extension-api/Contributions";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
-import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement";
+import { FavoriteRestClient } from "azure-devops-extension-api/Favorite";
 import { FeatureAvailabilityRestClient } from "azure-devops-extension-api/FeatureAvailability";
 import { FeatureManagementRestClient } from "azure-devops-extension-api/FeatureManagement";
+import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
 import { GalleryRestClient } from "azure-devops-extension-api/Gallery";
-import { GitRestClient } from "azure-devops-extension-api/Git";
-import { GraphRestClient } from "azure-devops-extension-api/Graph";
-import { OperationsRestClient } from "azure-devops-extension-api/Operations";
-import { NotificationRestClient } from "azure-devops-extension-api/Notification";
-import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
-import { PolicyRestClient } from "azure-devops-extension-api/Policy";
-import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
-import { FavoriteRestClient } from "azure-devops-extension-api/Favorite";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { LocationsRestClient } from "azure-devops-extension-api/Locations";
 import { ManagementRestClient } from "azure-devops-extension-api/Management";
+import { NotificationRestClient } from "azure-devops-extension-api/Notification";
+import { OperationsRestClient } from "azure-devops-extension-api/Operations";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ProfileRestClient } from "azure-devops-extension-api/Profile";
+import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ReportingRestClient } from "azure-devops-extension-api/AdvancedSecurity.Reporting";
 import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { ServiceHooksRestClient } from "azure-devops-extension-api/ServiceHooks";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
-import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
+import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
-import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 import { WorkItemTrackingProcessDefinitionsRestClient } from "azure-devops-extension-api/WorkItemTrackingProcessDefinitions";
 import { WorkItemTrackingProcessRestClient } from "azure-devops-extension-api/WorkItemTrackingProcess";
+import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { getClient, getRegisteredMockClient } from "../azure-devops-extension-api";
 import { RestClientBase } from "../azure-devops-extension-api/common/RestClientBase";
 import * as sdkMock from "../azure-devops-extension-sdk";
@@ -47,46 +43,42 @@ const surface = require("../scripts/surface.js");
 
 const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     AccountsRestClient,
-    ReportingRestClient,
     AlertRestClient,
-    WorkRestClient,
     BuildRestClient,
     ContributionsRestClient,
     CoreRestClient,
     DashboardRestClient,
-    FileContainerRestClient,
     ExtensionManagementRestClient,
+    FavoriteRestClient,
     FeatureAvailabilityRestClient,
     FeatureManagementRestClient,
+    FileContainerRestClient,
     GalleryRestClient,
-    GitRestClient,
-    GraphRestClient,
-    OperationsRestClient,
-    NotificationRestClient,
-    PipelinesRestClient,
-    PolicyRestClient,
-    ProjectAnalysisRestClient,
-    FavoriteRestClient,
     GitRestClient,
     GraphRestClient,
     LocationsRestClient,
     ManagementRestClient,
+    NotificationRestClient,
+    OperationsRestClient,
     PipelinesRestClient,
     PolicyRestClient,
     ProfileRestClient,
+    ProjectAnalysisRestClient,
     ReleaseRestClient,
+    ReportingRestClient,
     ResourceUsageRestClient,
     ServiceEndpointRestClient,
     ServiceHooksRestClient,
     TaskAgentRestClient,
-    TestRestClient,
     TestPlanRestClient,
+    TestRestClient,
     TestResultsRestClient,
     TfvcRestClient,
     WikiRestClient,
+    WorkItemTrackingProcessDefinitionsRestClient,
+    WorkItemTrackingProcessRestClient,
     WorkItemTrackingRestClient,
-    WorkItemTrackingProcessDefinitionsRestClient
-    WorkItemTrackingProcessRestClient
+    WorkRestClient
 };
 
 const BASE_METHODS = new Set(Object.getOwnPropertyNames(RestClientBase.prototype));
