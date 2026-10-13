@@ -3,6 +3,7 @@ import * as path from "path";
 
 const root = path.join(__dirname, "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const lockfile = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
 
 const SHIPPED_SOURCE_DIRECTORIES = ["azure-devops-extension-api", "azure-devops-extension-sdk", "jest-helpers"];
 const TEST_FRAMEWORK_IMPORT = /(?:require\(|from\s+|import\()\s*["'](?:jest|@jest\/[^"']+|vitest|mocha)["']/;
@@ -34,6 +35,13 @@ describe("package manifest", () => {
         expect(files.length).toBeGreaterThan(20);
         const offenders = files.filter(file => TEST_FRAMEWORK_IMPORT.test(fs.readFileSync(file, "utf8")));
         expect(offenders).toEqual([]);
+    });
+
+    it("keeps sprintf-js out of the installed tree", () => {
+        const installed = Object.keys(lockfile.packages);
+        expect(installed.length).toBeGreaterThan(100);
+        expect(installed.filter(name => /(^|\/)node_modules\/sprintf-js$/.test(name))).toEqual([]);
+        expect(lockfile.packages["node_modules/js-yaml"].version).toMatch(/^4\./);
     });
 
     it("detects a test framework import when one is present", () => {
