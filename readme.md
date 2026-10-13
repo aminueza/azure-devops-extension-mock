@@ -170,6 +170,7 @@ module.exports = {
 
 ```bash
 npm ci
+npm run lint          # eslint with the typescript-eslint recommended rules
 npm test              # runs jest with coverage (90% threshold enforced)
 npm run build         # emits dist/
 npm run surface       # compares the mocks with the real client declarations

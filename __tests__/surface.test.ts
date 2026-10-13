@@ -33,7 +33,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
 
 const BASE_METHODS = new Set(Object.getOwnPropertyNames(RestClientBase.prototype));
 
-const ownMethods = (cls: Function): string[] =>
+const ownMethods = (cls: { prototype: Record<string, unknown> }): string[] =>
     Object.getOwnPropertyNames(cls.prototype).filter(
         (name) => name !== "constructor" && !BASE_METHODS.has(name) && typeof cls.prototype[name] === "function"
     );

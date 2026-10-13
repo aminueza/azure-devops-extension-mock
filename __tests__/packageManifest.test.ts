@@ -97,6 +97,11 @@ describe("package manifest", () => {
         expect(manifest.scripts.compat).toBe("node scripts/compat.js");
     });
 
+    it("lints in CI", () => {
+        expect(manifest.scripts.lint).toBe("eslint .");
+        expect(workflow).toContain("- run: npm run lint");
+    });
+
     it("tests the oldest supported node version in CI", () => {
         const oldest = `${manifest.engines.node.match(/^>=(\d+)\./)[1]}.x`;
         const versions = workflow.match(/node-version: \[(.+)\]/)![1].split(", ");

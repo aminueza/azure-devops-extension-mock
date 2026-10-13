@@ -17,7 +17,6 @@ import {
     getTeamContext,
     sdkVersion,
     getUser,
-    getWebContext,
     init,
     notifyLoadFailed,
     notifyLoadSucceeded,

@@ -27,14 +27,14 @@ export class RestClientBase {
         return Promise.resolve(this._rootPath);
     }
 
-    protected beginRequest<T>(requestParams: RestClientRequestParams): Promise<T> {
+    protected beginRequest<T>(_requestParams: RestClientRequestParams): Promise<T> {
         return Promise.resolve({} as T);
     }
 
     protected _issueRequest<T>(
-        requestUrl: string,
-        apiVersion: string,
-        requestParams: RestClientRequestParams
+        _requestUrl: string,
+        _apiVersion: string,
+        _requestParams: RestClientRequestParams
     ): Promise<T> {
         return Promise.resolve({} as T);
     }

@@ -13,7 +13,6 @@ import {
     makeApproval,
     makeReleaseSettings,
     metrics,
-    releaseChanges,
     releaseDefinitionEnvironmentSummaries,
     releaseDefinitionRevisions,
     releaseDefinitions,
