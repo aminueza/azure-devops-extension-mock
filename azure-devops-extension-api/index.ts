@@ -13,6 +13,7 @@ import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEnd
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
+import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 
@@ -38,6 +39,7 @@ import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
 import { MockTfvcRestClient } from "./tfvc/Tfvc";
+import { MockTestPlanRestClient } from "./testPlan/TestPlan";
 import { MockWikiRestClient } from "./wiki/Wiki";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
 
@@ -63,6 +65,7 @@ registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient as a
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
 registerMockClient(TestRestClient, MockTestRestClient as any);
 registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
+registerMockClient(TestPlanRestClient, MockTestPlanRestClient as any);
 registerMockClient(WikiRestClient, MockWikiRestClient as any);
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient as any);
 
@@ -124,6 +127,7 @@ export {
     MockTaskAgentRestClient,
     MockTestRestClient,
     MockTfvcRestClient,
+    MockTestPlanRestClient,
     MockWikiRestClient,
     MockWorkItemTrackingRestClient
 };

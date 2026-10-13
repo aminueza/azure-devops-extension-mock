@@ -12,6 +12,7 @@ import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEnd
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
+import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 import { getClient, getRegisteredMockClient } from "../azure-devops-extension-api";
@@ -35,6 +36,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     TaskAgentRestClient,
     TestRestClient,
     TfvcRestClient,
+    TestPlanRestClient,
     WikiRestClient,
     WorkItemTrackingRestClient
 };
