@@ -14,6 +14,7 @@ const CLIENTS = [
     { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
     { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
     { area: "Release", real: "ReleaseRestClient", mock: "release/Release.ts" },
+    { area: "ServiceEndpoint", real: "ServiceEndpointRestClient", mock: "serviceEndpoint/ServiceEndpoint.ts" },
     { area: "TaskAgent", real: "TaskAgentRestClient", mock: "taskAgent/TaskAgent.ts" },
     { area: "Test", real: "TestRestClient", mock: "test/Test.ts" },
     { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },

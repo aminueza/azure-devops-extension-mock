@@ -7,6 +7,7 @@ import { GitRestClient } from "azure-devops-extension-api/Git";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
@@ -28,6 +29,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     PipelinesRestClient,
     PolicyRestClient,
     ReleaseRestClient,
+    ServiceEndpointRestClient,
     TaskAgentRestClient,
     TestRestClient,
     TfvcRestClient,

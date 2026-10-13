@@ -8,6 +8,7 @@ import { GitRestClient } from "azure-devops-extension-api/Git";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
@@ -31,6 +32,7 @@ import { MockGitRestClient } from "./git/Git";
 import { MockPipelinesRestClient } from "./pipelines/Pipelines";
 import { MockPolicyRestClient } from "./policy/Policy";
 import { MockReleaseRestClient } from "./release/Release";
+import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
 import { MockTfvcRestClient } from "./tfvc/Tfvc";
@@ -54,6 +56,7 @@ registerMockClient(GitRestClient, MockGitRestClient as any);
 registerMockClient(PipelinesRestClient, MockPipelinesRestClient as any);
 registerMockClient(PolicyRestClient, MockPolicyRestClient as any);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
+registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient as any);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
 registerMockClient(TestRestClient, MockTestRestClient as any);
 registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
@@ -113,6 +116,7 @@ export {
     MockPipelinesRestClient,
     MockPolicyRestClient,
     MockReleaseRestClient,
+    MockServiceEndpointRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
     MockTfvcRestClient,
