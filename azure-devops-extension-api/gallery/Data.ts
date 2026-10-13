@@ -446,7 +446,7 @@ export const policies = [
     makeFederatedCredentialPolicy(publishers[1].publisherId)
 ];
 
-export const userSettings: { [key: string]: any } = {
+export const userSettings: { [key: string]: unknown } = {
     theme: "dark",
     pageSize: 50,
     showPreview: true

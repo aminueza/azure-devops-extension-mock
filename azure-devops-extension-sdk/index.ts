@@ -63,7 +63,7 @@ export const notifyLoadFailed = (_: Error | string): Promise<void> => {
  * Mocking SDK.getConfiguration(), will return fix witInput parameters for all controls
  * except for 'RepositoryId' which can be overwritten within the unit test.
  */
-export const getConfiguration = (params?: { [key: string]: any }) => {
+export const getConfiguration = (params?: { [key: string]: unknown }) => {
     return params
         ? params
         : {
@@ -177,6 +177,7 @@ export const getWebContext = () => {
  * Mocking SDK.register()
  * Assign the callback methods (parameter instance) passed from the controls to the spy
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const register = <T = any>(instanceId: string, instance: T) => {
     instanceObjects[instanceId] = instance;
     console.log("Registering instance: " + instanceId);

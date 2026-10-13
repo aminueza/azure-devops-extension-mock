@@ -332,7 +332,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     updatePayloadInDraftForEditExtension(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         extensionName: string,
         draftId: string,
@@ -354,7 +354,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     createDraftForNewExtension(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         product: string,
         fileName?: string
@@ -371,7 +371,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     updatePayloadInDraftForNewExtension(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         draftId: string,
         fileName?: string
@@ -437,7 +437,7 @@ export class MockGalleryRestClient extends RestClientBase {
         });
     }
 
-    createExtension(_content: any, _extensionType?: string, _reCaptchaToken?: string): Promise<PublishedExtension> {
+    createExtension(_content: unknown, _extensionType?: string, _reCaptchaToken?: string): Promise<PublishedExtension> {
         return Promise.resolve(makePublishedExtension());
     }
 
@@ -454,7 +454,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     createExtensionWithPublisher(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         _extensionType?: string,
         _reCaptchaToken?: string
@@ -478,7 +478,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     updateExtension(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         extensionName: string,
         _extensionType?: string,
@@ -601,7 +601,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     updatePublisherAsset(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         assetType?: string,
         fileName?: string
@@ -663,7 +663,7 @@ export class MockGalleryRestClient extends RestClientBase {
     }
 
     publishExtensionWithPublisherSignature(
-        _content: any,
+        _content: unknown,
         publisherName: string,
         extensionName: string,
         _extensionType?: string,
@@ -748,7 +748,7 @@ export class MockGalleryRestClient extends RestClientBase {
         days?: number,
         _count?: number,
         afterDate?: Date
-    ): Promise<any> {
+    ): Promise<unknown> {
         const extension = findExtension(publisherName, extensionName);
         return Promise.resolve({
             ...dailyStats(extension, days ?? DEFAULT_STAT_DAYS, latestVersion(extension), afterDate),
@@ -804,14 +804,14 @@ export class MockGalleryRestClient extends RestClientBase {
         return Promise.resolve({ ...makeExtensionCategory(), ...category });
     }
 
-    getGalleryUserSettings(_userScope: string, key?: string): Promise<{ [key: string]: any }> {
+    getGalleryUserSettings(_userScope: string, key?: string): Promise<{ [key: string]: unknown }> {
         if (key === undefined) {
             return Promise.resolve(userSettings);
         }
         return Promise.resolve(key in userSettings ? { [key]: userSettings[key] } : {});
     }
 
-    setGalleryUserSettings(_entries: { [key: string]: any }, _userScope: string): Promise<void> {
+    setGalleryUserSettings(_entries: { [key: string]: unknown }, _userScope: string): Promise<void> {
         return Promise.resolve();
     }
 

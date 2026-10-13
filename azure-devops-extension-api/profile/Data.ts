@@ -27,7 +27,7 @@ export const makeProfileAttribute = (
     value: fake.lorem.words(2)
 });
 
-export const makeCoreProfileAttribute = (attributeName: string, value: any): CoreProfileAttribute => ({
+export const makeCoreProfileAttribute = (attributeName: string, value: unknown): CoreProfileAttribute => ({
     descriptor: makeAttributeDescriptor(CORE_CONTAINER, attributeName),
     revision: 1,
     timeStamp: fake.date.recent(),

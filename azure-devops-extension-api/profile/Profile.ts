@@ -64,12 +64,12 @@ export class MockProfileRestClient extends RestClientBase {
         return Promise.resolve(profileAttributes.filter(a => a.descriptor.containerName === partition));
     }
 
-    setProfileAttribute(_container: any, _id: string, _descriptor: string): Promise<void> {
+    setProfileAttribute(_container: unknown, _id: string, _descriptor: string): Promise<void> {
         return Promise.resolve();
     }
 
     setProfileAttributes(
-        _attributesCollection: VssJsonCollectionWrapperV<ProfileAttributeBase<any>[]>,
+        _attributesCollection: VssJsonCollectionWrapperV<ProfileAttributeBase<unknown>[]>,
         _id: string
     ): Promise<void> {
         return Promise.resolve();
@@ -80,7 +80,7 @@ export class MockProfileRestClient extends RestClientBase {
     }
 
     getAvatarPreview(
-        _container: any,
+        _container: unknown,
         _id: string,
         size?: string,
         _format?: string,
@@ -93,7 +93,7 @@ export class MockProfileRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    setAvatar(_container: any, _id: string): Promise<void> {
+    setAvatar(_container: unknown, _id: string): Promise<void> {
         return Promise.resolve();
     }
 

@@ -140,7 +140,22 @@ describe("WorkItemTrackingRestClient mock", () => {
     });
 
     it("deletes a work item", async () => {
-        await expect(client.deleteWorkItem(9, "proj")).resolves.toEqual({ id: 9, deleted: true });
+        const deleted = await client.deleteWorkItem(9, "proj");
+        expect(deleted.id).toBe(9);
+        expect(deleted.code).toBe(200);
+        expect(deleted.project).toBe("proj");
+        expect(deleted.resource.id).toBe(9);
+        expect(typeof deleted.deletedBy).toBe("string");
+        expect(Number.isNaN(Date.parse(deleted.deletedDate))).toBe(false);
+        expect(deleted.url).toBe(deleted.resource.url);
+    });
+
+    it("deletes a seeded work item without a project and reports its own project", async () => {
+        const seeded = workItems[0];
+        const deleted = await client.deleteWorkItem(seeded.id);
+        expect(deleted.resource).toBe(seeded);
+        expect(deleted.project).toBe(String(seeded.fields["System.TeamProject"]));
+        expect(deleted.type).toBe(String(seeded.fields["System.WorkItemType"]));
     });
 
     it("lists work item types", async () => {

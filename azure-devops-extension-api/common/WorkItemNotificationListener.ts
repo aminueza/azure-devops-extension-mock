@@ -5,7 +5,7 @@ import {
     IWorkItemNotificationListener
 } from "azure-devops-extension-api/WorkItemTracking";
 
-export const instanceObjects: any = {};
+export const instanceObjects: Record<string, unknown> = {};
 
 export const WorkItemNotificationListener: IWorkItemNotificationListener = {
     onLoaded: function (workItemLoadedArgs: IWorkItemLoadedArgs): void {

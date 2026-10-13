@@ -177,9 +177,27 @@ describe("package manifest", () => {
             }
         }
         expect(counts).toEqual({
-            [path.join("azure-devops-extension-api", "build", "Build.ts")]: 2,
             [path.join("azure-devops-extension-api", "common", "CommonServices.ts")]: 1,
             [path.join("azure-devops-extension-api", "common", "fixtures.ts")]: 1
+        });
+    });
+
+    it("lints shipped source for explicit any and allows it in tests only", () => {
+        const config = fs.readFileSync(path.join(root, "eslint.config.mjs"), "utf8");
+        expect(config).toContain('"@typescript-eslint/no-explicit-any": "error"');
+        const directives: Record<string, number> = {};
+        for (const directory of SHIPPED_SOURCE_DIRECTORIES) {
+            for (const file of sourceFiles(path.join(root, directory))) {
+                const found = fs.readFileSync(file, "utf8").match(/eslint-disable/g);
+                if (found) {
+                    directives[path.relative(root, file)] = found.length;
+                }
+            }
+        }
+        expect(directives).toEqual({
+            [path.join("azure-devops-extension-api", "factory.ts")]: 1,
+            [path.join("azure-devops-extension-api", "index.ts")]: 2,
+            [path.join("azure-devops-extension-sdk", "index.ts")]: 1
         });
     });
 

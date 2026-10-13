@@ -588,7 +588,7 @@ export const pullRequestWorkItemRefs: ResourceRef[] = [
     makePullRequestWorkItemRef("4003")
 ];
 
-export const pullRequestProperties: Record<string, any> = {
+export const pullRequestProperties: Record<string, unknown> = {
     riskLevel: "low",
     reviewedBy: "release-team"
 };
