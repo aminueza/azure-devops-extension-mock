@@ -1,6 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { patchOperations } from "../common/jsonPatch";
+import { forget, remember } from "../common/state";
 import {
     Attachment,
     BuildRestClient,
@@ -99,6 +100,26 @@ import {
     timeline
 } from "./Data";
 
+const rememberTags = (list: string[], tags: string[]): void => {
+    for (const tag of tags) {
+        remember(list, tag, existing => existing === tag);
+        remember(projectTags, tag, existing => existing === tag);
+    }
+};
+
+const forgetTags = (list: string[], tags: string[]): void => {
+    forget(list, existing => tags.includes(existing));
+};
+
+const rememberResources = (resources: DefinitionResourceReference[]): DefinitionResourceReference[] =>
+    resources.map(resource =>
+        remember(
+            definitionResources,
+            { ...makeDefinitionResourceReference(resource.id, resource.type), ...resource },
+            existing => existing.id === resource.id && existing.type === resource.type
+        )
+    );
+
 const encode = (value: string): ArrayBuffer => {
     const buffer = new ArrayBuffer(value.length);
     const view = new Uint8Array(buffer);
@@ -124,14 +145,17 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     createDefinition(definition: BuildDefinition, _project: string): Promise<BuildDefinition> {
-        return Promise.resolve({ ...makeBuildDefinition(), ...definition });
+        const created = { ...makeBuildDefinition(), ...definition };
+        return Promise.resolve(remember(buildDefinitions, created, existing => existing.id === created.id));
     }
 
     updateDefinition(definition: BuildDefinition, _project: string, definitionId: number): Promise<BuildDefinition> {
-        return Promise.resolve({ ...makeBuildDefinition(), ...definition, id: definitionId });
+        const updated = { ...makeBuildDefinition(), ...definition, id: definitionId };
+        return Promise.resolve(remember(buildDefinitions, updated, existing => existing.id === definitionId));
     }
 
-    deleteDefinition(_project: string, _definitionId: number): Promise<void> {
+    deleteDefinition(_project: string, definitionId: number): Promise<void> {
+        forget(buildDefinitions, existing => existing.id === definitionId);
         return Promise.resolve();
     }
 
@@ -145,18 +169,25 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     queueBuild(build: Build, _project: string): Promise<Build> {
-        return Promise.resolve({ ...makeBuild(), ...build });
+        const queued = { ...makeBuild(), ...build };
+        return Promise.resolve(remember(buildList, queued, existing => existing.id === queued.id));
     }
 
     updateBuild(build: Build, _project: string, buildId: number): Promise<Build> {
-        return Promise.resolve({ ...makeBuild(), ...build, id: buildId });
+        const updated = { ...makeBuild(), ...build, id: buildId };
+        return Promise.resolve(remember(buildList, updated, existing => existing.id === buildId));
     }
 
     updateBuilds(builds: Build[], _project: string): Promise<Build[]> {
-        return Promise.resolve(builds.map(build => ({ ...makeBuild(), ...build })));
+        const updated = builds.map(build => ({ ...makeBuild(), ...build }));
+        for (const build of updated) {
+            remember(buildList, build, existing => existing.id === build.id);
+        }
+        return Promise.resolve(updated);
     }
 
-    deleteBuild(_project: string, _buildId: number): Promise<void> {
+    deleteBuild(_project: string, buildId: number): Promise<void> {
+        forget(buildList, existing => existing.id === buildId);
         return Promise.resolve();
     }
 
@@ -179,7 +210,8 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     createArtifact(artifact: BuildArtifact, _project: string, _buildId: number): Promise<BuildArtifact> {
-        return Promise.resolve({ ...makeArtifact(), ...artifact });
+        const created = { ...makeArtifact(), ...artifact };
+        return Promise.resolve(remember(artifacts, created, existing => existing.name === created.name));
     }
 
     getArtifactContentZip(): Promise<ArrayBuffer> {
@@ -203,15 +235,21 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     addBuildTag(_project: string, _buildId: number, tag: string): Promise<string[]> {
-        return Promise.resolve([...new Set([...buildTags, tag])]);
+        const tags = [...new Set([...buildTags, tag])];
+        rememberTags(buildTags, [tag]);
+        return Promise.resolve(tags);
     }
 
     addBuildTags(tags: string[], _project: string, _buildId: number): Promise<string[]> {
-        return Promise.resolve([...new Set([...buildTags, ...tags])]);
+        const merged = [...new Set([...buildTags, ...tags])];
+        rememberTags(buildTags, tags);
+        return Promise.resolve(merged);
     }
 
     deleteBuildTag(_project: string, _buildId: number, tag: string): Promise<string[]> {
-        return Promise.resolve(buildTags.filter(existing => existing !== tag));
+        const tags = buildTags.filter(existing => existing !== tag);
+        forgetTags(buildTags, [tag]);
+        return Promise.resolve(tags);
     }
 
     getBuildTags(_project: string, _buildId: number): Promise<string[]> {
@@ -220,21 +258,28 @@ export class MockBuildRestClient extends RestClientBase {
 
     updateBuildTags(updateParameters: UpdateTagParameters, _project: string, _buildId: number): Promise<string[]> {
         const removed = new Set(updateParameters.tagsToRemove);
-        return Promise.resolve(
-            [...new Set([...buildTags, ...updateParameters.tagsToAdd])].filter(tag => !removed.has(tag))
-        );
+        const tags = [...new Set([...buildTags, ...updateParameters.tagsToAdd])].filter(tag => !removed.has(tag));
+        rememberTags(buildTags, updateParameters.tagsToAdd);
+        forgetTags(buildTags, updateParameters.tagsToRemove);
+        return Promise.resolve(tags);
     }
 
     addDefinitionTag(_project: string, _definitionId: number, tag: string): Promise<string[]> {
-        return Promise.resolve([...new Set([...definitionTags, tag])]);
+        const tags = [...new Set([...definitionTags, tag])];
+        rememberTags(definitionTags, [tag]);
+        return Promise.resolve(tags);
     }
 
     addDefinitionTags(tags: string[], _project: string, _definitionId: number): Promise<string[]> {
-        return Promise.resolve([...new Set([...definitionTags, ...tags])]);
+        const merged = [...new Set([...definitionTags, ...tags])];
+        rememberTags(definitionTags, tags);
+        return Promise.resolve(merged);
     }
 
     deleteDefinitionTag(_project: string, _definitionId: number, tag: string): Promise<string[]> {
-        return Promise.resolve(definitionTags.filter(existing => existing !== tag));
+        const tags = definitionTags.filter(existing => existing !== tag);
+        forgetTags(definitionTags, [tag]);
+        return Promise.resolve(tags);
     }
 
     getDefinitionTags(_project: string, _definitionId: number, revision?: number): Promise<string[]> {
@@ -247,13 +292,18 @@ export class MockBuildRestClient extends RestClientBase {
         _definitionId: number
     ): Promise<string[]> {
         const removed = new Set(updateParameters.tagsToRemove);
-        return Promise.resolve(
-            [...new Set([...definitionTags, ...updateParameters.tagsToAdd])].filter(tag => !removed.has(tag))
-        );
+        const tags = [...new Set([...definitionTags, ...updateParameters.tagsToAdd])].filter(tag => !removed.has(tag));
+        rememberTags(definitionTags, updateParameters.tagsToAdd);
+        forgetTags(definitionTags, updateParameters.tagsToRemove);
+        return Promise.resolve(tags);
     }
 
     deleteTag(_project: string, tag: string): Promise<string[]> {
-        return Promise.resolve(projectTags.filter(existing => existing !== tag));
+        const tags = projectTags.filter(existing => existing !== tag);
+        forgetTags(projectTags, [tag]);
+        forgetTags(buildTags, [tag]);
+        forgetTags(definitionTags, [tag]);
+        return Promise.resolve(tags);
     }
 
     getTags(_project: string): Promise<string[]> {
@@ -261,7 +311,11 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     getBuildBadge(_project: string, _repoType: string, _repoId?: string, _branchName?: string): Promise<BuildBadge> {
-        return Promise.resolve({ ...makeBuildBadge(), buildId: buildList[0].id });
+        return Promise.resolve(
+            buildList
+                .slice(0, 1)
+                .reduce<BuildBadge>((badge, build) => ({ ...badge, buildId: build.id }), makeBuildBadge())
+        );
     }
 
     getBuildBadgeData(_project: string, repoType: string, repoId?: string, branchName?: string): Promise<string> {
@@ -299,10 +353,12 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     createFolder(folder: Folder, _project: string, path: string): Promise<Folder> {
-        return Promise.resolve({ ...makeFolder(path), ...folder, path });
+        const created = { ...makeFolder(path), ...folder, path };
+        return Promise.resolve(remember(folders, created, existing => existing.path === path));
     }
 
-    deleteFolder(_project: string, _path: string): Promise<void> {
+    deleteFolder(_project: string, path: string): Promise<void> {
+        forget(folders, existing => existing.path === path || existing.path.startsWith(`${path}\\`));
         return Promise.resolve();
     }
 
@@ -313,10 +369,12 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     updateFolder(folder: Folder, _project: string, path: string): Promise<Folder> {
-        return Promise.resolve({ ...makeFolder(path), ...folder, path });
+        const updated = { ...makeFolder(path), ...folder, path };
+        return Promise.resolve(remember(folders, updated, existing => existing.path === path));
     }
 
-    deleteTemplate(_project: string, _templateId: string): Promise<void> {
+    deleteTemplate(_project: string, templateId: string): Promise<void> {
+        forget(definitionTemplates, existing => existing.id === templateId);
         return Promise.resolve();
     }
 
@@ -334,20 +392,22 @@ export class MockBuildRestClient extends RestClientBase {
         _project: string,
         templateId: string
     ): Promise<BuildDefinitionTemplate> {
-        return Promise.resolve({
+        const saved = {
             ...makeBuildDefinitionTemplate(templateId, "Build"),
             ...template,
             id: templateId
-        });
+        };
+        return Promise.resolve(remember(definitionTemplates, saved, existing => existing.id === templateId));
     }
 
     restoreDefinition(_project: string, definitionId: number, deleted: boolean): Promise<BuildDefinition> {
         const found = buildDefinitions.find(definition => definition.id === definitionId);
         const definition = found ?? { ...makeBuildDefinition(), id: definitionId };
-        return Promise.resolve({
+        const restored = {
             ...definition,
             queueStatus: deleted ? DefinitionQueueStatus.Disabled : DefinitionQueueStatus.Enabled
-        });
+        };
+        return Promise.resolve(remember(buildDefinitions, restored, existing => existing.id === definitionId));
     }
 
     getDefinitionMetrics(_project: string, _definitionId: number, minMetricsTime?: Date): Promise<BuildMetric[]> {
@@ -407,24 +467,14 @@ export class MockBuildRestClient extends RestClientBase {
         _project: string,
         _definitionId: number
     ): Promise<DefinitionResourceReference[]> {
-        return Promise.resolve(
-            resources.map(resource => ({
-                ...makeDefinitionResourceReference(resource.id, resource.type),
-                ...resource
-            }))
-        );
+        return Promise.resolve(rememberResources(resources));
     }
 
     authorizeProjectResources(
         resources: DefinitionResourceReference[],
         _project: string
     ): Promise<DefinitionResourceReference[]> {
-        return Promise.resolve(
-            resources.map(resource => ({
-                ...makeDefinitionResourceReference(resource.id, resource.type),
-                ...resource
-            }))
-        );
+        return Promise.resolve(rememberResources(resources));
     }
 
     getProjectResources(_project: string, type?: string, id?: string): Promise<DefinitionResourceReference[]> {
@@ -604,10 +654,11 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     addRetentionLeases(newLeases: NewRetentionLease[], _project: string): Promise<RetentionLease[]> {
-        return Promise.resolve(newLeases.map(makeLeaseFromNew));
+        return Promise.resolve(newLeases.map(newLease => remember(retentionLeases, makeLeaseFromNew(newLease))));
     }
 
-    deleteRetentionLeasesById(_project: string, _ids: number[]): Promise<void> {
+    deleteRetentionLeasesById(_project: string, ids: number[]): Promise<void> {
+        forget(retentionLeases, existing => ids.includes(existing.leaseId));
         return Promise.resolve();
     }
 
@@ -673,7 +724,9 @@ export class MockBuildRestClient extends RestClientBase {
         _project: string,
         leaseId: number
     ): Promise<RetentionLease> {
-        return Promise.resolve(makeUpdatedLease(leaseId, leaseUpdate));
+        return Promise.resolve(
+            remember(retentionLeases, makeUpdatedLease(leaseId, leaseUpdate), existing => existing.leaseId === leaseId)
+        );
     }
 
     getRetentionHistory(daysToLookback?: number): Promise<BuildRetentionHistory> {
