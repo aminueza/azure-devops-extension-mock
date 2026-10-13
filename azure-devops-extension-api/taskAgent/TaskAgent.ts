@@ -130,7 +130,7 @@ import {
 } from "./Data";
 
 const page = <T>(items: T[], continuationToken: string | null): PagedList<T> =>
-    Object.assign([...items], { continuationToken }) as PagedList<T>;
+    Object.assign([...items], { continuationToken });
 
 const take = <T>(items: T[], count?: number): T[] => items.slice(0, count ?? items.length);
 
@@ -278,7 +278,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
     }
 
     getAgents(poolId: number): Promise<TaskAgent[]> {
-        return Promise.resolve(agents.map(a => ({ ...a, poolId } as unknown as TaskAgent)));
+        return Promise.resolve(agents.map(a => ({ ...a, poolId })));
     }
 
     getAgent(_poolId: number, agentId: number): Promise<TaskAgent> {
@@ -321,7 +321,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
     }
 
     addVariableGroup(group: VariableGroupParameters): Promise<VariableGroup> {
-        return Promise.resolve({ ...makeVariableGroup(), ...(group as unknown as VariableGroup) });
+        return Promise.resolve({ ...makeVariableGroup(), ...group });
     }
 
     updateVariableGroup(
@@ -330,7 +330,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
     ): Promise<VariableGroup> {
         return Promise.resolve({
             ...makeVariableGroup(),
-            ...(group as unknown as VariableGroup),
+            ...group,
             id: groupId
         });
     }
