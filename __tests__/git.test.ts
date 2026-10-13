@@ -92,7 +92,9 @@ describe("GitRestClient mock", () => {
         expect(heads.length).toBe(3);
         expect(heads.every(r => r.name.startsWith("refs/heads/"))).toBe(true);
         const none = await client.getRefs("repo-id", "proj", "nope");
-        expect(none).toEqual([]);
+        expect(none.length).toBe(0);
+        expect(none.continuationToken).toBeNull();
+        expect(heads.continuationToken).toBeNull();
     });
 
     it("updates a ref returning the main ref", async () => {
