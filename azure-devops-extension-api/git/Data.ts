@@ -99,7 +99,7 @@ export const makeGitRepository = (): GitRepository => ({
     isFork: false,
     isDisabled: false,
     isInMaintenance: false,
-    parentRepository: makeGitRepositoryRef(),
+    parentRepository: fake.helpers.absent(),
     project: makeProjectReference(),
     _links: {}
 });
@@ -110,7 +110,7 @@ export const makeGitRef = (name = "refs/heads/main"): GitRef => ({
     peeledObjectId: fake.git.commitSha(),
     creator: makeIdentityRef(),
     isLocked: false,
-    isLockedBy: makeIdentityRef(),
+    isLockedBy: fake.helpers.absent(),
     statuses: [],
     url: fake.internet.url(),
     _links: {}
@@ -164,10 +164,10 @@ export const makePullRequest = (): GitPullRequest => {
         status: PullRequestStatus.Active,
         createdBy: makeIdentityRef(),
         creationDate: fake.date.recent(),
-        closedBy: makeIdentityRef(),
-        closedDate: fake.date.recent(),
-        autoCompleteSetBy: makeIdentityRef(),
-        completionQueueTime: fake.date.recent(),
+        closedBy: fake.helpers.absent(),
+        closedDate: fake.helpers.absent(),
+        autoCompleteSetBy: fake.helpers.absent(),
+        completionQueueTime: fake.helpers.absent(),
         completionOptions: {
             autoCompleteIgnoreConfigIds: [],
             bypassPolicy: false,
@@ -183,7 +183,7 @@ export const makePullRequest = (): GitPullRequest => {
         description: fake.lorem.paragraph(),
         sourceRefName,
         targetRefName: "refs/heads/main",
-        forkSource: { ...makeGitRef(sourceRefName), repository: makeGitRepository() },
+        forkSource: fake.helpers.absent(),
         mergeId: fake.string.uuid(),
         mergeStatus: PullRequestAsyncStatus.Succeeded,
         mergeFailureMessage: "",

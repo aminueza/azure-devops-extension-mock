@@ -97,17 +97,19 @@ describe("TaskAgent fixtures are complete", () => {
         expect(agent.properties).toEqual({});
     });
 
-    it("links the agent requests back to the agent by reference only", () => {
+    it("makes an idle agent with no assigned or completed request", () => {
         const agent = makeAgent("runner-3");
-        expect(agent.assignedRequest.reservedAgent.id).toBe(agent.id);
-        expect(agent.assignedRequest.reservedAgent.name).toBe("runner-3");
-        expect(agent.lastCompletedRequest.reservedAgent.id).toBe(agent.id);
-        expect(agent.assignedAgentCloudRequest.agent.id).toBe(agent.id);
-        expect(agent.assignedRequest.requestId).not.toBeUndefined();
-        expect(Object.keys(agent.assignedRequest.reservedAgent).sort()).toEqual(AGENT_REFERENCE_KEYS);
-        expect(Object.keys(agent.assignedAgentCloudRequest.agent).sort()).toEqual(AGENT_REFERENCE_KEYS);
-        expect(Object.keys(agent.assignedAgentCloudRequest.pool).sort()).toEqual(POOL_REFERENCE_KEYS);
+        expect(agent.name).toBe("runner-3");
+        expect(agent.assignedRequest).toBeUndefined();
+        expect(agent.lastCompletedRequest).toBeUndefined();
+        expect(agent.assignedAgentCloudRequest).toBeUndefined();
         expect(() => JSON.stringify(agent)).not.toThrow();
+    });
+
+    it("keeps agents and pools inside requests as references", () => {
+        expect(Object.keys(makeAgentJobRequest().reservedAgent).sort()).toEqual(AGENT_REFERENCE_KEYS);
+        expect(Object.keys(makeAgentCloudRequest().agent).sort()).toEqual(AGENT_REFERENCE_KEYS);
+        expect(Object.keys(makeAgentCloudRequest().pool).sort()).toEqual(POOL_REFERENCE_KEYS);
     });
 
     it("makes a job request whose agents are references", () => {
@@ -169,7 +171,7 @@ describe("TaskAgent fixtures are complete", () => {
     });
 
     it("seeds every list with the completed shapes", () => {
-        expect(agents.every(agent => agent.assignedRequest.reservedAgent.id === agent.id)).toBe(true);
+        expect(agents.every(agent => agent.assignedRequest === undefined)).toBe(true);
         expect(agentQueues.every(queue => typeof queue.pool.scope === "string")).toBe(true);
         expect(taskGroups.every(group => group.definitionType === "metaTask")).toBe(true);
         expect(variableGroups.every(group => group.variables["MyVariable"].isReadOnly === false)).toBe(true);

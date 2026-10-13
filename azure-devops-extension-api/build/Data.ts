@@ -172,7 +172,7 @@ export const makeBuildDefinition = (): BuildDefinition => {
     };
 };
 
-const makeBuildWithoutTrigger = (): Omit<Build, "triggeredByBuild"> => ({
+export const makeBuild = (): Build => ({
     id: fake.number.id(),
     buildNumber: `${fake.date.recent().getFullYear()}.${fake.number.int({ min: 1, max: 999 })}`,
     status: BuildStatus.Completed,
@@ -237,12 +237,8 @@ const makeBuildWithoutTrigger = (): Omit<Build, "triggeredByBuild"> => ({
     tags: [],
     templateParameters: {},
     triggerInfo: {},
+    triggeredByBuild: fake.helpers.absent(),
     validationResults: [{ message: "", result: ValidationResult.OK }]
-});
-
-export const makeBuild = (): Build => ({
-    ...makeBuildWithoutTrigger(),
-    triggeredByBuild: makeBuildWithoutTrigger() as Build
 });
 
 export const makeArtifact = (name = "drop"): BuildArtifact => ({

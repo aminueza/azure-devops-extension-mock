@@ -136,7 +136,8 @@ describe("package manifest", () => {
         }
         expect(counts).toEqual({
             [path.join("azure-devops-extension-api", "build", "Build.ts")]: 2,
-            [path.join("azure-devops-extension-api", "common", "CommonServices.ts")]: 1
+            [path.join("azure-devops-extension-api", "common", "CommonServices.ts")]: 1,
+            [path.join("azure-devops-extension-api", "common", "fixtures.ts")]: 1
         });
     });
 

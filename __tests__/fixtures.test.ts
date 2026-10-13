@@ -187,6 +187,12 @@ describe("fixtures helpers", () => {
         expect(fake.helpers.distinct(0, () => "unused", value => value)).toEqual([]);
     });
 
+    it("stands in for a field the service leaves out", () => {
+        const holder: { closedBy: { id: string } } = { closedBy: fake.helpers.absent() };
+        expect(holder.closedBy).toBeUndefined();
+        expect(JSON.stringify(holder)).toBe("{}");
+    });
+
     it("gives up when the maker cannot produce enough distinct items", () => {
         expect(() => fake.helpers.distinct(2, () => "same", value => value)).toThrow(
             "Could not make 2 distinct items in 1000 attempts"

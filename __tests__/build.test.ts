@@ -343,12 +343,9 @@ describe("build data factories", () => {
         expect(build.validationResults).toEqual([{ message: "", result: ValidationResult.OK }]);
     });
 
-    it("gives a build one triggering build that does not recurse further", () => {
+    it("makes a build that no other build triggered", () => {
         const build = makeBuild();
-        expect(build.triggeredByBuild.id).toBeGreaterThan(0);
-        expect(build.triggeredByBuild.id).not.toBe(build.id);
-        expect(build.triggeredByBuild.status).toBe(BuildStatus.Completed);
-        expect(build.triggeredByBuild).not.toHaveProperty("triggeredByBuild");
+        expect(build.triggeredByBuild).toBeUndefined();
         expect(() => JSON.stringify(build)).not.toThrow();
     });
 

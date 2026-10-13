@@ -4,6 +4,7 @@ import {
     GitPullRequestMergeStrategy,
     GitRestClient,
     PullRequestAsyncStatus,
+    PullRequestStatus,
     PullRequestMergeFailureType,
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
@@ -47,19 +48,18 @@ describe("Git fixtures without casts", () => {
         const repository = makeGitRepository();
         expect(repository.creationDate).toBeInstanceOf(Date);
         expect(repository.validRemoteUrls.length).toBe(1);
-        expect(repository.parentRepository.isFork).toBe(true);
-        expect(typeof repository.parentRepository.collection.id).toBe("string");
+        expect(repository.isFork).toBe(false);
+        expect(repository.parentRepository).toBeUndefined();
         expect(typeof repository.project.id).toBe("string");
         expect(repository._links).toEqual({});
-        expect(repository).not.toHaveProperty("parentRepository.parentRepository");
-        expect(repositories.every(seeded => seeded.parentRepository.id !== seeded.id)).toBe(true);
+        expect(repositories.every(seeded => seeded.parentRepository === undefined)).toBe(true);
     });
 
     it("fills every ref field", () => {
         const ref = makeGitRef("refs/heads/topic");
         expect(ref.peeledObjectId).toMatch(SHA);
         expect(ref.isLocked).toBe(false);
-        expect(typeof ref.isLockedBy.id).toBe("string");
+        expect(ref.isLockedBy).toBeUndefined();
         expect(ref.statuses).toEqual([]);
         expect(ref._links).toEqual({});
     });
@@ -117,10 +117,11 @@ describe("Git fixtures without casts", () => {
     it("fills every pull request field", () => {
         const pullRequest = makePullRequest();
         expect(pullRequest.artifactId).toMatch(/^vstfs:\/\/\/Git\/PullRequestId\//);
-        expect(typeof pullRequest.autoCompleteSetBy.id).toBe("string");
-        expect(typeof pullRequest.closedBy.id).toBe("string");
-        expect(pullRequest.closedDate).toBeInstanceOf(Date);
-        expect(pullRequest.completionQueueTime).toBeInstanceOf(Date);
+        expect(pullRequest.status).toBe(PullRequestStatus.Active);
+        expect(pullRequest.autoCompleteSetBy).toBeUndefined();
+        expect(pullRequest.closedBy).toBeUndefined();
+        expect(pullRequest.closedDate).toBeUndefined();
+        expect(pullRequest.completionQueueTime).toBeUndefined();
         expect(pullRequest.completionOptions.mergeStrategy).toBe(GitPullRequestMergeStrategy.Squash);
         expect(pullRequest.completionOptions.squashMerge).toBe(true);
         expect(pullRequest.completionOptions.autoCompleteIgnoreConfigIds).toEqual([]);
@@ -134,8 +135,7 @@ describe("Git fixtures without casts", () => {
         expect(pullRequest.mergeFailureType).toBe(PullRequestMergeFailureType.None);
         expect(pullRequest.mergeFailureMessage).toBe("");
         expect(typeof pullRequest.mergeId).toBe("string");
-        expect(pullRequest.forkSource.name).toBe(pullRequest.sourceRefName);
-        expect(typeof pullRequest.forkSource.repository.id).toBe("string");
+        expect(pullRequest.forkSource).toBeUndefined();
         expect(pullRequest.hasMultipleMergeBases).toBe(false);
         expect(pullRequest.ignoreTargetRefAndChooseDynamically).toBe(false);
         expect(pullRequest.supportsIterations).toBe(true);

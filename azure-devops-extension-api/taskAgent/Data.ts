@@ -150,8 +150,8 @@ export const makeAgent = (name?: string): TaskAgent => {
     const reference = makeAgentReference(name);
     return {
         ...reference,
-        assignedAgentCloudRequest: { ...makeAgentCloudRequest(), agent: reference },
-        assignedRequest: { ...makeAgentJobRequest(), reservedAgent: reference },
+        assignedAgentCloudRequest: fake.helpers.absent(),
+        assignedRequest: fake.helpers.absent(),
         authorization: {
             authorizationUrl: fake.internet.url(),
             clientId: fake.string.uuid(),
@@ -161,7 +161,7 @@ export const makeAgent = (name?: string): TaskAgent => {
             }
         },
         createdOn: fake.date.past(),
-        lastCompletedRequest: { ...makeAgentJobRequest(), reservedAgent: reference },
+        lastCompletedRequest: fake.helpers.absent(),
         maxParallelism: 1,
         pendingUpdate: {
             currentState: "Completed",
