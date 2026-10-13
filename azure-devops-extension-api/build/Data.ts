@@ -1,4 +1,5 @@
 import { fake } from "../common/fixtures";
+import { makePagedList } from "../common/pagedList";
 import {
     Attachment,
     AuditAction,
@@ -309,9 +310,6 @@ export const makeChange = (): Change => ({
     messageTruncated: false,
     pusher: fake.string.uuid()
 });
-
-export const makePagedList = <T>(items: T[]): PagedList<T> =>
-    Object.assign([...items], { continuationToken: "" });
 
 export const makeBuildBadge = (): BuildBadge => ({
     buildId: fake.number.int({ min: 1, max: 100_000 }),
@@ -780,3 +778,5 @@ export const repositoryWebhooks: RepositoryWebhook[] = [
     makeRepositoryWebhook("billing"),
     makeRepositoryWebhook("website")
 ];
+
+export { makePagedList };

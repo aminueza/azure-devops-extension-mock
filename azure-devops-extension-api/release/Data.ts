@@ -1,4 +1,5 @@
 import { fake } from "../common/fixtures";
+import { makePagedList } from "../common/pagedList";
 import {
     Release,
     ReleaseDefinition,
@@ -65,7 +66,7 @@ import {
     WorkflowTask
 } from "azure-devops-extension-api/Release";
 import { InputValuesQuery } from "azure-devops-extension-api/FormInput";
-import { PagedList } from "azure-devops-extension-api/WebApi";
+
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
 export const makeReleaseShallowReference = (id: number): ReleaseShallowReference => ({
@@ -425,9 +426,6 @@ export const releaseDefinitions = Array.from({ length: 3 }, makeReleaseDefinitio
 export const releases = Array.from({ length: 5 }, makeRelease);
 export const deployments = Array.from({ length: 5 }, makeDeployment);
 export const approvals = Array.from({ length: 3 }, makeApproval);
-
-export const makePagedList = <T>(items: T[]): PagedList<T> =>
-    Object.assign([...items], { continuationToken: "" });
 
 export const releaseDefinitionsPage = makePagedList(releaseDefinitions);
 export const deploymentsPage = makePagedList(deployments);
@@ -810,3 +808,5 @@ export const summaryMailSections = [
     makeSummaryMailSection(MailSectionType.Environments, 2, "Environments"),
     makeSummaryMailSection(MailSectionType.WorkItems, 3, "Work items")
 ];
+
+export { makePagedList };
