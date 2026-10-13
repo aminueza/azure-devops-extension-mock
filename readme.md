@@ -267,9 +267,9 @@ The SDK needs no such step: `moduleNameMapper` already points
 and `SDK.getService()` work as they are.
 [`examples/consumer`](./examples/consumer) has the full working test.
 
-The mocks keep no state between calls: an object you create with one method
-is not returned by a later `get` or `list`. Use overrides for flows that
-depend on that.
+By default the mocks keep no state between calls: an object you create with
+one method is not returned by a later `get` or `list`. For flows that depend
+on that, use overrides or turn on the [stateful mode](#stateful-mode).
 
 ## Fixture helpers
 
