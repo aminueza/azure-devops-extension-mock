@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Hand-written mocks for the last 19 `GitRestClient` methods: the Advanced Security enablement and billing methods and the ref favorite methods.
+- Hand-written mocks for the last 48 `TaskAgentRestClient` methods: environments, Kubernetes resources, virtual machine groups, secure files, task groups, task definitions, packages, Azure subscriptions and management groups, endpoint queries and the YAML schema. Every method of the twelve mocked clients now returns fixtures.
+
 ### Changed
 
 - The peer range for `azure-devops-extension-api` is now `^5.273.0`. The previous range, `^4.0.0 || ^5.272.3`, claimed support that never worked: every 1.x release requires `azure-devops-extension-api/Pipelines`, which v4 and 5.271 do not ship, so the package failed to load there, and 5.272 lacks a type the TaskAgent mock imports.
