@@ -1,5 +1,6 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
+import { forget, remember, stateful } from "../common/state";
 import {
     AdvSecEnablementStatus,
     AdvSecEnablementUpdate,
@@ -93,6 +94,7 @@ import {
     importRequests,
     items,
     likedComments,
+    likingUser,
     makeAnnotatedTag,
     makeAttachment,
     makeBranchStats,
@@ -101,6 +103,8 @@ import {
     makeCommentThread,
     makeCommit,
     makeCommitDiffs,
+    makeDeletedRepository,
+    makeEnablementStatus,
     makeConflictUpdateResult,
     makeFileDiff,
     makeForkSyncRequest,
@@ -148,17 +152,89 @@ import {
     trees
 } from "./Data";
 
-const applyPropertyPatch = (
-    base: Record<string, unknown>,
-    patchDocument: JsonPatchDocument
-): Record<string, unknown> => {
-    const operations: JsonPatchOperation[] = Array.isArray(patchDocument) ? patchDocument : [];
-    return operations.reduce(
+const patchOperations = (patchDocument: JsonPatchDocument): JsonPatchOperation[] =>
+    Array.isArray(patchDocument) ? patchDocument : [];
+
+const patchTarget = (operation: JsonPatchOperation): string => operation.path.replace(/^\//, "");
+
+const applyPropertyPatch = (base: Record<string, unknown>, patchDocument: JsonPatchDocument): Record<string, unknown> =>
+    patchOperations(patchDocument).reduce(
         (properties, operation) => ({
             ...properties,
-            [operation.path.replace(/^\//, "")]: operation.value
+            [patchTarget(operation)]: operation.value
         }),
         { ...base }
+    );
+
+const removeOperation = 1;
+const deletedObjectId = /^0+$/;
+const allRepositoriesId = "ffffffff-ffff-ffff-ffff-ffffffffffff";
+
+const removedIds = (patchDocument: JsonPatchDocument): number[] =>
+    patchOperations(patchDocument)
+        .filter(operation => operation.op === removeOperation)
+        .map(operation => Number(patchTarget(operation)));
+
+const upsert = <T>(list: T[], item: T, same: (existing: T) => boolean): T[] =>
+    list.some(same) ? list.map(existing => (same(existing) ? item : existing)) : [...list, item];
+
+const rewriteComments = (threadId: number, change: (comments: Comment[]) => Comment[]): void => {
+    const thread = pullRequestThreads.find(item => item.id === threadId);
+    if (thread) {
+        remember(pullRequestThreads, { ...thread, comments: change(thread.comments) }, item => item.id === threadId);
+    }
+};
+
+const nextCommentId = (threadId: number): number => {
+    const thread = pullRequestThreads.find(item => item.id === threadId);
+    return stateful.isEnabled() && thread ? Math.max(0, ...thread.comments.map(comment => comment.id)) + 1 : 1;
+};
+
+const applyRefUpdate = (update: GitRefUpdate): void => {
+    if (!stateful.isEnabled()) {
+        return;
+    }
+    if (deletedObjectId.test(update.newObjectId)) {
+        forget(refs, ref => ref.name === update.name);
+        return;
+    }
+    const found = refs.find(ref => ref.name === update.name);
+    remember(
+        refs,
+        { ...(found ?? makeGitRef(update.name)), objectId: update.newObjectId },
+        ref => ref.name === update.name
+    );
+};
+
+const resolveConflicts = (source: GitConflict[], conflictUpdates: GitConflict[]): GitConflictUpdateResult[] =>
+    conflictUpdates.map(update => {
+        const result = makeConflictUpdateResult(update);
+        remember(source, result.updatedConflict, conflict => conflict.conflictId === update.conflictId);
+        return result;
+    });
+
+const applyEnablementUpdate = (update: AdvSecEnablementUpdate): void => {
+    if (!stateful.isEnabled()) {
+        return;
+    }
+    const everyRepository = update.repositoryId.toLowerCase() === allRepositoriesId;
+    const matched = enablementStatuses.filter(
+        status =>
+            status.projectId === update.projectId && (everyRepository || status.repositoryId === update.repositoryId)
+    );
+    const targets =
+        matched.length > 0 ? matched : [makeEnablementStatus(update.projectId, update.repositoryId, update.newStatus)];
+    targets.forEach(target =>
+        remember(
+            enablementStatuses,
+            {
+                ...target,
+                dependabotEnabled: update.newDependabotStatus,
+                dependencyScanningInjectionEnabled: update.newDependencyScanningInjectionEnablementStatus,
+                enabled: update.newStatus
+            },
+            status => status.projectId === target.projectId && status.repositoryId === target.repositoryId
+        )
     );
 };
 
@@ -208,10 +284,20 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createRepository(gitRepositoryToCreate: GitRepository, _project?: string): Promise<GitRepository> {
-        return Promise.resolve({ ...makeGitRepository(), ...gitRepositoryToCreate });
+        const created = { ...makeGitRepository(), ...gitRepositoryToCreate };
+        return Promise.resolve(remember(repositories, created, r => r.id === created.id));
     }
 
-    deleteRepository(_repositoryId: string, _project?: string): Promise<void> {
+    deleteRepository(repositoryId: string, _project?: string): Promise<void> {
+        const found = repositories.find(r => r.id === repositoryId);
+        if (found && stateful.isEnabled()) {
+            remember(
+                deletedRepositories,
+                { ...makeDeletedRepository(), id: found.id, name: found.name, project: found.project },
+                r => r.id === repositoryId
+            );
+            forget(repositories, r => r.id === repositoryId);
+        }
         return Promise.resolve();
     }
 
@@ -220,7 +306,13 @@ export class MockGitRestClient extends RestClientBase {
         repositoryId: string,
         _project?: string
     ): Promise<GitRepository> {
-        return Promise.resolve({ ...makeGitRepository(), ...newRepositoryInfo, id: repositoryId });
+        return Promise.resolve(
+            remember(
+                repositories,
+                { ...makeGitRepository(), ...newRepositoryInfo, id: repositoryId },
+                r => r.id === repositoryId
+            )
+        );
     }
 
     getRefs(_repositoryId: string, _project?: string, filter?: string): Promise<PagedList<GitRef>> {
@@ -308,7 +400,8 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createPullRequest(gitPullRequestToCreate: GitPullRequest, _repositoryId: string): Promise<GitPullRequest> {
-        return Promise.resolve({ ...makePullRequest(), ...gitPullRequestToCreate });
+        const created = { ...makePullRequest(), ...gitPullRequestToCreate };
+        return Promise.resolve(remember(pullRequests, created, p => p.pullRequestId === created.pullRequestId));
     }
 
     updatePullRequest(
@@ -316,11 +409,17 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         pullRequestId: number
     ): Promise<GitPullRequest> {
-        return Promise.resolve({
-            ...makePullRequest(),
-            ...gitPullRequestToUpdate,
-            pullRequestId
-        });
+        return Promise.resolve(
+            remember(
+                pullRequests,
+                {
+                    ...makePullRequest(),
+                    ...gitPullRequestToUpdate,
+                    pullRequestId
+                },
+                p => p.pullRequestId === pullRequestId
+            )
+        );
     }
 
     getThreads(_repositoryId: string, _pullRequestId: number): Promise<GitPullRequestCommentThread[]> {
@@ -332,16 +431,14 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         _pullRequestId: number
     ): Promise<GitPullRequestCommentThread> {
-        return Promise.resolve({ ...makeCommentThread(), ...commentThread });
+        const created = { ...makeCommentThread(), ...commentThread };
+        return Promise.resolve(remember(pullRequestThreads, created, thread => thread.id === created.id));
     }
 
-    createComment(
-        comment: Comment,
-        _repositoryId: string,
-        _pullRequestId: number,
-        _threadId: number
-    ): Promise<Comment> {
-        return Promise.resolve({ ...comment, id: comment.id ?? 1 });
+    createComment(comment: Comment, _repositoryId: string, _pullRequestId: number, threadId: number): Promise<Comment> {
+        const created = { ...comment, id: comment.id ?? nextCommentId(threadId) };
+        rewriteComments(threadId, comments => upsert(comments, created, item => item.id === created.id));
+        return Promise.resolve(created);
     }
 
     getAccessibleRepositories(request: GetAccessibleRepositoriesRequest): Promise<GetAccessibleRepositoriesResponse> {
@@ -384,7 +481,8 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve(deletedRepositories);
     }
 
-    deleteRepositoryFromRecycleBin(_project: string, _repositoryId: string): Promise<void> {
+    deleteRepositoryFromRecycleBin(_project: string, repositoryId: string): Promise<void> {
+        forget(deletedRepositories, r => r.id === repositoryId);
         return Promise.resolve();
     }
 
@@ -399,8 +497,12 @@ export class MockGitRestClient extends RestClientBase {
             id: repositoryId,
             isDisabled: repositoryDetails.deleted
         };
-        if (!found) return Promise.resolve(restored);
-        return Promise.resolve({ ...restored, name: found.name, project: found.project });
+        const repository = found ? { ...restored, name: found.name, project: found.project } : restored;
+        if (!repositoryDetails.deleted) {
+            forget(deletedRepositories, r => r.id === repositoryId);
+            remember(repositories, repository, r => r.id === repositoryId);
+        }
+        return Promise.resolve(repository);
     }
 
     createForkSyncRequest(
@@ -409,11 +511,12 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string,
         _includeLinks?: boolean
     ): Promise<GitForkSyncRequest> {
-        return Promise.resolve({
+        const created = {
             ...makeForkSyncRequest(),
             ...syncParams,
             status: GitAsyncOperationStatus.Queued
-        });
+        };
+        return Promise.resolve(remember(forkSyncRequests, created, r => r.operationId === created.operationId));
     }
 
     getForkSyncRequest(
@@ -450,12 +553,13 @@ export class MockGitRestClient extends RestClientBase {
         _project: string,
         repositoryId: string
     ): Promise<GitImportRequest> {
-        return Promise.resolve({
+        const created = {
             ...makeImportRequest(),
             ...importRequest,
             repository: { ...makeGitRepository(), id: repositoryId },
             status: GitAsyncOperationStatus.Queued
-        });
+        };
+        return Promise.resolve(remember(importRequests, created, r => r.importRequestId === created.importRequestId));
     }
 
     getImportRequest(_project: string, _repositoryId: string, importRequestId: number): Promise<GitImportRequest> {
@@ -478,11 +582,17 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         importRequestId: number
     ): Promise<GitImportRequest> {
-        return Promise.resolve({
-            ...makeImportRequest(),
-            ...importRequestToUpdate,
-            importRequestId
-        });
+        return Promise.resolve(
+            remember(
+                importRequests,
+                {
+                    ...makeImportRequest(),
+                    ...importRequestToUpdate,
+                    importRequestId
+                },
+                r => r.importRequestId === importRequestId
+            )
+        );
     }
 
     getPermission(_projectName?: string, repositoryId?: string, _permission?: string): Promise<boolean> {
@@ -509,7 +619,12 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string,
         _projectId?: string
     ): Promise<GitRefUpdateResult[]> {
-        return Promise.resolve(refUpdates.map(update => makeRefUpdateResult({ ...update, repositoryId })));
+        return Promise.resolve(
+            refUpdates.map(update => {
+                applyRefUpdate(update);
+                return makeRefUpdateResult({ ...update, repositoryId });
+            })
+        );
     }
 
     getTree(
@@ -768,12 +883,13 @@ export class MockGitRestClient extends RestClientBase {
         repositoryNameOrId: string,
         includeLinks?: boolean
     ): Promise<GitMerge> {
-        return Promise.resolve({
+        const created = {
             ...makeGitMerge(mergeParameters.comment),
             ...mergeParameters,
             status: GitAsyncOperationStatus.Queued,
             _links: includeLinks ? { repository: { href: repositoryNameOrId } } : {}
-        });
+        };
+        return Promise.resolve(remember(merges, created, m => m.mergeOperationId === created.mergeOperationId));
     }
 
     getMergeRequest(
@@ -804,7 +920,8 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createAnnotatedTag(tagObject: GitAnnotatedTag, _project: string, _repositoryId: string): Promise<GitAnnotatedTag> {
-        return Promise.resolve({ ...makeAnnotatedTag(tagObject.name), ...tagObject });
+        const created = { ...makeAnnotatedTag(tagObject.name), ...tagObject };
+        return Promise.resolve(remember(annotatedTags, created, t => t.objectId === created.objectId));
     }
 
     getAnnotatedTag(_project: string, _repositoryId: string, objectId: string): Promise<GitAnnotatedTag> {
@@ -832,10 +949,11 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         _project?: string
     ): Promise<GitStatus> {
-        return Promise.resolve({
+        const created = {
             ...makeGitStatus(gitCommitStatusToCreate.id, GitStatusState.Pending),
             ...gitCommitStatusToCreate
-        });
+        };
+        return Promise.resolve(remember(commitStatuses, created, s => s.id === created.id));
     }
 
     getPullRequestReviewers(
@@ -863,11 +981,17 @@ export class MockGitRestClient extends RestClientBase {
         reviewerId: string,
         _project?: string
     ): Promise<IdentityRefWithVote> {
-        return Promise.resolve({
-            ...makeIdentityRefWithVote(reviewerId, 0),
-            ...reviewer,
-            id: reviewerId
-        });
+        return Promise.resolve(
+            remember(
+                pullRequestReviewers,
+                {
+                    ...makeIdentityRefWithVote(reviewerId, 0),
+                    ...reviewer,
+                    id: reviewerId
+                },
+                r => r.id === reviewerId
+            )
+        );
     }
 
     createPullRequestReviewers(
@@ -877,10 +1001,16 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string
     ): Promise<IdentityRefWithVote[]> {
         return Promise.resolve(
-            reviewers.map(reviewer => ({
-                ...makeIdentityRefWithVote(reviewer.id, 0),
-                ...reviewer
-            }))
+            reviewers.map(reviewer =>
+                remember(
+                    pullRequestReviewers,
+                    {
+                        ...makeIdentityRefWithVote(reviewer.id, 0),
+                        ...reviewer
+                    },
+                    r => r.id === reviewer.id
+                )
+            )
         );
     }
 
@@ -890,11 +1020,17 @@ export class MockGitRestClient extends RestClientBase {
         _pullRequestId: number,
         _project?: string
     ): Promise<IdentityRefWithVote> {
-        return Promise.resolve({
-            ...makeIdentityRefWithVote(reviewer.id, reviewer.vote),
-            ...reviewer,
-            reviewerUrl: ""
-        });
+        return Promise.resolve(
+            remember(
+                pullRequestReviewers,
+                {
+                    ...makeIdentityRefWithVote(reviewer.id, reviewer.vote),
+                    ...reviewer,
+                    reviewerUrl: ""
+                },
+                r => r.id === reviewer.id
+            )
+        );
     }
 
     updatePullRequestReviewer(
@@ -905,28 +1041,41 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string
     ): Promise<IdentityRefWithVote> {
         const found = pullRequestReviewers.find(r => r.id === reviewerId);
-        return Promise.resolve({
-            ...(found ?? makeIdentityRefWithVote(reviewerId, 0)),
-            ...reviewer,
-            id: reviewerId
-        });
+        return Promise.resolve(
+            remember(
+                pullRequestReviewers,
+                {
+                    ...(found ?? makeIdentityRefWithVote(reviewerId, 0)),
+                    ...reviewer,
+                    id: reviewerId
+                },
+                r => r.id === reviewerId
+            )
+        );
     }
 
     updatePullRequestReviewers(
-        _patchVotes: IdentityRefWithVote[],
+        patchVotes: IdentityRefWithVote[],
         _repositoryId: string,
         _pullRequestId: number,
         _project?: string
     ): Promise<void> {
+        patchVotes.forEach(patch => {
+            const found = pullRequestReviewers.find(r => r.id === patch.id);
+            if (found) {
+                remember(pullRequestReviewers, { ...found, ...patch }, r => r.id === patch.id);
+            }
+        });
         return Promise.resolve();
     }
 
     deletePullRequestReviewer(
         _repositoryId: string,
         _pullRequestId: number,
-        _reviewerId: string,
+        reviewerId: string,
         _project?: string
     ): Promise<void> {
+        forget(pullRequestReviewers, r => r.id === reviewerId);
         return Promise.resolve();
     }
 
@@ -958,16 +1107,23 @@ export class MockGitRestClient extends RestClientBase {
         _projectId?: string
     ): Promise<WebApiTagDefinition> {
         const found = pullRequestLabels.find(l => l.name === label.name);
-        return Promise.resolve(found ?? makePullRequestLabel(`label-${label.name}`, label.name));
+        return Promise.resolve(
+            remember(
+                pullRequestLabels,
+                found ?? makePullRequestLabel(`label-${label.name}`, label.name),
+                l => l.name === label.name
+            )
+        );
     }
 
     deletePullRequestLabels(
         _repositoryId: string,
         _pullRequestId: number,
-        _labelIdOrName: string,
+        labelIdOrName: string,
         _project?: string,
         _projectId?: string
     ): Promise<void> {
+        forget(pullRequestLabels, l => l.id === labelIdOrName || l.name === labelIdOrName);
         return Promise.resolve();
     }
 
@@ -987,18 +1143,20 @@ export class MockGitRestClient extends RestClientBase {
         _pullRequestId: number,
         _project?: string
     ): Promise<GitPullRequestStatus> {
-        return Promise.resolve({
+        const created = {
             ...makePullRequestStatus(status.id, GitStatusState.Pending, status.iterationId),
             ...status
-        });
+        };
+        return Promise.resolve(remember(pullRequestStatuses, created, s => s.id === created.id));
     }
 
     deletePullRequestStatus(
         _repositoryId: string,
         _pullRequestId: number,
-        _statusId: number,
+        statusId: number,
         _project?: string
     ): Promise<void> {
+        forget(pullRequestStatuses, s => s.id === statusId);
         return Promise.resolve();
     }
 
@@ -1011,11 +1169,13 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     updatePullRequestStatuses(
-        _patchDocument: JsonPatchDocument,
+        patchDocument: JsonPatchDocument,
         _repositoryId: string,
         _pullRequestId: number,
         _project?: string
     ): Promise<void> {
+        const removed = removedIds(patchDocument);
+        forget(pullRequestStatuses, s => removed.includes(s.id));
         return Promise.resolve();
     }
 
@@ -1185,30 +1345,36 @@ export class MockGitRestClient extends RestClientBase {
         iterationId: number,
         _project?: string
     ): Promise<GitPullRequestStatus> {
-        return Promise.resolve({
+        const created = {
             ...makePullRequestStatus(status.id, GitStatusState.Pending, iterationId),
             ...status,
             iterationId
-        });
+        };
+        return Promise.resolve(
+            remember(pullRequestIterationStatuses, created, s => s.id === created.id && s.iterationId === iterationId)
+        );
     }
 
     deletePullRequestIterationStatus(
         _repositoryId: string,
         _pullRequestId: number,
-        _iterationId: number,
-        _statusId: number,
+        iterationId: number,
+        statusId: number,
         _project?: string
     ): Promise<void> {
+        forget(pullRequestIterationStatuses, s => s.id === statusId && s.iterationId === iterationId);
         return Promise.resolve();
     }
 
     updatePullRequestIterationStatuses(
-        _patchDocument: JsonPatchDocument,
+        patchDocument: JsonPatchDocument,
         _repositoryId: string,
         _pullRequestId: number,
-        _iterationId: number,
+        iterationId: number,
         _project?: string
     ): Promise<void> {
+        const removed = removedIds(patchDocument);
+        forget(pullRequestIterationStatuses, s => removed.includes(s.id) && s.iterationId === iterationId);
         return Promise.resolve();
     }
 
@@ -1250,11 +1416,17 @@ export class MockGitRestClient extends RestClientBase {
         conflictId: number,
         project?: string
     ): Promise<GitConflict> {
-        return this.getPullRequestConflict(repositoryId, pullRequestId, conflictId, project).then(existing => ({
-            ...existing,
-            ...conflict,
-            conflictId
-        }));
+        return this.getPullRequestConflict(repositoryId, pullRequestId, conflictId, project).then(existing =>
+            remember(
+                pullRequestConflicts,
+                {
+                    ...existing,
+                    ...conflict,
+                    conflictId
+                },
+                c => c.conflictId === conflictId
+            )
+        );
     }
 
     updatePullRequestConflicts(
@@ -1263,7 +1435,7 @@ export class MockGitRestClient extends RestClientBase {
         _pullRequestId: number,
         _project?: string
     ): Promise<GitConflictUpdateResult[]> {
-        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+        return Promise.resolve(resolveConflicts(pullRequestConflicts, conflictUpdates));
     }
 
     getPullRequestThread(
@@ -1287,11 +1459,17 @@ export class MockGitRestClient extends RestClientBase {
         threadId: number,
         project?: string
     ): Promise<GitPullRequestCommentThread> {
-        return this.getPullRequestThread(repositoryId, pullRequestId, threadId, project).then(existing => ({
-            ...existing,
-            ...commentThread,
-            id: threadId
-        }));
+        return this.getPullRequestThread(repositoryId, pullRequestId, threadId, project).then(existing =>
+            remember(
+                pullRequestThreads,
+                {
+                    ...existing,
+                    ...commentThread,
+                    id: threadId
+                },
+                thread => thread.id === threadId
+            )
+        );
     }
 
     getComments(
@@ -1324,20 +1502,25 @@ export class MockGitRestClient extends RestClientBase {
         commentId: number,
         project?: string
     ): Promise<Comment> {
-        return this.getComment(repositoryId, pullRequestId, threadId, commentId, project).then(existing => ({
-            ...existing,
-            ...comment,
-            id: commentId
-        }));
+        return this.getComment(repositoryId, pullRequestId, threadId, commentId, project).then(existing => {
+            const updated = {
+                ...existing,
+                ...comment,
+                id: commentId
+            };
+            rewriteComments(threadId, comments => upsert(comments, updated, item => item.id === commentId));
+            return updated;
+        });
     }
 
     deleteComment(
         _repositoryId: string,
         _pullRequestId: number,
-        _threadId: number,
-        _commentId: number,
+        threadId: number,
+        commentId: number,
         _project?: string
     ): Promise<void> {
+        rewriteComments(threadId, comments => comments.filter(item => item.id !== commentId));
         return Promise.resolve();
     }
 
@@ -1346,10 +1529,16 @@ export class MockGitRestClient extends RestClientBase {
         _project: string,
         _repositoryId: string
     ): Promise<GitCherryPick> {
-        return Promise.resolve({
-            ...makeCherryPick(createdCherryPickId, cherryPickToCreate.generatedRefName),
-            parameters: cherryPickToCreate
-        });
+        return Promise.resolve(
+            remember(
+                cherryPicks,
+                {
+                    ...makeCherryPick(createdCherryPickId, cherryPickToCreate.generatedRefName),
+                    parameters: cherryPickToCreate
+                },
+                pick => pick.cherryPickId === createdCherryPickId
+            )
+        );
     }
 
     getCherryPick(_project: string, cherryPickId: number, _repositoryId: string): Promise<GitCherryPick> {
@@ -1404,11 +1593,17 @@ export class MockGitRestClient extends RestClientBase {
         conflictId: number,
         project?: string
     ): Promise<GitConflict> {
-        return this.getCherryPickConflict(repositoryId, cherryPickId, conflictId, project).then(existing => ({
-            ...existing,
-            ...conflict,
-            conflictId
-        }));
+        return this.getCherryPickConflict(repositoryId, cherryPickId, conflictId, project).then(existing =>
+            remember(
+                cherryPickConflicts,
+                {
+                    ...existing,
+                    ...conflict,
+                    conflictId
+                },
+                c => c.conflictId === conflictId
+            )
+        );
     }
 
     updateCherryPickConflicts(
@@ -1417,7 +1612,7 @@ export class MockGitRestClient extends RestClientBase {
         _cherryPickId: number,
         _project?: string
     ): Promise<GitConflictUpdateResult[]> {
-        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+        return Promise.resolve(resolveConflicts(cherryPickConflicts, conflictUpdates));
     }
 
     createRevert(
@@ -1425,10 +1620,16 @@ export class MockGitRestClient extends RestClientBase {
         _project: string,
         _repositoryId: string
     ): Promise<GitRevert> {
-        return Promise.resolve({
-            ...makeRevert(createdRevertId, revertToCreate.generatedRefName),
-            parameters: revertToCreate
-        });
+        return Promise.resolve(
+            remember(
+                reverts,
+                {
+                    ...makeRevert(createdRevertId, revertToCreate.generatedRefName),
+                    parameters: revertToCreate
+                },
+                revert => revert.revertId === createdRevertId
+            )
+        );
     }
 
     getRevert(_project: string, revertId: number, _repositoryId: string): Promise<GitRevert> {
@@ -1471,11 +1672,17 @@ export class MockGitRestClient extends RestClientBase {
         conflictId: number,
         project?: string
     ): Promise<GitConflict> {
-        return this.getRevertConflict(repositoryId, revertId, conflictId, project).then(existing => ({
-            ...existing,
-            ...conflict,
-            conflictId
-        }));
+        return this.getRevertConflict(repositoryId, revertId, conflictId, project).then(existing =>
+            remember(
+                revertConflicts,
+                {
+                    ...existing,
+                    ...conflict,
+                    conflictId
+                },
+                c => c.conflictId === conflictId
+            )
+        );
     }
 
     updateRevertConflicts(
@@ -1484,7 +1691,7 @@ export class MockGitRestClient extends RestClientBase {
         _revertId: number,
         _project?: string
     ): Promise<GitConflictUpdateResult[]> {
-        return Promise.resolve(conflictUpdates.map(update => makeConflictUpdateResult(update)));
+        return Promise.resolve(resolveConflicts(revertConflicts, conflictUpdates));
     }
 
     createAttachment(
@@ -1494,18 +1701,25 @@ export class MockGitRestClient extends RestClientBase {
         _pullRequestId: number,
         _project?: string
     ): Promise<Attachment> {
-        return Promise.resolve({
-            ...makeAttachment(createdAttachmentId, fileName),
-            properties: { content }
-        });
+        return Promise.resolve(
+            remember(
+                pullRequestAttachments,
+                {
+                    ...makeAttachment(createdAttachmentId, fileName),
+                    properties: { content }
+                },
+                attachment => attachment.displayName === fileName
+            )
+        );
     }
 
     deleteAttachment(
-        _fileName: string,
+        fileName: string,
         _repositoryId: string,
         _pullRequestId: number,
         _project?: string
     ): Promise<void> {
+        forget(pullRequestAttachments, attachment => attachment.displayName === fileName);
         return Promise.resolve();
     }
 
@@ -1535,9 +1749,17 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         _pullRequestId: number,
         _threadId: number,
-        _commentId: number,
+        commentId: number,
         _project?: string
     ): Promise<void> {
+        if (stateful.isEnabled()) {
+            const comment = likedComments.find(item => item.id === commentId) ?? makeComment(commentId);
+            remember(
+                likedComments,
+                { ...comment, usersLiked: upsert(comment.usersLiked, likingUser, user => user.id === likingUser.id) },
+                item => item.id === commentId
+            );
+        }
         return Promise.resolve();
     }
 
@@ -1545,9 +1767,17 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         _pullRequestId: number,
         _threadId: number,
-        _commentId: number,
+        commentId: number,
         _project?: string
     ): Promise<void> {
+        const comment = likedComments.find(item => item.id === commentId);
+        if (comment) {
+            remember(
+                likedComments,
+                { ...comment, usersLiked: comment.usersLiked.filter(user => user.id !== likingUser.id) },
+                item => item.id === commentId
+            );
+        }
         return Promise.resolve();
     }
 
@@ -1571,10 +1801,12 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     deleteEnablementStatus(
-        _allProjects: boolean,
+        allProjects: boolean,
         _includeBillableCommitters?: boolean,
-        _projectIds?: string[]
+        projectIds?: string[]
     ): Promise<void> {
+        const selected = projectIds ?? [];
+        forget(enablementStatuses, s => allProjects || selected.includes(s.projectId));
         return Promise.resolve();
     }
 
@@ -1608,7 +1840,8 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    updateEnablementStatus(_enablementUpdates: AdvSecEnablementUpdate[]): Promise<void> {
+    updateEnablementStatus(enablementUpdates: AdvSecEnablementUpdate[]): Promise<void> {
+        enablementUpdates.forEach(applyEnablementUpdate);
         return Promise.resolve();
     }
 
@@ -1643,13 +1876,15 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createFavorite(favorite: GitRefFavorite, _project: string): Promise<GitRefFavorite> {
-        return Promise.resolve({
+        const created = {
             ...makeRefFavorite(favorite.name, favorite.repositoryId, favorite.identityId),
             ...favorite
-        });
+        };
+        return Promise.resolve(remember(refFavorites, created, f => f.id === created.id));
     }
 
-    deleteRefFavorite(_project: string, _favoriteId: number): Promise<void> {
+    deleteRefFavorite(_project: string, favoriteId: number): Promise<void> {
+        forget(refFavorites, f => f.id === favoriteId);
         return Promise.resolve();
     }
 
