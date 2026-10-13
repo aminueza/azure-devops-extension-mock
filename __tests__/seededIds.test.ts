@@ -2,11 +2,15 @@ import * as boards from "../azure-devops-extension-api/boards/Data";
 import * as build from "../azure-devops-extension-api/build/Data";
 import * as core from "../azure-devops-extension-api/core/Data";
 import * as dashboard from "../azure-devops-extension-api/dashboard/Data";
+import * as fileContainer from "../azure-devops-extension-api/fileContainer/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
 import * as graph from "../azure-devops-extension-api/graph/Data";
+import * as operations from "../azure-devops-extension-api/operations/Data";
 import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
 import * as policy from "../azure-devops-extension-api/policy/Data";
+import * as projectAnalysis from "../azure-devops-extension-api/projectAnalysis/Data";
 import * as release from "../azure-devops-extension-api/release/Data";
+import * as resourceUsage from "../azure-devops-extension-api/resourceUsage/Data";
 import * as serviceEndpoint from "../azure-devops-extension-api/serviceEndpoint/Data";
 import * as taskAgent from "../azure-devops-extension-api/taskAgent/Data";
 import * as test from "../azure-devops-extension-api/test/Data";
@@ -22,11 +26,15 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["build", build],
     ["core", core],
     ["dashboard", dashboard],
+    ["fileContainer", fileContainer],
     ["git", git],
     ["graph", graph],
+    ["operations", operations],
     ["pipelines", pipelines],
     ["policy", policy],
+    ["projectAnalysis", projectAnalysis],
     ["release", release],
+    ["resourceUsage", resourceUsage],
     ["serviceEndpoint", serviceEndpoint],
     ["taskAgent", taskAgent],
     ["test", test],

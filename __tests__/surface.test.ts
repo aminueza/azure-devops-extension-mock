@@ -3,11 +3,15 @@ import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
+import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
+import { OperationsRestClient } from "azure-devops-extension-api/Operations";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
+import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
@@ -28,11 +32,15 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     BuildRestClient,
     CoreRestClient,
     DashboardRestClient,
+    FileContainerRestClient,
     GitRestClient,
     GraphRestClient,
+    OperationsRestClient,
     PipelinesRestClient,
     PolicyRestClient,
+    ProjectAnalysisRestClient,
     ReleaseRestClient,
+    ResourceUsageRestClient,
     ServiceEndpointRestClient,
     TaskAgentRestClient,
     TestRestClient,

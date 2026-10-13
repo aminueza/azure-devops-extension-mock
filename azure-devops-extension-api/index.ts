@@ -4,11 +4,15 @@ import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
+import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
+import { OperationsRestClient } from "azure-devops-extension-api/Operations";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
+import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
@@ -31,11 +35,15 @@ import { MockBoardsRestClient } from "./boards/Boards";
 import { MockBuildRestClient } from "./build/Build";
 import { MockCoreRestClient } from "./core/Core";
 import { MockDashboardRestClient } from "./dashboard/Dashboard";
+import { MockFileContainerRestClient } from "./fileContainer/FileContainer";
 import { MockGitRestClient } from "./git/Git";
 import { MockGraphRestClient } from "./graph/Graph";
+import { MockOperationsRestClient } from "./operations/Operations";
 import { MockPipelinesRestClient } from "./pipelines/Pipelines";
 import { MockPolicyRestClient } from "./policy/Policy";
+import { MockProjectAnalysisRestClient } from "./projectAnalysis/ProjectAnalysis";
 import { MockReleaseRestClient } from "./release/Release";
+import { MockResourceUsageRestClient } from "./resourceUsage/ResourceUsage";
 import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
@@ -58,11 +66,15 @@ registerMockClient(WorkRestClient, MockBoardsRestClient);
 registerMockClient(BuildRestClient, MockBuildRestClient);
 registerMockClient(CoreRestClient, MockCoreRestClient);
 registerMockClient(DashboardRestClient, MockDashboardRestClient);
+registerMockClient(FileContainerRestClient, MockFileContainerRestClient);
 registerMockClient(GitRestClient, MockGitRestClient);
 registerMockClient(GraphRestClient, MockGraphRestClient);
+registerMockClient(OperationsRestClient, MockOperationsRestClient);
 registerMockClient(PipelinesRestClient, MockPipelinesRestClient);
 registerMockClient(PolicyRestClient, MockPolicyRestClient);
+registerMockClient(ProjectAnalysisRestClient, MockProjectAnalysisRestClient);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient);
+registerMockClient(ResourceUsageRestClient, MockResourceUsageRestClient);
 registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient);
 registerMockClient(TestRestClient, MockTestRestClient);
@@ -121,11 +133,15 @@ export {
     MockBuildRestClient,
     MockCoreRestClient,
     MockDashboardRestClient,
+    MockFileContainerRestClient,
     MockGitRestClient,
     MockGraphRestClient,
+    MockOperationsRestClient,
     MockPipelinesRestClient,
     MockPolicyRestClient,
+    MockProjectAnalysisRestClient,
     MockReleaseRestClient,
+    MockResourceUsageRestClient,
     MockServiceEndpointRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
