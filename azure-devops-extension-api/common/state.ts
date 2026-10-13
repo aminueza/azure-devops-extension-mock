@@ -1,5 +1,6 @@
 const snapshots = new Map<unknown[], unknown[]>();
 let enabled = false;
+let lastFreshId = 10_000_000;
 
 const track = (list: unknown[]): void => {
     if (!snapshots.has(list)) {
@@ -37,6 +38,17 @@ export const remember = <T>(list: T[], item: T, same?: (existing: T) => boolean)
         }
     }
     return item;
+};
+
+export const stored = <T>(list: T[], same: (existing: T) => boolean, fallback: () => T): T =>
+    (enabled ? list.find(same) : undefined) ?? fallback();
+
+export const freshId = (drawn: number): number => {
+    if (!enabled) {
+        return drawn;
+    }
+    lastFreshId += 1;
+    return lastFreshId;
 };
 
 export const forget = <T>(list: T[], same: (existing: T) => boolean): void => {

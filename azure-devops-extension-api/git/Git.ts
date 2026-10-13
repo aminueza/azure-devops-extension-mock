@@ -1,6 +1,6 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
-import { forget, remember, stateful } from "../common/state";
+import { forget, freshId, remember, stateful, stored } from "../common/state";
 import {
     AdvSecEnablementStatus,
     AdvSecEnablementUpdate,
@@ -309,7 +309,11 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve(
             remember(
                 repositories,
-                { ...makeGitRepository(), ...newRepositoryInfo, id: repositoryId },
+                {
+                    ...stored(repositories, r => r.id === repositoryId, makeGitRepository),
+                    ...newRepositoryInfo,
+                    id: repositoryId
+                },
                 r => r.id === repositoryId
             )
         );
@@ -400,7 +404,12 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createPullRequest(gitPullRequestToCreate: GitPullRequest, _repositoryId: string): Promise<GitPullRequest> {
-        const created = { ...makePullRequest(), ...gitPullRequestToCreate };
+        const drawn = makePullRequest();
+        const created = {
+            ...drawn,
+            ...gitPullRequestToCreate,
+            pullRequestId: gitPullRequestToCreate.pullRequestId ?? freshId(drawn.pullRequestId)
+        };
         return Promise.resolve(remember(pullRequests, created, p => p.pullRequestId === created.pullRequestId));
     }
 
@@ -413,7 +422,7 @@ export class MockGitRestClient extends RestClientBase {
             remember(
                 pullRequests,
                 {
-                    ...makePullRequest(),
+                    ...stored(pullRequests, p => p.pullRequestId === pullRequestId, makePullRequest),
                     ...gitPullRequestToUpdate,
                     pullRequestId
                 },
@@ -511,8 +520,10 @@ export class MockGitRestClient extends RestClientBase {
         _project?: string,
         _includeLinks?: boolean
     ): Promise<GitForkSyncRequest> {
+        const drawn = makeForkSyncRequest();
         const created = {
-            ...makeForkSyncRequest(),
+            ...drawn,
+            operationId: freshId(drawn.operationId),
             ...syncParams,
             status: GitAsyncOperationStatus.Queued
         };
@@ -553,9 +564,11 @@ export class MockGitRestClient extends RestClientBase {
         _project: string,
         repositoryId: string
     ): Promise<GitImportRequest> {
+        const drawn = makeImportRequest();
         const created = {
-            ...makeImportRequest(),
+            ...drawn,
             ...importRequest,
+            importRequestId: importRequest.importRequestId ?? freshId(drawn.importRequestId),
             repository: { ...makeGitRepository(), id: repositoryId },
             status: GitAsyncOperationStatus.Queued
         };
@@ -586,7 +599,7 @@ export class MockGitRestClient extends RestClientBase {
             remember(
                 importRequests,
                 {
-                    ...makeImportRequest(),
+                    ...stored(importRequests, r => r.importRequestId === importRequestId, makeImportRequest),
                     ...importRequestToUpdate,
                     importRequestId
                 },
@@ -883,8 +896,10 @@ export class MockGitRestClient extends RestClientBase {
         repositoryNameOrId: string,
         includeLinks?: boolean
     ): Promise<GitMerge> {
+        const drawn = makeGitMerge(mergeParameters.comment);
         const created = {
-            ...makeGitMerge(mergeParameters.comment),
+            ...drawn,
+            mergeOperationId: freshId(drawn.mergeOperationId),
             ...mergeParameters,
             status: GitAsyncOperationStatus.Queued,
             _links: includeLinks ? { repository: { href: repositoryNameOrId } } : {}

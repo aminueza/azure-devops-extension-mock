@@ -2,7 +2,7 @@ import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { patchOperations } from "../common/jsonPatch";
 import { fake } from "../common/fixtures";
-import { forget, remember, stateful } from "../common/state";
+import { forget, freshId, remember, stateful } from "../common/state";
 import { makeIdentityRef } from "../core/Data";
 import {
     WorkItemTrackingRestClient,
@@ -134,8 +134,13 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     createWorkItem(document: unknown, _project: string, type: string): Promise<WorkItem> {
-        const wi = makeWorkItem();
-        const workItemFields: Record<string, unknown> = { ...wi.fields, "System.WorkItemType": type };
+        const drawn = makeWorkItem();
+        const wi = { ...drawn, id: freshId(drawn.id) };
+        const workItemFields: Record<string, unknown> = {
+            ...wi.fields,
+            "System.Id": wi.id,
+            "System.WorkItemType": type
+        };
         for (const op of patchOperations(document)) {
             if (op.op === "add" && typeof op.path === "string" && op.path.startsWith("/fields/")) {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;

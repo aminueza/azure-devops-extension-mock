@@ -161,6 +161,45 @@ import { fake } from "azure-devops-extension-mock/fixtures";
 beforeEach(() => fake.seed(1234));
 ```
 
+### Stateful mode
+
+By default the mocks keep no state: an object you create with one method is
+not returned by a later `get` or `list`. Turn the stateful mode on to test
+flows that create, update or delete and then read back:
+
+```ts
+import { getClient, stateful } from "azure-devops-extension-mock";
+import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
+
+beforeEach(() => stateful.enable());
+afterEach(() => stateful.disable());
+
+it("reads back a work item it created", async () => {
+    const client = getClient(WorkItemTrackingRestClient);
+    const created = await client.createWorkItem(
+        [{ op: "add", path: "/fields/System.Title", value: "Fix login" }],
+        "MyProject",
+        "Bug"
+    );
+    const read = await client.getWorkItem(created.id);
+    expect(read.fields["System.Title"]).toBe("Fix login");
+});
+```
+
+- `stateful.enable()` turns it on, `stateful.reset()` restores the seeded
+  data, and `stateful.disable()` restores it and turns the mode off.
+- The mode covers `GitRestClient`, `WorkItemTrackingRestClient` and
+  `BuildRestClient`. The other clients stay stateless.
+- An update starts from the stored entry, so fields you do not pass keep
+  their value. An object you create without an id gets one that no seeded
+  entry uses.
+- Not every read follows the writes. In Git, a created thread is not listed
+  by `getThreads` and new refs do not appear in `getBranches`; reviewers,
+  labels and statuses are shared by all pull requests. In WorkItemTracking,
+  revisions and updates are not recorded and `getRootNodes` does not show
+  created nodes. In Build, tags and artifacts are shared by all builds, and
+  settings and property bags stay stateless.
+
 ## Using with jest
 
 Two things to wire up when testing an extension:

@@ -1,7 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { patchOperations } from "../common/jsonPatch";
-import { forget, remember } from "../common/state";
+import { forget, remember, stored } from "../common/state";
 import {
     Attachment,
     BuildRestClient,
@@ -150,7 +150,11 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     updateDefinition(definition: BuildDefinition, _project: string, definitionId: number): Promise<BuildDefinition> {
-        const updated = { ...makeBuildDefinition(), ...definition, id: definitionId };
+        const updated = {
+            ...stored(buildDefinitions, existing => existing.id === definitionId, makeBuildDefinition),
+            ...definition,
+            id: definitionId
+        };
         return Promise.resolve(remember(buildDefinitions, updated, existing => existing.id === definitionId));
     }
 
@@ -174,12 +178,15 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     updateBuild(build: Build, _project: string, buildId: number): Promise<Build> {
-        const updated = { ...makeBuild(), ...build, id: buildId };
+        const updated = { ...stored(buildList, existing => existing.id === buildId, makeBuild), ...build, id: buildId };
         return Promise.resolve(remember(buildList, updated, existing => existing.id === buildId));
     }
 
     updateBuilds(builds: Build[], _project: string): Promise<Build[]> {
-        const updated = builds.map(build => ({ ...makeBuild(), ...build }));
+        const updated = builds.map(build => ({
+            ...stored(buildList, existing => existing.id === build.id, makeBuild),
+            ...build
+        }));
         for (const build of updated) {
             remember(buildList, build, existing => existing.id === build.id);
         }
@@ -369,7 +376,15 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     updateFolder(folder: Folder, _project: string, path: string): Promise<Folder> {
-        const updated = { ...makeFolder(path), ...folder, path };
+        const updated = {
+            ...stored(
+                folders,
+                existing => existing.path === path,
+                () => makeFolder(path)
+            ),
+            ...folder,
+            path
+        };
         return Promise.resolve(remember(folders, updated, existing => existing.path === path));
     }
 
@@ -724,8 +739,23 @@ export class MockBuildRestClient extends RestClientBase {
         _project: string,
         leaseId: number
     ): Promise<RetentionLease> {
+        const updated = makeUpdatedLease(leaseId, leaseUpdate);
+        const kept = stored(
+            retentionLeases,
+            existing => existing.leaseId === leaseId,
+            () => updated
+        );
         return Promise.resolve(
-            remember(retentionLeases, makeUpdatedLease(leaseId, leaseUpdate), existing => existing.leaseId === leaseId)
+            remember(
+                retentionLeases,
+                {
+                    ...updated,
+                    ownerId: kept.ownerId,
+                    definitionId: kept.definitionId,
+                    runId: kept.runId
+                },
+                existing => existing.leaseId === leaseId
+            )
         );
     }
 
