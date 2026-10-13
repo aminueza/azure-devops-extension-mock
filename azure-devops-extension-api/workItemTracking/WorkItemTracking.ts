@@ -140,7 +140,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;
             }
         }
-        return Promise.resolve({ ...wi, fields: workItemFields } as WorkItem);
+        return Promise.resolve({ ...wi, fields: workItemFields });
     }
 
     updateWorkItem(

@@ -4,7 +4,7 @@ import { Account, AccountStatus, AccountType } from "azure-devops-extension-api/
 /**
  * Mocked AccountsRestClient data
  */
-export const accounts = Array.from({ length: 10 }, () => (
+export const accounts = Array.from({ length: 10 }, (): Account => (
     {
         accountId: fake.string.uuid(),
         accountName: fake.lorem.slug(),
@@ -31,4 +31,4 @@ export const accounts = Array.from({ length: 10 }, () => (
             "key": "value"
         },
         statusReason: fake.lorem.sentence()
-    } as Account));
+    }));

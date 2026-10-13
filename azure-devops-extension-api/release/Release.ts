@@ -64,6 +64,7 @@ import {
     makeBuffer,
     makeEnvironment,
     makeEnvironmentTemplate,
+    makePagedList,
     makeFavoriteItem,
     makeFolder,
     makeInputValuesQuery,
@@ -128,9 +129,7 @@ export class MockReleaseRestClient extends RestClientBase {
     }
 
     getReleases(_project?: string): Promise<PagedList<Release>> {
-        return Promise.resolve(
-            Object.assign([...releases], { continuationToken: "" }) as unknown as PagedList<Release>
-        );
+        return Promise.resolve(makePagedList(releases));
     }
 
     getRelease(_project: string, releaseId: number): Promise<Release> {

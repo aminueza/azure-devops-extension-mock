@@ -2,6 +2,10 @@ import { fake } from "../common/fixtures";
 import {
     TaskAgent,
     TaskAgentPool,
+    TaskAgentPoolOptions,
+    TaskAgentPoolReference,
+    TaskAgentReference,
+    TaskAgentUpdateReasonType,
     TaskAgentQueue,
     TaskGroup,
     VariableGroup,
@@ -13,7 +17,6 @@ import {
     EnvironmentResourceType,
     TaskAgentStatus,
     TaskAgentPoolType,
-    VariableGroupProviderData,
     TaskAgentCloud,
     TaskAgentCloudType,
     TaskAgentCloudRequest,
@@ -50,26 +53,31 @@ import {
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef } from "../core/Data";
 
-export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
+export const makeAgentPoolReference = (name = "Default"): TaskAgentPoolReference => ({
     id: fake.number.id(),
     name,
     scope: fake.string.uuid(),
     isHosted: name.startsWith("Azure"),
-    poolType: TaskAgentPoolType.Automation,
-    size: fake.number.int({ min: 1, max: 50 }),
-    agentCloudId: 0,
     isLegacy: false,
+    options: TaskAgentPoolOptions.None,
+    poolType: TaskAgentPoolType.Automation,
+    size: fake.number.int({ min: 1, max: 50 })
+});
+
+export const makeAgentPool = (name = "Default"): TaskAgentPool => ({
+    ...makeAgentPoolReference(name),
+    agentCloudId: 0,
     autoProvision: false,
     autoSize: false,
     autoUpdate: true,
     createdOn: fake.date.past(),
     createdBy: makeIdentityRef(),
     owner: makeIdentityRef(),
-    targetSize: 0,
-    _links: {} as any
-} as unknown as TaskAgentPool);
+    properties: {},
+    targetSize: 0
+});
 
-export const makeAgent = (name?: string): TaskAgent => ({
+export const makeAgentReference = (name?: string): TaskAgentReference => ({
     id: fake.number.id(),
     name: name ?? `agent-${fake.lorem.slug()}`,
     version: `${fake.number.int({ min: 2, max: 3 })}.218.0`,
@@ -82,76 +90,248 @@ export const makeAgent = (name?: string): TaskAgent => ({
     ]),
     provisioningState: "Provisioned",
     accessPoint: "CodexAccessMapping",
-    createdOn: fake.date.past(),
-    maxParallelism: 1,
-    statusChangedOn: fake.date.recent(),
-    systemCapabilities: {
-        "Agent.OS": "Linux",
-        "Agent.OSArchitecture": "X64"
-    },
-    userCapabilities: {},
-    _links: {} as any
-} as unknown as TaskAgent);
+    _links: {}
+});
+
+export const makeOrchestrationOwner = (): TaskOrchestrationOwner => ({
+    _links: {},
+    id: fake.number.id(),
+    name: fake.lorem.slug()
+});
+
+export const makeAgentCloudRequest = (): TaskAgentCloudRequest => ({
+    agent: makeAgentReference(),
+    agentCloudId: fake.number.int({ min: 1, max: 500 }),
+    agentConnectedTime: fake.date.recent(),
+    agentData: { poolName: fake.lorem.slug() },
+    agentSpecification: { VMImage: fake.lorem.slug() },
+    pool: makeAgentPoolReference(),
+    poolProvidersTags: { tier: fake.lorem.word() },
+    provisionedTime: fake.date.recent(),
+    provisionRequestTime: fake.date.recent(),
+    releaseRequestTime: fake.date.recent(),
+    requestId: fake.string.uuid(),
+    requestVersion: fake.number.int({ min: 1, max: 5 })
+});
+
+export const makeAgentJobRequest = (): TaskAgentJobRequest => ({
+    agentSpecification: { VMImage: fake.lorem.slug() },
+    assignTime: fake.date.recent(),
+    data: { ParallelismTag: "Private", ServiceOwner: fake.string.uuid() },
+    definition: makeOrchestrationOwner(),
+    demands: [{ name: "Agent.Version", value: "2.218.0" }],
+    finishTime: fake.date.recent(),
+    hostId: fake.string.uuid(),
+    jobId: fake.string.uuid(),
+    jobName: fake.lorem.slug(),
+    lockedUntil: fake.date.future(),
+    matchedAgents: [makeAgentReference()],
+    matchesAllAgentsInPool: false,
+    orchestrationId: fake.string.uuid(),
+    owner: makeOrchestrationOwner(),
+    planGroup: fake.lorem.slug(),
+    planId: fake.string.uuid(),
+    planType: "Build",
+    poolId: fake.number.int({ min: 1, max: 1000 }),
+    priority: fake.number.int({ min: 0, max: 10 }),
+    queueId: fake.number.int({ min: 1, max: 1000 }),
+    queueTime: fake.date.past(),
+    receiveTime: fake.date.recent(),
+    requestId: fake.number.int({ min: 1, max: 10_000 }),
+    reservedAgent: makeAgentReference(),
+    result: TaskResult.Succeeded,
+    scopeId: fake.string.uuid(),
+    serviceOwner: fake.string.uuid(),
+    statusMessage: fake.lorem.sentence(),
+    userDelayed: false
+});
+
+export const makeAgent = (name?: string): TaskAgent => {
+    const reference = makeAgentReference(name);
+    return {
+        ...reference,
+        assignedAgentCloudRequest: fake.helpers.absent(),
+        assignedRequest: fake.helpers.absent(),
+        authorization: {
+            authorizationUrl: fake.internet.url(),
+            clientId: fake.string.uuid(),
+            publicKey: {
+                exponent: [1, 0, 1],
+                modulus: Array.from({ length: 8 }, () => fake.number.int({ min: 0, max: 255 }))
+            }
+        },
+        createdOn: fake.date.past(),
+        lastCompletedRequest: fake.helpers.absent(),
+        maxParallelism: 1,
+        pendingUpdate: {
+            currentState: "Completed",
+            reason: { code: TaskAgentUpdateReasonType.Manual },
+            requestedBy: makeIdentityRef(),
+            requestTime: fake.date.recent(),
+            sourceVersion: { major: 2, minor: 217, patch: 0 },
+            targetVersion: { major: 2, minor: 218, patch: 0 }
+        },
+        properties: {},
+        statusChangedOn: fake.date.recent(),
+        systemCapabilities: {
+            "Agent.OS": "Linux",
+            "Agent.OSArchitecture": "X64"
+        },
+        userCapabilities: {}
+    };
+};
 
 export const makeAgentQueue = (name = "Default"): TaskAgentQueue => ({
     id: fake.number.id(),
     name,
     projectId: fake.string.uuid(),
-    pool: {
-        id: fake.number.id(),
+    pool: makeAgentPoolReference(name)
+});
+
+export const makeTaskDefinition = (): TaskDefinition => {
+    const name = fake.lorem.slug(2);
+    const base: Omit<TaskDefinition, "deprecationMessage" | "retiredDate"> = {
+        _buildConfigMapping: { Default: "1.0.0" },
+        agentExecution: {
+            execTask: {
+                buildConfig: "Default",
+                contributionIdentifier: `ms.vss-distributed-task.${name}`,
+                contributionVersion: "1.0.0",
+                id: fake.string.uuid(),
+                inputs: {},
+                name,
+                version: "1.0.0"
+            },
+            platformInstructions: {}
+        },
+        author: fake.company.name(),
+        buildConfig: "Default",
+        category: fake.helpers.arrayElement(["Build", "Deploy", "Package", "Test", "Utility"]),
+        contentsUploaded: true,
+        contributionIdentifier: `ms.vss-distributed-task.${name}`,
+        contributionVersion: "1.0.0",
+        dataSourceBindings: [],
+        definitionType: "task",
+        demands: [{ name: "Agent.Version", value: "2.218.0" }],
+        deprecated: false,
+        description: fake.lorem.sentence(),
+        disabled: false,
+        ecosystem: "",
+        execution: { Node20_1: { target: "index.js" } },
+        friendlyName: fake.commerce.productName(),
+        groups: [
+            {
+                displayName: "Advanced",
+                isExpanded: false,
+                name: "advanced",
+                tags: [],
+                visibleRule: ""
+            }
+        ],
+        helpMarkDown: fake.lorem.sentence(),
+        helpUrl: fake.internet.url(),
+        hostType: "",
+        iconUrl: fake.image.url(),
+        id: fake.string.uuid(),
+        inputs: [
+            {
+                aliases: [],
+                defaultValue: "",
+                groupName: "advanced",
+                helpMarkDown: fake.lorem.sentence(),
+                label: "Working directory",
+                name: "workingDirectory",
+                options: {},
+                properties: {},
+                required: false,
+                type: "filePath",
+                validation: { expression: "", message: "" },
+                visibleRule: ""
+            }
+        ],
+        instanceNameFormat: `Run ${name}`,
+        minimumAgentVersion: "2.144.0",
         name,
-        isHosted: name.startsWith("Azure"),
-        poolType: TaskAgentPoolType.Automation
-    } as any,
-    _links: {} as any
-} as unknown as TaskAgentQueue);
+        outputVariables: [{ description: fake.lorem.sentence(), name: "result" }],
+        packageLocation: "",
+        packageType: "",
+        postJobExecution: {},
+        preJobExecution: {},
+        preview: false,
+        release: { ordinal: 1, sprint: fake.number.int({ min: 180, max: 260 }) },
+        releaseNotes: fake.lorem.sentence(),
+        restrictions: {
+            commands: { mode: TaskCommandMode.Any },
+            settableVariables: { allowed: [] }
+        },
+        runsOn: ["Agent", "DeploymentGroup"],
+        satisfies: [],
+        serverOwned: true,
+        showEnvironmentVariables: false,
+        sourceDefinitions: [],
+        sourceLocation: "",
+        version: {
+            build: "",
+            isTest: false,
+            major: fake.number.int({ min: 0, max: 5 }),
+            minor: fake.number.int({ min: 0, max: 260 }),
+            patch: fake.number.int({ min: 0, max: 20 }),
+            preRelease: ""
+        },
+        visibility: ["Build", "Release"]
+    };
+    const newerFields = { deprecationMessage: "", retiredDate: fake.date.future() };
+    return { ...base, ...newerFields };
+};
 
 export const makeTaskGroup = (): TaskGroup => ({
+    ...makeTaskDefinition(),
     id: fake.string.uuid(),
     name: fake.lorem.slug(),
     description: fake.lorem.sentence(),
-    version: { major: 1, minor: 0, patch: 0, isTest: false } as any,
+    version: { build: "", isTest: false, major: 1, minor: 0, patch: 0, preRelease: "" },
     revision: 1,
     tasks: [],
     inputs: [],
-    outputs: [],
     createdBy: makeIdentityRef(),
     createdOn: fake.date.past(),
     modifiedBy: makeIdentityRef(),
     modifiedOn: fake.date.recent(),
     author: fake.person.fullName(),
     owner: fake.person.fullName(),
-    _links: {} as any
-} as unknown as TaskGroup);
+    comment: fake.lorem.sentence(),
+    definitionType: "metaTask",
+    deleted: false,
+    parentDefinitionId: fake.string.uuid()
+});
 
 export const makeVariableGroup = (name?: string): VariableGroup => ({
     id: fake.number.id(),
     name: name ?? fake.lorem.slug(),
     description: fake.lorem.sentence(),
     type: "Vsts",
-    providerData: undefined as unknown as VariableGroupProviderData,
+    providerData: {},
     variables: {
-        "MyVariable": { value: "myValue", isSecret: false }
-    } as any,
+        "MyVariable": { value: "myValue", isReadOnly: false, isSecret: false }
+    },
     variableGroupProjectReferences: [],
     createdBy: makeIdentityRef(),
     createdOn: fake.date.past(),
     modifiedBy: makeIdentityRef(),
     modifiedOn: fake.date.recent(),
     isShared: false
-} as unknown as VariableGroup);
+});
 
 export const makeDeploymentGroup = (): DeploymentGroup => ({
     id: fake.number.id(),
     name: fake.lorem.slug(),
     description: fake.lorem.sentence(),
-    project: { id: fake.string.uuid(), name: fake.company.name() } as any,
-    pool: makeAgentPool() as any,
+    project: { id: fake.string.uuid(), name: fake.company.name() },
+    pool: makeAgentPool(),
     machineCount: fake.number.int({ min: 1, max: 50 }),
     machines: [],
-    poolId: fake.number.int(),
-    _links: {} as any
-} as unknown as DeploymentGroup);
+    machineTags: [fake.lorem.word(), fake.lorem.word()]
+});
 
 export const makeAgentCloud = (): TaskAgentCloud => ({
     acquireAgentEndpoint: fake.internet.url(),
@@ -173,21 +353,6 @@ export const makeAgentCloudType = (): TaskAgentCloudType => ({
     displayName: fake.commerce.productName(),
     inputDescriptors: [],
     name: fake.lorem.slug()
-});
-
-export const makeAgentCloudRequest = (): TaskAgentCloudRequest => ({
-    agent: makeAgent(),
-    agentCloudId: fake.number.int({ min: 1, max: 500 }),
-    agentConnectedTime: fake.date.recent(),
-    agentData: { poolName: fake.lorem.slug() },
-    agentSpecification: { VMImage: fake.lorem.slug() },
-    pool: makeAgentPool(),
-    poolProvidersTags: { tier: fake.lorem.word() },
-    provisionedTime: fake.date.recent(),
-    provisionRequestTime: fake.date.recent(),
-    releaseRequestTime: fake.date.recent(),
-    requestId: fake.string.uuid(),
-    requestVersion: fake.number.int({ min: 1, max: 5 })
 });
 
 export const makeQueueRestrictions = (): TaskAgentQueueRestrictions => ({
@@ -255,45 +420,7 @@ export const variableGroups: VariableGroup[] = [
 export const deploymentGroups: DeploymentGroup[] = Array.from({ length: 2 }, makeDeploymentGroup);
 
 export const deploymentGroupsPage: PagedList<DeploymentGroup> =
-    Object.assign([...deploymentGroups], { continuationToken: "" }) as PagedList<DeploymentGroup>;
-
-export const makeOrchestrationOwner = (): TaskOrchestrationOwner => ({
-    _links: {},
-    id: fake.number.id(),
-    name: fake.lorem.slug()
-});
-
-export const makeAgentJobRequest = (): TaskAgentJobRequest => ({
-    agentSpecification: { VMImage: fake.lorem.slug() },
-    assignTime: fake.date.recent(),
-    data: { ParallelismTag: "Private", ServiceOwner: fake.string.uuid() },
-    definition: makeOrchestrationOwner(),
-    demands: [{ name: "Agent.Version", value: "2.218.0" }],
-    finishTime: fake.date.recent(),
-    hostId: fake.string.uuid(),
-    jobId: fake.string.uuid(),
-    jobName: fake.lorem.slug(),
-    lockedUntil: fake.date.future(),
-    matchedAgents: [makeAgent()],
-    matchesAllAgentsInPool: false,
-    orchestrationId: fake.string.uuid(),
-    owner: makeOrchestrationOwner(),
-    planGroup: fake.lorem.slug(),
-    planId: fake.string.uuid(),
-    planType: "Build",
-    poolId: fake.number.int({ min: 1, max: 1000 }),
-    priority: fake.number.int({ min: 0, max: 10 }),
-    queueId: fake.number.int({ min: 1, max: 1000 }),
-    queueTime: fake.date.past(),
-    receiveTime: fake.date.recent(),
-    requestId: fake.number.int({ min: 1, max: 10_000 }),
-    reservedAgent: makeAgent(),
-    result: TaskResult.Succeeded,
-    scopeId: fake.string.uuid(),
-    serviceOwner: fake.string.uuid(),
-    statusMessage: fake.lorem.sentence(),
-    userDelayed: false
-});
+    Object.assign([...deploymentGroups], { continuationToken: "" });
 
 export const makeAgentSession = (): TaskAgentSession => ({
     agent: makeAgent(),
@@ -327,7 +454,7 @@ export const agentRequests: TaskAgentJobRequest[] = Array.from(
         jobId: `job-${900 + index}`,
         queueId: 800 + index,
         poolId: 600 + index,
-        reservedAgent: { ...makeAgent(), id: 700 + index }
+        reservedAgent: { ...makeAgentReference(), id: 700 + index }
     })
 );
 
@@ -623,102 +750,6 @@ export const makeSecureFile = (name?: string): SecureFile => ({
     properties: { environment: fake.lorem.word() },
     ticket: fake.string.alphanumeric(32)
 });
-
-export const makeTaskDefinition = (): TaskDefinition => {
-    const name = fake.lorem.slug(2);
-    const base: Omit<TaskDefinition, "deprecationMessage" | "retiredDate"> = {
-        _buildConfigMapping: { Default: "1.0.0" },
-        agentExecution: {
-            execTask: {
-                buildConfig: "Default",
-                contributionIdentifier: `ms.vss-distributed-task.${name}`,
-                contributionVersion: "1.0.0",
-                id: fake.string.uuid(),
-                inputs: {},
-                name,
-                version: "1.0.0"
-            },
-            platformInstructions: {}
-        },
-        author: fake.company.name(),
-        buildConfig: "Default",
-        category: fake.helpers.arrayElement(["Build", "Deploy", "Package", "Test", "Utility"]),
-        contentsUploaded: true,
-        contributionIdentifier: `ms.vss-distributed-task.${name}`,
-        contributionVersion: "1.0.0",
-        dataSourceBindings: [],
-        definitionType: "task",
-        demands: [{ name: "Agent.Version", value: "2.218.0" }],
-        deprecated: false,
-        description: fake.lorem.sentence(),
-        disabled: false,
-        ecosystem: "",
-        execution: { Node20_1: { target: "index.js" } },
-        friendlyName: fake.commerce.productName(),
-        groups: [
-            {
-                displayName: "Advanced",
-                isExpanded: false,
-                name: "advanced",
-                tags: [],
-                visibleRule: ""
-            }
-        ],
-        helpMarkDown: fake.lorem.sentence(),
-        helpUrl: fake.internet.url(),
-        hostType: "",
-        iconUrl: fake.image.url(),
-        id: fake.string.uuid(),
-        inputs: [
-            {
-                aliases: [],
-                defaultValue: "",
-                groupName: "advanced",
-                helpMarkDown: fake.lorem.sentence(),
-                label: "Working directory",
-                name: "workingDirectory",
-                options: {},
-                properties: {},
-                required: false,
-                type: "filePath",
-                validation: { expression: "", message: "" },
-                visibleRule: ""
-            }
-        ],
-        instanceNameFormat: `Run ${name}`,
-        minimumAgentVersion: "2.144.0",
-        name,
-        outputVariables: [{ description: fake.lorem.sentence(), name: "result" }],
-        packageLocation: "",
-        packageType: "",
-        postJobExecution: {},
-        preJobExecution: {},
-        preview: false,
-        release: { ordinal: 1, sprint: fake.number.int({ min: 180, max: 260 }) },
-        releaseNotes: fake.lorem.sentence(),
-        restrictions: {
-            commands: { mode: TaskCommandMode.Any },
-            settableVariables: { allowed: [] }
-        },
-        runsOn: ["Agent", "DeploymentGroup"],
-        satisfies: [],
-        serverOwned: true,
-        showEnvironmentVariables: false,
-        sourceDefinitions: [],
-        sourceLocation: "",
-        version: {
-            build: "",
-            isTest: false,
-            major: fake.number.int({ min: 0, max: 5 }),
-            minor: fake.number.int({ min: 0, max: 260 }),
-            patch: fake.number.int({ min: 0, max: 20 }),
-            preRelease: ""
-        },
-        visibility: ["Build", "Release"]
-    };
-    const newerFields = { deprecationMessage: "", retiredDate: fake.date.future() };
-    return { ...base, ...newerFields };
-};
 
 export const azureManagementGroups: AzureManagementGroup[] = Array.from(
     { length: 2 },

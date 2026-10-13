@@ -1,6 +1,13 @@
-import { DashboardRestClient, DashboardScope, WidgetScope } from "azure-devops-extension-api/Dashboard";
+import {
+    DashboardRestClient,
+    DashboardScope,
+    GroupMemberPermission,
+    TeamDashboardPermission,
+    WidgetScope
+} from "azure-devops-extension-api/Dashboard";
 import { getClient } from "../azure-devops-extension-api";
 import {
+    dashboardGroup,
     dashboards,
     makeDashboard,
     makeDashboardGroup,
@@ -100,5 +107,47 @@ describe("dashboard data factories", () => {
         expect(makeDashboardGroup().dashboardEntries.length).toBe(2);
         expect(makeWidgetMetadata().contributionId).toMatch(/-widget$/);
         expect(makeWidgetMetadata("x.y").configurationContributionId).toBe("x.y-configuration");
+    });
+});
+
+describe("dashboard fixtures checked by the compiler", () => {
+    it("fills the widget configuration, sizes and parent dashboard", () => {
+        const widget = makeWidget();
+        expect(widget.allowedSizes).toEqual([
+            { rowSpan: 1, columnSpan: 1 },
+            { rowSpan: 2, columnSpan: 2 }
+        ]);
+        expect(widget.areSettingsBlockedForUser).toBe(false);
+        expect(widget.artifactId).toBe("");
+        expect(widget.configurationContributionId).toBe(`${widget.contributionId}-configuration`);
+        expect(widget.configurationContributionRelativeId).toBe(widget.configurationContributionId);
+        expect(widget.contentUri).toMatch(/^https:/);
+        expect(widget.settingsVersion).toEqual({ major: 1, minor: 0, patch: 0 });
+        expect(widget.lightboxOptions).toEqual({ width: 800, height: 600, resizable: false });
+        expect(widget.dashboard.name).toBe("Overview");
+        expect(widget.dashboard.widgets).toEqual([]);
+    });
+
+    it("fills the dashboard audit fields", () => {
+        const dashboard = makeDashboard("Ops");
+        expect(dashboard.globalParametersConfig).toBe("");
+        expect(dashboard.lastAccessedDate).toBeInstanceOf(Date);
+        expect(dashboard.modifiedDate).toBeInstanceOf(Date);
+        expect(dashboard.modifiedBy).toMatch(/^[0-9a-f-]{36}$/);
+        expect(dashboard._links).toEqual({});
+        dashboard.widgets.forEach(widget => expect(widget.dashboard.widgets).toEqual([]));
+    });
+
+    it("fills the dashboard group entries and permissions", () => {
+        const group = makeDashboardGroup();
+        expect(group.permission).toBe(GroupMemberPermission.None);
+        expect(group.teamDashboardPermission).toBe(TeamDashboardPermission.None);
+        group.dashboardEntries.forEach(entry => {
+            expect(entry.dashboardScope).toBe(DashboardScope.Project_Team);
+            expect(entry.widgets).toEqual([]);
+            expect(entry.modifiedDate).toBeInstanceOf(Date);
+            expect(entry.eTag).toMatch(/^[0-9a-f-]{36}$/);
+        });
+        expect(dashboardGroup.dashboardEntries).toHaveLength(2);
     });
 });

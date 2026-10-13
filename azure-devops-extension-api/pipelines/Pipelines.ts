@@ -49,7 +49,7 @@ export class MockPipelinesRestClient extends RestClientBase {
             ...next,
             name: inputParameters.name ?? next.name,
             folder: inputParameters.folder ?? next.folder,
-            configuration: inputParameters.configuration as any
+            configuration: inputParameters.configuration
         });
     }
 
@@ -69,7 +69,7 @@ export class MockPipelinesRestClient extends RestClientBase {
     ): Promise<Run> {
         return Promise.resolve({
             ...makeRun(pipelineId),
-            variables: (runParameters as any).variables ?? {}
+            variables: runParameters.variables ?? {}
         });
     }
 

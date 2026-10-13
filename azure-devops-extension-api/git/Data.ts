@@ -14,10 +14,14 @@ import {
     GitRepositoryRef,
     GitPullRequest,
     GitPullRequestCommentThread,
+    GitPullRequestMergeStrategy,
+    GitCommit,
     GitCommitRef,
     GitBranchStats,
     GitRef,
     GitItem,
+    PullRequestAsyncStatus,
+    PullRequestMergeFailureType,
     PullRequestStatus,
     GitObjectType,
     GitPullRequestStatus,
@@ -62,129 +66,13 @@ import {
     VersionControlChangeType
 } from "azure-devops-extension-api/Git";
 import { WebApiTagDefinition } from "azure-devops-extension-api/Core";
-import { IdentityRef, ResourceRef } from "azure-devops-extension-api/WebApi";
+import { IdentityRef, PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
 import {
     makeIdentityRef,
     makeProjectCollectionReference,
     makeProjectReference,
     makeTagDefinition
 } from "../core/Data";
-
-export const makeGitRepository = (): GitRepository => ({
-    id: fake.string.uuid(),
-    name: fake.lorem.slug(),
-    url: fake.internet.url(),
-    remoteUrl: fake.internet.url(),
-    sshUrl: `git@${fake.internet.domainName()}:${fake.lorem.slug()}.git`,
-    webUrl: fake.internet.url(),
-    defaultBranch: "refs/heads/main",
-    size: fake.number.int({ min: 1024, max: 10_000_000 }),
-    isFork: false,
-    isDisabled: false,
-    isInMaintenance: false,
-    project: makeProjectReference() as any,
-    _links: {} as any
-} as unknown as GitRepository);
-
-export const makeGitRef = (name = "refs/heads/main"): GitRef => ({
-    name,
-    objectId: fake.git.commitSha(),
-    creator: makeIdentityRef(),
-    url: fake.internet.url(),
-    _links: {} as any
-} as unknown as GitRef);
-
-export const makeCommit = (): GitCommitRef => ({
-    commitId: fake.git.commitSha(),
-    author: {
-        name: fake.person.fullName(),
-        email: fake.internet.email(),
-        date: fake.date.recent()
-    },
-    committer: {
-        name: fake.person.fullName(),
-        email: fake.internet.email(),
-        date: fake.date.recent()
-    },
-    comment: fake.git.commitMessage(),
-    url: fake.internet.url(),
-    remoteUrl: fake.internet.url(),
-    parents: [fake.git.commitSha()]
-} as unknown as GitCommitRef);
-
-export const makePullRequest = (): GitPullRequest => ({
-    pullRequestId: fake.number.int({ min: 1, max: 10_000 }),
-    codeReviewId: fake.number.int(),
-    status: PullRequestStatus.Active,
-    createdBy: makeIdentityRef(),
-    creationDate: fake.date.recent(),
-    title: fake.lorem.sentence(),
-    description: fake.lorem.paragraph(),
-    sourceRefName: `refs/heads/${fake.git.branch()}`,
-    targetRefName: "refs/heads/main",
-    mergeStatus: 3 as any,
-    isDraft: false,
-    reviewers: [],
-    url: fake.internet.url(),
-    repository: makeGitRepository(),
-    labels: [],
-    workItemRefs: [],
-    _links: {} as any
-} as unknown as GitPullRequest);
-
-export const makeBranchStats = (name = "main"): GitBranchStats => ({
-    name,
-    aheadCount: fake.number.int({ min: 0, max: 5 }),
-    behindCount: fake.number.int({ min: 0, max: 20 }),
-    isBaseVersion: name === "main",
-    commit: makeCommit()
-} as unknown as GitBranchStats);
-
-export const makeGitItem = (path = "/README.md"): GitItem => ({
-    objectId: fake.git.commitSha(),
-    commitId: fake.git.commitSha(),
-    path,
-    isFolder: path.endsWith("/"),
-    url: fake.internet.url(),
-    gitObjectType: path.endsWith("/") ? GitObjectType.Tree : GitObjectType.Blob,
-    latestProcessedChange: makeCommit(),
-    _links: {} as any
-} as unknown as GitItem);
-
-export const makePush = (): GitPush => ({
-    pushId: fake.number.int({ min: 1, max: 10_000 }),
-    date: fake.date.recent(),
-    pushedBy: makeIdentityRef(),
-    url: fake.internet.url(),
-    refUpdates: [],
-    commits: [makeCommit()],
-    repository: makeGitRepository()
-} as unknown as GitPush);
-
-export const makeCommentThread = (): GitPullRequestCommentThread => ({
-    id: fake.number.id(),
-    pullRequestThreadContext: {
-        iterationContext: {
-            firstComparingIteration: 1,
-            secondComparingIteration: 2
-        },
-        changeTrackingId: fake.number.int()
-    },
-    status: 1 as any,
-    comments: [{
-        id: 1,
-        parentCommentId: 0,
-        author: makeIdentityRef(),
-        content: fake.lorem.sentence(),
-        publishedDate: fake.date.recent(),
-        lastUpdatedDate: fake.date.recent(),
-        lastContentUpdatedDate: fake.date.recent(),
-        commentType: 1
-    }] as any,
-    lastUpdatedDate: fake.date.recent(),
-    publishedDate: fake.date.recent(),
-    _links: {} as any
-} as unknown as GitPullRequestCommentThread);
 
 export const makeGitRepositoryRef = (): GitRepositoryRef => ({
     id: fake.string.uuid(),
@@ -196,6 +84,227 @@ export const makeGitRepositoryRef = (): GitRepositoryRef => ({
     sshUrl: `git@${fake.internet.domainName()}:${fake.lorem.slug()}.git`,
     url: fake.internet.url()
 });
+
+export const makeGitRepository = (): GitRepository => ({
+    id: fake.string.uuid(),
+    name: fake.lorem.slug(),
+    url: fake.internet.url(),
+    remoteUrl: fake.internet.url(),
+    sshUrl: `git@${fake.internet.domainName()}:${fake.lorem.slug()}.git`,
+    webUrl: fake.internet.url(),
+    validRemoteUrls: [fake.internet.url()],
+    defaultBranch: "refs/heads/main",
+    size: fake.number.int({ min: 1024, max: 10_000_000 }),
+    creationDate: fake.date.past(),
+    isFork: false,
+    isDisabled: false,
+    isInMaintenance: false,
+    parentRepository: fake.helpers.absent(),
+    project: makeProjectReference(),
+    _links: {}
+});
+
+export const makeGitRef = (name = "refs/heads/main"): GitRef => ({
+    name,
+    objectId: fake.git.commitSha(),
+    peeledObjectId: fake.git.commitSha(),
+    creator: makeIdentityRef(),
+    isLocked: false,
+    isLockedBy: fake.helpers.absent(),
+    statuses: [],
+    url: fake.internet.url(),
+    _links: {}
+});
+
+export const makeGitUserDate = (): GitUserDate => ({
+    date: fake.date.recent(),
+    email: fake.internet.email(),
+    imageUrl: fake.internet.url(),
+    name: fake.person.fullName()
+});
+
+export const makePushRef = (pushId: number): GitPushRef => ({
+    _links: {},
+    date: fake.date.recent(),
+    pushCorrelationId: fake.string.uuid(),
+    pushedBy: makeIdentityRef(),
+    pushId,
+    url: fake.internet.url()
+});
+
+export const makeCommit = (): GitCommitRef => ({
+    commitId: fake.git.commitSha(),
+    author: makeGitUserDate(),
+    committer: makeGitUserDate(),
+    comment: fake.git.commitMessage(),
+    commentTruncated: false,
+    changeCounts: { [VersionControlChangeType.Edit]: 1 },
+    changes: [],
+    commitTooManyChanges: false,
+    url: fake.internet.url(),
+    remoteUrl: fake.internet.url(),
+    parents: [fake.git.commitSha()],
+    push: makePushRef(fake.number.id()),
+    statuses: [],
+    workItems: [],
+    _links: {}
+});
+
+export const makeGitCommit = (): GitCommit => ({
+    ...makeCommit(),
+    treeId: fake.git.commitSha()
+});
+
+export const makePullRequest = (): GitPullRequest => {
+    const sourceRefName = `refs/heads/${fake.git.branch()}`;
+    return {
+        pullRequestId: fake.number.int({ min: 1, max: 10_000 }),
+        codeReviewId: fake.number.int(),
+        artifactId: `vstfs:///Git/PullRequestId/${fake.string.uuid()}`,
+        status: PullRequestStatus.Active,
+        createdBy: makeIdentityRef(),
+        creationDate: fake.date.recent(),
+        closedBy: fake.helpers.absent(),
+        closedDate: fake.helpers.absent(),
+        autoCompleteSetBy: fake.helpers.absent(),
+        completionQueueTime: fake.helpers.absent(),
+        completionOptions: {
+            autoCompleteIgnoreConfigIds: [],
+            bypassPolicy: false,
+            bypassReason: "",
+            deleteSourceBranch: true,
+            mergeCommitMessage: fake.git.commitMessage(),
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            squashMerge: true,
+            transitionWorkItems: true,
+            triggeredByAutoComplete: false
+        },
+        title: fake.lorem.sentence(),
+        description: fake.lorem.paragraph(),
+        sourceRefName,
+        targetRefName: "refs/heads/main",
+        forkSource: fake.helpers.absent(),
+        mergeId: fake.string.uuid(),
+        mergeStatus: PullRequestAsyncStatus.Succeeded,
+        mergeFailureMessage: "",
+        mergeFailureType: PullRequestMergeFailureType.None,
+        mergeOptions: {
+            conflictAuthorshipCommits: false,
+            detectRenameFalsePositives: false,
+            disableRenames: false
+        },
+        hasMultipleMergeBases: false,
+        ignoreTargetRefAndChooseDynamically: false,
+        isDraft: false,
+        supportsIterations: true,
+        reviewers: [],
+        commits: [makeCommit()],
+        lastMergeCommit: makeCommit(),
+        lastMergeSourceCommit: makeCommit(),
+        lastMergeTargetCommit: makeCommit(),
+        url: fake.internet.url(),
+        remoteUrl: fake.internet.url(),
+        repository: makeGitRepository(),
+        labels: [],
+        workItemRefs: [],
+        _links: {}
+    };
+};
+
+export const makeBranchStats = (name = "main"): GitBranchStats => ({
+    name,
+    aheadCount: fake.number.int({ min: 0, max: 5 }),
+    behindCount: fake.number.int({ min: 0, max: 20 }),
+    isBaseVersion: name === "main",
+    commit: makeCommit()
+});
+
+export const makeGitItem = (path = "/README.md"): GitItem => {
+    const fileName = path.split("/").filter(Boolean).pop() ?? "";
+    return {
+        objectId: fake.git.commitSha(),
+        originalObjectId: fake.git.commitSha(),
+        commitId: fake.git.commitSha(),
+        path,
+        isFolder: path.endsWith("/"),
+        isSymLink: false,
+        url: fake.internet.url(),
+        gitObjectType: path.endsWith("/") ? GitObjectType.Tree : GitObjectType.Blob,
+        content: "",
+        contentMetadata: {
+            contentType: "text/plain",
+            encoding: 65001,
+            extension: fileName.includes(".") ? fileName.slice(fileName.lastIndexOf(".") + 1) : "",
+            fileName,
+            isBinary: false,
+            isImage: false,
+            vsLink: ""
+        },
+        submoduleWebUrl: "",
+        latestProcessedChange: makeCommit(),
+        _links: {}
+    };
+};
+
+export const makePush = (): GitPush => ({
+    ...makePushRef(fake.number.int({ min: 1, max: 10_000 })),
+    refUpdates: [],
+    commits: [makeCommit()],
+    repository: makeGitRepository()
+});
+
+export const makeComment = (id: number): Comment => ({
+    _links: {},
+    author: makeIdentityRef(),
+    commentType: CommentType.Text,
+    content: fake.lorem.sentence(),
+    id,
+    isDeleted: false,
+    lastContentUpdatedDate: fake.date.recent(),
+    lastUpdatedDate: fake.date.recent(),
+    parentCommentId: 0,
+    publishedDate: fake.date.recent(),
+    usersLiked: []
+});
+
+export const makeCommentThread = (): GitPullRequestCommentThread => {
+    const filePath = `/src/${fake.system.fileName()}`;
+    const author = makeIdentityRef();
+    return {
+        id: fake.number.id(),
+        pullRequestThreadContext: {
+            iterationContext: {
+                firstComparingIteration: 1,
+                secondComparingIteration: 2
+            },
+            changeTrackingId: fake.number.int(),
+            trackingCriteria: {
+                firstComparingIteration: 1,
+                secondComparingIteration: 2,
+                origFilePath: filePath,
+                origLeftFileStart: { line: 1, offset: 1 },
+                origLeftFileEnd: { line: 1, offset: 10 },
+                origRightFileStart: { line: 1, offset: 1 },
+                origRightFileEnd: { line: 1, offset: 10 }
+            }
+        },
+        threadContext: {
+            filePath,
+            leftFileStart: { line: 1, offset: 1 },
+            leftFileEnd: { line: 1, offset: 10 },
+            rightFileStart: { line: 1, offset: 1 },
+            rightFileEnd: { line: 1, offset: 10 }
+        },
+        status: CommentThreadStatus.Active,
+        comments: [{ ...makeComment(1), author }],
+        identities: { [author.id]: author },
+        isDeleted: false,
+        properties: {},
+        lastUpdatedDate: fake.date.recent(),
+        publishedDate: fake.date.recent(),
+        _links: {}
+    };
+};
 
 export const makeDeletedRepository = (): GitDeletedRepository => ({
     id: fake.string.uuid(),
@@ -288,13 +397,6 @@ export const makeTreeArchive = (objectId: string): ArrayBuffer => {
     return buffer;
 };
 
-export const makeGitUserDate = (): GitUserDate => ({
-    date: fake.date.recent(),
-    email: fake.internet.email(),
-    imageUrl: fake.internet.url(),
-    name: fake.person.fullName()
-});
-
 export const makeAnnotatedTag = (name: string): GitAnnotatedTag => ({
     message: fake.lorem.sentence(),
     name,
@@ -380,13 +482,16 @@ export const makeItemText = (item: GitItem): string => `${item.path}\n${item.obj
 
 export const repositories: GitRepository[] = Array.from({ length: 5 }, makeGitRepository);
 export const pullRequests: GitPullRequest[] = Array.from({ length: 5 }, makePullRequest);
-export const refs: GitRef[] = [
-    makeGitRef("refs/heads/main"),
-    makeGitRef("refs/heads/develop"),
-    makeGitRef(`refs/heads/feature/${fake.lorem.slug()}`),
-    makeGitRef("refs/tags/v1.0.0")
-];
-export const commits: GitCommitRef[] = Array.from({ length: 10 }, makeCommit);
+export const refs: PagedList<GitRef> = Object.assign(
+    [
+        makeGitRef("refs/heads/main"),
+        makeGitRef("refs/heads/develop"),
+        makeGitRef(`refs/heads/feature/${fake.lorem.slug()}`),
+        makeGitRef("refs/tags/v1.0.0")
+    ],
+    { continuationToken: null }
+);
+export const commits: GitCommit[] = Array.from({ length: 10 }, makeGitCommit);
 export const branches: GitBranchStats[] = [
     makeBranchStats("main"),
     makeBranchStats("develop"),
@@ -495,15 +600,6 @@ export const pullRequestProperties: Record<string, any> = {
     reviewedBy: "release-team"
 };
 
-export const makePushRef = (pushId: number): GitPushRef => ({
-    _links: {},
-    date: fake.date.recent(),
-    pushCorrelationId: fake.string.uuid(),
-    pushedBy: makeIdentityRef(),
-    pushId,
-    url: fake.internet.url()
-});
-
 export const makePullRequestChange = (
     path: string,
     changeTrackingId: number
@@ -538,11 +634,12 @@ export const makePullRequestIteration = (
     updatedDate: fake.date.recent()
 });
 
-export const makeFileDiffDetail = (path: string): FileDiffDetail => ({
-    changeType: VersionControlChangeType.Edit,
-    isFolder: path.endsWith("/"),
-    isLinuxExecutable: false,
-    isSymbolicLink: false,
+type FileDiffDetailBase = Omit<
+    FileDiffDetail,
+    "changeType" | "isFolder" | "isLinuxExecutable" | "isSymbolicLink"
+>;
+
+const makeFileDiffDetailBase = (path: string): FileDiffDetailBase => ({
     lineDiffBlocks: [
         {
             changeType: LineDiffBlockChangeType.Edit,
@@ -557,6 +654,16 @@ export const makeFileDiffDetail = (path: string): FileDiffDetail => ({
     originalPath: path,
     path
 });
+
+export const makeFileDiffDetail = (path: string): FileDiffDetail => {
+    const newerFields = {
+        changeType: VersionControlChangeType.Edit,
+        isFolder: path.endsWith("/"),
+        isLinuxExecutable: false,
+        isSymbolicLink: false
+    };
+    return { ...newerFields, ...makeFileDiffDetailBase(path) };
+};
 
 export const pullRequestIterations: GitPullRequestIteration[] = [
     makePullRequestIteration(5001, IterationReason.Create),
@@ -623,20 +730,6 @@ export const makeConflictUpdateResult = (conflict: GitConflict): GitConflictUpda
     updateStatus: GitConflictUpdateStatus.Succeeded
 });
 
-export const makeComment = (id: number): Comment => ({
-    _links: {},
-    author: makeIdentityRef(),
-    commentType: CommentType.Text,
-    content: fake.lorem.sentence(),
-    id,
-    isDeleted: false,
-    lastContentUpdatedDate: fake.date.recent(),
-    lastUpdatedDate: fake.date.recent(),
-    parentCommentId: 0,
-    publishedDate: fake.date.recent(),
-    usersLiked: []
-});
-
 export const makePullRequestThread = (
     id: number,
     status: CommentThreadStatus,
@@ -644,6 +737,7 @@ export const makePullRequestThread = (
 ): GitPullRequestCommentThread => ({
     ...makeCommentThread(),
     comments,
+    identities: Object.fromEntries(comments.map(comment => [comment.author.id, comment.author])),
     id,
     status
 });

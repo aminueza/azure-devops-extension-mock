@@ -1,6 +1,7 @@
 import { fake } from "../common/fixtures";
 import {
     Process,
+    ProcessCustomizationType,
     ProcessType,
     ProjectInfo,
     ProjectProperty,
@@ -13,7 +14,6 @@ import {
     WebApiConnectedService,
     WebApiConnectedServiceDetails,
     WebApiTeam,
-    WebApiTeamRef,
     WebApiTagDefinition
 } from "azure-devops-extension-api/Core";
 import { IdentityRef, TeamMember } from "azure-devops-extension-api/WebApi";
@@ -32,7 +32,7 @@ export const makeIdentityRef = (): IdentityRef => ({
     isContainer: false,
     isDeletedInOrigin: false,
     profileUrl: fake.internet.url(),
-    _links: {} as any
+    _links: {}
 });
 
 export const makeProjectReference = (): TeamProjectReference => ({
@@ -41,7 +41,7 @@ export const makeProjectReference = (): TeamProjectReference => ({
     name: fake.company.name(),
     description: fake.lorem.sentence(),
     url: fake.internet.url(),
-    state: "wellFormed" as any,
+    state: "wellFormed",
     revision: fake.number.int({ min: 1, max: 100 }),
     visibility: fake.helpers.arrayElement([
         ProjectVisibility.Private,
@@ -49,7 +49,7 @@ export const makeProjectReference = (): TeamProjectReference => ({
     ]),
     lastUpdateTime: fake.date.recent(),
     defaultTeamImageUrl: fake.image.avatar()
-} as TeamProjectReference);
+});
 
 export const makeProject = (): TeamProject => ({
     ...makeProjectReference(),
@@ -61,9 +61,9 @@ export const makeProject = (): TeamProject => ({
         id: fake.string.uuid(),
         name: `${fake.company.name()} Team`,
         url: fake.internet.url()
-    } as WebApiTeamRef,
-    _links: {} as any
-} as unknown as TeamProject);
+    },
+    _links: {}
+});
 
 export const makeTeam = (): WebApiTeam => ({
     id: fake.string.uuid(),
@@ -73,8 +73,33 @@ export const makeTeam = (): WebApiTeam => ({
     identityUrl: fake.internet.url(),
     projectId: fake.string.uuid(),
     projectName: fake.company.name(),
-    identity: makeIdentityRef()
-} as unknown as WebApiTeam);
+    identity: {
+        customDisplayName: "",
+        descriptor: {
+            identifier: `S-1-9-${fake.number.id()}`,
+            identityType: "Microsoft.TeamFoundation.Identity"
+        },
+        id: fake.string.uuid(),
+        isActive: true,
+        isContainer: true,
+        masterId: fake.string.uuid(),
+        memberIds: [fake.string.uuid()],
+        memberOf: [],
+        members: [
+            {
+                identifier: `S-1-9-${fake.number.id()}`,
+                identityType: "Microsoft.IdentityModel.Claims.ClaimsIdentity"
+            }
+        ],
+        metaTypeId: 255,
+        properties: {},
+        providerDisplayName: `[${fake.company.name()}]\\${fake.company.name()} Team`,
+        resourceVersion: 2,
+        socialDescriptor: "",
+        subjectDescriptor: `vssgp.${fake.string.alphanumeric(24)}`,
+        uniqueUserId: 0
+    }
+});
 
 export const makeTeamMember = (): TeamMember => ({
     identity: makeIdentityRef(),
@@ -88,8 +113,8 @@ export const makeProcess = (): Process => ({
     url: fake.internet.url(),
     isDefault: fake.datatype.boolean(),
     type: ProcessType.System,
-    _links: {} as any
-} as unknown as Process);
+    _links: {}
+});
 
 export const makeOperationReference = (): OperationReference => ({
     id: fake.string.uuid(),
@@ -103,14 +128,15 @@ export const makeProjectCollectionReference = (): TeamProjectCollectionReference
     name: fake.company.name(),
     url: fake.internet.url(),
     avatarUrl: fake.image.avatar()
-} as TeamProjectCollectionReference);
+});
 
 export const makeProjectCollection = (): TeamProjectCollection => ({
     ...makeProjectCollectionReference(),
     description: fake.lorem.sentence(),
+    processCustomizationType: ProcessCustomizationType.Inherited,
     state: "Started",
-    _links: {} as any
-} as unknown as TeamProjectCollection);
+    _links: {}
+});
 
 export const makeTagDefinition = (): WebApiTagDefinition => ({
     id: fake.string.uuid(),

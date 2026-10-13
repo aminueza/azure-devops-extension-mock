@@ -6,7 +6,12 @@ import {
     ContinuousIntegrationTrigger,
     DefinitionTriggerType,
     DefinitionType,
-    PullRequestTrigger
+    PullRequestTrigger,
+    QueueOptions,
+    QueuePriority,
+    TaskResult,
+    TimelineRecordState,
+    ValidationResult
 } from "azure-devops-extension-api/Build";
 
 import { getClient } from "../azure-devops-extension-api";
@@ -20,6 +25,8 @@ import {
     makeBuild,
     makeBuildDefinition,
     makeChange,
+    makePagedList,
+    makeStageTimeline,
     makeTimeline,
     makeTimelineRecord,
     timeline
@@ -283,5 +290,136 @@ describe("build data factories", () => {
         expect(change.id).toMatch(/^[0-9a-f]{40}$/);
         expect(change.type).toBe("TfsGit");
         expect(change.author).toHaveProperty("displayName");
+    });
+
+    it("fills every required build field so the fixture matches the declared type", () => {
+        const build = makeBuild();
+        expect(build.project.name).toEqual(expect.any(String));
+        expect(build.logs).toEqual({
+            id: expect.any(Number),
+            type: "Container",
+            url: expect.any(String)
+        });
+        expect(build.repository).toEqual({
+            id: expect.any(String),
+            type: "TfsGit",
+            name: expect.any(String),
+            url: expect.any(String),
+            defaultBranch: "refs/heads/main",
+            checkoutSubmodules: false,
+            clean: "false",
+            properties: {},
+            rootFolder: ""
+        });
+        expect(build._links).toEqual({});
+        expect(build.agentSpecification).toEqual({ identifier: "ubuntu-latest" });
+        expect(build.appendCommitMessageToRunName).toBe(true);
+        expect(build.buildNumberRevision).toBeGreaterThan(0);
+        expect(build.controller.enabled).toBe(true);
+        expect(build.deleted).toBe(false);
+        expect(build.deletedBy).toHaveProperty("displayName");
+        expect(build.deletedDate).toBeInstanceOf(Date);
+        expect(build.deletedReason).toBe("");
+        expect(build.demands).toEqual([]);
+        expect(build.keepForever).toBe(false);
+        expect(build.orchestrationPlan).toEqual({ orchestrationType: 1, planId: expect.any(String) });
+        expect(build.plans).toEqual([{ orchestrationType: 1, planId: expect.any(String) }]);
+        expect(build.parameters).toBe("{}");
+        expect(build.priority).toBe(QueuePriority.Normal);
+        expect(build.properties).toEqual({});
+        expect(build.quality).toBe("");
+        expect(build.queue.name).toBe("Azure Pipelines");
+        expect(build.queue.pool).toEqual({
+            id: expect.any(Number),
+            name: "Azure Pipelines",
+            isHosted: true
+        });
+        expect(build.queueOptions).toBe(QueueOptions.None);
+        expect(build.queuePosition).toBe(0);
+        expect(build.retainedByRelease).toBe(false);
+        expect(build.tags).toEqual([]);
+        expect(build.templateParameters).toEqual({});
+        expect(build.triggerInfo).toEqual({});
+        expect(build.validationResults).toEqual([{ message: "", result: ValidationResult.OK }]);
+    });
+
+    it("makes a build that no other build triggered", () => {
+        const build = makeBuild();
+        expect(build.triggeredByBuild).toBeUndefined();
+        expect(() => JSON.stringify(build)).not.toThrow();
+    });
+
+    it("fills the artifact resource links", () => {
+        const artifact = makeArtifact();
+        expect(artifact.resource._links).toEqual({});
+        expect(artifact.resource.type).toBe("Container");
+        expect(artifact.resource.properties).toEqual({});
+    });
+
+    it("fills every required timeline record field", () => {
+        const record = makeTimelineRecord();
+        expect(record.state).toBe(TimelineRecordState.Completed);
+        expect(record.result).toBe(TaskResult.Succeeded);
+        expect(record.log).toEqual({
+            id: expect.any(Number),
+            type: "Container",
+            url: expect.any(String)
+        });
+        expect(record._links).toEqual({});
+        expect(record.attempt).toBe(1);
+        expect(record.currentOperation).toBe("");
+        expect(record.details).toEqual({
+            id: expect.any(String),
+            changeId: expect.any(Number),
+            url: expect.any(String)
+        });
+        expect(record.errorCount).toBe(0);
+        expect(record.identifier).toEqual(expect.any(String));
+        expect(record.issues).toEqual([]);
+        expect(record.lastModified).toBeInstanceOf(Date);
+        expect(record.percentComplete).toBe(100);
+        expect(record.previousAttempts).toEqual([]);
+        expect(record.queueId).toBeGreaterThan(0);
+        expect(record.refName).toEqual(expect.any(String));
+        expect(record.resultCode).toBe("");
+        expect(record.task).toEqual({ id: expect.any(String), name: "CmdLine", version: "2.250.1" });
+        expect(record.warningCount).toBe(0);
+    });
+
+    it("makes a timeline whose records carry the filled fields", () => {
+        const tl = makeTimeline();
+        expect(tl.url).toEqual(expect.any(String));
+        expect(tl.lastChangedOn).toBeInstanceOf(Date);
+        tl.records.forEach(record => {
+            expect(record.attempt).toBe(1);
+            expect(record.task.name).toBe("CmdLine");
+        });
+    });
+
+    it("makes a stage timeline whose record keeps the filled record fields", () => {
+        const stage = makeStageTimeline("timeline-test", "Test");
+        expect(stage.id).toBe("timeline-test");
+        expect(stage.records).toHaveLength(1);
+        expect(stage.records[0].type).toBe("Stage");
+        expect(stage.records[0].name).toBe("Test");
+        expect(stage.records[0].state).toBe(TimelineRecordState.Completed);
+        expect(stage.records[0].percentComplete).toBe(100);
+        expect(stage.records[0].previousAttempts).toEqual([]);
+    });
+
+    it("fills the change display uri, truncation flag and pusher", () => {
+        const change = makeChange();
+        expect(change.displayUri).toEqual(expect.any(String));
+        expect(change.messageTruncated).toBe(false);
+        expect(change.pusher).toEqual(expect.any(String));
+    });
+
+    it("makes a paged list that copies the items and carries an empty continuation token", () => {
+        const items = [1, 2, 3];
+        const page = makePagedList(items);
+        expect(page).not.toBe(items);
+        expect(Array.isArray(page)).toBe(true);
+        expect([...page]).toEqual(items);
+        expect(page.continuationToken).toBe("");
     });
 });

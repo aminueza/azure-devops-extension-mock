@@ -12,6 +12,8 @@ import {
     GitRepository,
     GitPullRequest,
     GitPullRequestCommentThread,
+    GitBlobRef,
+    GitCommit,
     GitCommitRef,
     GitBranchStats,
     GitRef,
@@ -102,6 +104,7 @@ import {
     makeConflictUpdateResult,
     makeFileDiff,
     makeForkSyncRequest,
+    makeGitCommit,
     makeGitConflict,
     makeGitItem,
     makeGitMerge,
@@ -227,9 +230,13 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve({ ...makeGitRepository(), ...newRepositoryInfo, id: repositoryId });
     }
 
-    getRefs(_repositoryId: string, _project?: string, filter?: string): Promise<GitRef[]> {
+    getRefs(_repositoryId: string, _project?: string, filter?: string): Promise<PagedList<GitRef>> {
         if (!filter) return Promise.resolve(refs);
-        return Promise.resolve(refs.filter(r => r.name.includes(filter)));
+        const page: PagedList<GitRef> = Object.assign(
+            refs.filter(r => r.name.includes(filter)),
+            { continuationToken: null }
+        );
+        return Promise.resolve(page);
     }
 
     updateRef(): Promise<GitRef> {
@@ -249,9 +256,9 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve(commits);
     }
 
-    getCommit(commitId: string): Promise<GitCommitRef> {
+    getCommit(commitId: string): Promise<GitCommit> {
         const found = commits.find(c => c.commitId === commitId);
-        return Promise.resolve(found ?? { ...makeCommit(), commitId });
+        return Promise.resolve(found ?? { ...makeGitCommit(), commitId });
     }
 
     getCommitsBatch(): Promise<GitCommitRef[]> {
@@ -271,8 +278,8 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve(new ArrayBuffer(0));
     }
 
-    getBlob(_repositoryId: string, sha1: string): Promise<any> {
-        return Promise.resolve({ objectId: sha1, size: 0, url: "" });
+    getBlob(_repositoryId: string, sha1: string): Promise<GitBlobRef> {
+        return Promise.resolve({ _links: {}, objectId: sha1, size: 0, url: "" });
     }
 
     getPushes(_repositoryId: string): Promise<GitPush[]> {
@@ -350,7 +357,7 @@ export class MockGitRestClient extends RestClientBase {
         _pullRequestId: number,
         _threadId: number
     ): Promise<Comment> {
-        return Promise.resolve({ ...comment, id: comment.id ?? 1 } as Comment);
+        return Promise.resolve({ ...comment, id: comment.id ?? 1 });
     }
 
     getAccessibleRepositories(
@@ -1118,12 +1125,10 @@ export class MockGitRestClient extends RestClientBase {
             queries: queries.queries,
             results: queries.queries.map(input =>
                 Object.fromEntries(
-                    input.items.map(item =>
-                        [
-                            item,
-                            input.type === GitPullRequestQueryType.NotSet ? [] : pullRequests
-                        ] as [string, GitPullRequest[]]
-                    )
+                    input.items.map((item): [string, GitPullRequest[]] => [
+                        item,
+                        input.type === GitPullRequestQueryType.NotSet ? [] : pullRequests
+                    ])
                 )
             )
         });

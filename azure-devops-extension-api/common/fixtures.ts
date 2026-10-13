@@ -93,6 +93,8 @@ const distinct = <T>(length: number, make: () => T, ...keys: Array<(item: T) => 
     return items;
 };
 
+const absent = <T>(): T => undefined as unknown as T;
+
 const chars = (alphabet: string, length: number): string =>
     Array.from({ length }, () => alphabet[int({ min: 0, max: alphabet.length - 1 })]).join("");
 
@@ -143,7 +145,7 @@ export const fake = {
     commerce: { productName: (): string => `${arrayElement(ADJECTIVES)} ${arrayElement(MATERIALS)} ${arrayElement(PRODUCTS)}` },
     date: { recent, past, future },
     datatype: { boolean: (): boolean => random() < 0.5 },
-    helpers: { arrayElement, distinct },
+    helpers: { arrayElement, distinct, absent },
     git: {
         commitSha: (): string => chars(HEX, 40),
         commitMessage: (): string => `${arrayElement(VERBS)} ${arrayElement(NOUNS)}`,

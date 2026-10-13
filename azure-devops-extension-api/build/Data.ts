@@ -1,4 +1,5 @@
 import { fake } from "../common/fixtures";
+import { makePagedList } from "../common/pagedList";
 import {
     Attachment,
     AuditAction,
@@ -31,6 +32,8 @@ import {
     PipelineGeneralSettings,
     ProjectRetentionSetting,
     PullRequest,
+    QueueOptions,
+    QueuePriority,
     RepositoryWebhook,
     RetentionLease,
     RetentionLeaseUpdate,
@@ -41,6 +44,7 @@ import {
     SourceRepositoryItem,
     SupportedTrigger,
     SupportLevel,
+    TaskResult,
     Timeline,
     TimelineRecord,
     TimelineRecordState,
@@ -51,6 +55,7 @@ import {
     DefinitionQueueStatus,
     DefinitionReference,
     PullRequestTrigger,
+    ValidationResult,
     YamlProcess
 } from "azure-devops-extension-api/Build";
 import { PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
@@ -181,7 +186,7 @@ export const makeBuild = (): Build => ({
     url: fake.internet.url(),
     uri: fake.internet.url(),
     definition: makeDefinitionReference(),
-    project: makeProjectReference() as any,
+    project: makeProjectReference(),
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
     lastChangedBy: makeIdentityRef(),
@@ -190,26 +195,65 @@ export const makeBuild = (): Build => ({
         id: fake.number.id(),
         type: "Container",
         url: fake.internet.url()
-    } as any,
+    },
     repository: {
         id: fake.string.uuid(),
-        type: "TfsGit"
-    } as any,
-    _links: {} as any
-} as unknown as Build);
+        type: "TfsGit",
+        name: fake.lorem.slug(),
+        url: fake.internet.url(),
+        defaultBranch: "refs/heads/main",
+        checkoutSubmodules: false,
+        clean: "false",
+        properties: {},
+        rootFolder: ""
+    },
+    _links: {},
+    agentSpecification: { identifier: "ubuntu-latest" },
+    appendCommitMessageToRunName: true,
+    buildNumberRevision: fake.number.int({ min: 1, max: 999 }),
+    controller: makeBuildController(),
+    deleted: false,
+    deletedBy: makeIdentityRef(),
+    deletedDate: fake.date.recent(),
+    deletedReason: "",
+    demands: [],
+    keepForever: false,
+    orchestrationPlan: { orchestrationType: 1, planId: fake.string.uuid() },
+    parameters: "{}",
+    plans: [{ orchestrationType: 1, planId: fake.string.uuid() }],
+    priority: QueuePriority.Normal,
+    properties: {},
+    quality: "",
+    queue: {
+        _links: {},
+        id: fake.number.id(),
+        name: "Azure Pipelines",
+        url: fake.internet.url(),
+        pool: { id: fake.number.id(), name: "Azure Pipelines", isHosted: true }
+    },
+    queueOptions: QueueOptions.None,
+    queuePosition: 0,
+    retainedByRelease: false,
+    tags: [],
+    templateParameters: {},
+    triggerInfo: {},
+    triggeredByBuild: fake.helpers.absent(),
+    validationResults: [{ message: "", result: ValidationResult.OK }]
+});
 
 export const makeArtifact = (name = "drop"): BuildArtifact => ({
     id: fake.number.id(),
     name,
     source: fake.string.uuid(),
     resource: {
+        _links: {},
         type: "Container",
         data: `#/${fake.number.int()}/${name}`,
         properties: {},
         url: fake.internet.url(),
         downloadUrl: fake.internet.url()
-    } as any
-} as unknown as BuildArtifact);
+    }
+});
 
 export const makeTimelineRecord = (): TimelineRecord => ({
     id: fake.string.uuid(),
@@ -218,14 +262,29 @@ export const makeTimelineRecord = (): TimelineRecord => ({
     name: fake.lorem.slug(),
     startTime: fake.date.recent(),
     finishTime: fake.date.recent(),
-    state: 2 as any,
-    result: 0 as any,
+    state: TimelineRecordState.Completed,
+    result: TaskResult.Succeeded,
     workerName: fake.lorem.slug(),
     order: fake.number.int(),
-    log: { id: fake.number.id(), type: "Container", url: fake.internet.url() } as any,
+    log: { id: fake.number.id(), type: "Container", url: fake.internet.url() },
     changeId: fake.number.int(),
-    url: fake.internet.url()
-} as unknown as TimelineRecord);
+    url: fake.internet.url(),
+    _links: {},
+    attempt: 1,
+    currentOperation: "",
+    details: { id: fake.string.uuid(), changeId: fake.number.int(), url: fake.internet.url() },
+    errorCount: 0,
+    identifier: fake.lorem.slug(),
+    issues: [],
+    lastModified: fake.date.recent(),
+    percentComplete: 100,
+    previousAttempts: [],
+    queueId: fake.number.id(),
+    refName: fake.lorem.slug(),
+    resultCode: "",
+    task: { id: fake.string.uuid(), name: "CmdLine", version: "2.250.1" },
+    warningCount: 0
+});
 
 export const makeTimeline = (): Timeline => ({
     id: fake.string.uuid(),
@@ -234,7 +293,7 @@ export const makeTimeline = (): Timeline => ({
     lastChangedOn: fake.date.recent(),
     records: Array.from({ length: 3 }, makeTimelineRecord),
     url: fake.internet.url()
-} as unknown as Timeline);
+});
 
 export const makeChange = (): Change => ({
     id: fake.git.commitSha(),
@@ -242,8 +301,11 @@ export const makeChange = (): Change => ({
     type: "TfsGit",
     author: makeIdentityRef(),
     timestamp: fake.date.recent(),
-    location: fake.internet.url()
-} as unknown as Change);
+    location: fake.internet.url(),
+    displayUri: fake.internet.url(),
+    messageTruncated: false,
+    pusher: fake.string.uuid()
+});
 
 export const makeBuildBadge = (): BuildBadge => ({
     buildId: fake.number.int({ min: 1, max: 100_000 }),
@@ -266,7 +328,7 @@ export const makeBuildController = (): BuildController => ({
 export const buildDefinitions = Array.from({ length: 5 }, makeBuildDefinition);
 const builds = Array.from({ length: 10 }, makeBuild);
 export const buildList = builds;
-export const buildsPage: PagedList<Build> = Object.assign(builds, { continuationToken: "" }) as PagedList<Build>;
+export const buildsPage: PagedList<Build> = Object.assign(builds, { continuationToken: "" });
 export const artifacts: BuildArtifact[] = [makeArtifact("drop"), makeArtifact("symbols")];
 export const timeline: Timeline = makeTimeline();
 export const changes: Change[] = Array.from({ length: 3 }, makeChange);
@@ -428,7 +490,7 @@ export const makeStageTimeline = (id: string, stageName: string): Timeline => ({
             state: TimelineRecordState.Completed
         }
     ]
-} as unknown as Timeline);
+});
 
 export const stageTimelines: Timeline[] = [
     makeStageTimeline("timeline-build", "Build"),
@@ -712,3 +774,5 @@ export const repositoryWebhooks: RepositoryWebhook[] = [
     makeRepositoryWebhook("billing"),
     makeRepositoryWebhook("website")
 ];
+
+export { makePagedList };

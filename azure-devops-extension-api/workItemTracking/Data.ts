@@ -38,6 +38,12 @@ import {
     QueryHierarchyItem,
     QueryType,
     QueryResultType,
+    QueryRecursionOption,
+    LargeTextCustomHtmlFormat,
+    LinkQueryMode,
+    LogicalOperation,
+    WorkItemFieldReference,
+    WorkItemQueryClause,
     WorkItemStateColor
 } from "azure-devops-extension-api/WorkItemTracking";
 
@@ -51,10 +57,22 @@ export const makeWorkItemReference = (): WorkItemReference => ({
 
 export const makeWorkItem = (id?: number): WorkItem => {
     const workItemId = id ?? fake.number.int({ min: 1, max: 10_000 });
+    const rev = fake.number.int({ min: 1, max: 10 });
     return {
         id: workItemId,
-        rev: fake.number.int({ min: 1, max: 10 }),
+        rev,
         url: fake.internet.url(),
+        commentVersionRef: {
+            commentId: fake.number.id(),
+            createdInRevision: rev,
+            isDeleted: false,
+            text: fake.lorem.sentence(),
+            version: 1,
+            url: fake.internet.url()
+        },
+        multilineFieldsFormat: {
+            "System.Description": LargeTextCustomHtmlFormat.Html
+        },
         fields: {
             "System.Id": workItemId,
             "System.Title": fake.lorem.sentence(),
@@ -79,8 +97,8 @@ export const makeWorkItem = (id?: number): WorkItem => {
             self: { href: fake.internet.url() },
             html: { href: fake.internet.url() },
             workItemType: { href: fake.internet.url() }
-        } as any
-    } as unknown as WorkItem;
+        }
+    };
 };
 
 export const makeWorkItemType = (name = "Bug"): WorkItemType => ({
@@ -91,7 +109,7 @@ export const makeWorkItemType = (name = "Bug"): WorkItemType => ({
     icon: {
         id: name.toLowerCase(),
         url: fake.internet.url()
-    } as any,
+    },
     isDisabled: false,
     xmlForm: "",
     fields: [],
@@ -101,13 +119,52 @@ export const makeWorkItemType = (name = "Bug"): WorkItemType => ({
         name: s,
         color: fake.color.rgb({ format: "hex" }).slice(1),
         category: s
-    } as unknown as WorkItemStateColor)),
+    })),
     url: fake.internet.url(),
-    _links: {} as any
-} as unknown as WorkItemType);
+    _links: {}
+});
+
+export const makeFieldReference = (referenceName: string): WorkItemFieldReference => ({
+    name: referenceName.slice(referenceName.lastIndexOf(".") + 1),
+    referenceName,
+    url: fake.internet.url()
+});
+
+export const makeQueryClause = (
+    referenceName: string,
+    value: string,
+    clauses: WorkItemQueryClause[] = []
+): WorkItemQueryClause => ({
+    clauses,
+    field: makeFieldReference(referenceName),
+    fieldValue: makeFieldReference(referenceName),
+    isFieldValue: false,
+    logicalOperator: LogicalOperation.AND,
+    operator: { name: "=", referenceName: "SupportedOperations.Equals" },
+    value
+});
 
 export const makeQuery = (id = fake.string.uuid()): QueryHierarchyItem => ({
     id,
+    children: [],
+    clauses: makeQueryClause("System.TeamProject", "@project", [
+        makeQueryClause("System.State", "Active")
+    ]),
+    columns: [makeFieldReference("System.Id"), makeFieldReference("System.Title")],
+    createdBy: makeIdentityReference(),
+    createdDate: fake.date.past(),
+    filterOptions: LinkQueryMode.WorkItems,
+    isDeleted: false,
+    isInvalidSyntax: false,
+    lastExecutedBy: makeIdentityReference(),
+    lastExecutedDate: fake.date.recent(),
+    lastModifiedBy: makeIdentityReference(),
+    lastModifiedDate: fake.date.recent(),
+    linkClauses: makeQueryClause("System.Links.LinkType", "System.LinkTypes.Hierarchy-Forward"),
+    queryRecursionOption: QueryRecursionOption.ParentFirst,
+    sortColumns: [{ descending: false, field: makeFieldReference("System.Id") }],
+    sourceClauses: makeQueryClause("System.WorkItemType", "Feature"),
+    targetClauses: makeQueryClause("System.WorkItemType", "User Story"),
     name: fake.lorem.words(3),
     path: `Shared Queries/${fake.lorem.word()}`,
     isFolder: false,
@@ -116,8 +173,8 @@ export const makeQuery = (id = fake.string.uuid()): QueryHierarchyItem => ({
     queryType: QueryType.Flat,
     wiql: "SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project",
     url: fake.internet.url(),
-    _links: {} as any
-} as unknown as QueryHierarchyItem);
+    _links: {}
+});
 
 export const makeQueryResult = (): WorkItemQueryResult => ({
     queryType: QueryType.Flat,
@@ -131,7 +188,7 @@ export const makeQueryResult = (): WorkItemQueryResult => ({
     sortColumns: [],
     workItems: Array.from({ length: 5 }, makeWorkItemReference),
     workItemRelations: []
-} as unknown as WorkItemQueryResult);
+});
 
 export const makeWorkItemField = (referenceName: string, type: FieldType): WorkItemField => ({
     referenceName,
@@ -276,8 +333,8 @@ export const makeWorkItemTypeCategory = (name: string): WorkItemTypeCategory => 
     defaultWorkItemType: makeWorkItemType("Bug"),
     workItemTypes: [makeWorkItemType("Bug")],
     url: fake.internet.url(),
-    _links: {} as any
-} as unknown as WorkItemTypeCategory);
+    _links: {}
+});
 
 export const makeWorkItemTypeColor = (workItemTypeName: string): WorkItemTypeColor => ({
     primaryColor: fake.color.rgb({ format: "hex" }).slice(1),
@@ -531,5 +588,5 @@ export const categories: WorkItemTypeCategory[] = types.map(t => ({
     defaultWorkItemType: makeWorkItemType(t),
     workItemTypes: [makeWorkItemType(t)],
     url: fake.internet.url(),
-    _links: {} as any
-} as unknown as WorkItemTypeCategory));
+    _links: {}
+}));

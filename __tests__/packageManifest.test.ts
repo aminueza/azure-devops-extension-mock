@@ -123,6 +123,24 @@ describe("package manifest", () => {
         expect(rules).toContainEqual({ matchDepTypes: ["peerDependencies"], enabled: false });
     });
 
+    it("keeps type-escaping casts out of shipped source", () => {
+        const escapes = / as (?:any|unknown)\b/g;
+        const counts: Record<string, number> = {};
+        for (const directory of SHIPPED_SOURCE_DIRECTORIES) {
+            for (const file of sourceFiles(path.join(root, directory))) {
+                const found = fs.readFileSync(file, "utf8").match(escapes);
+                if (found) {
+                    counts[path.relative(root, file)] = found.length;
+                }
+            }
+        }
+        expect(counts).toEqual({
+            [path.join("azure-devops-extension-api", "build", "Build.ts")]: 2,
+            [path.join("azure-devops-extension-api", "common", "CommonServices.ts")]: 1,
+            [path.join("azure-devops-extension-api", "common", "fixtures.ts")]: 1
+        });
+    });
+
     it("detects a test framework import when one is present", () => {
         expect(TEST_FRAMEWORK_IMPORT.test("const { expect } = require(\"@jest/globals\");")).toBe(true);
         expect(TEST_FRAMEWORK_IMPORT.test("import { vi } from \"vitest\";")).toBe(true);

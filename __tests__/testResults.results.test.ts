@@ -208,7 +208,7 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
         const updated = await client.updateTestRun({} as any, "proj", -31);
         expect(updated.id).toBe(-31);
         expect(updated.name.startsWith("Test Run ")).toBe(true);
-        expect(updated.comment).toBeUndefined();
+        expect(typeof updated.comment).toBe("string");
         expect(updated.state).toBeDefined();
     });
 

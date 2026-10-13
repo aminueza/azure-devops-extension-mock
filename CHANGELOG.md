@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The fixtures are now checked by the compiler. Almost every fixture maker used to end in a type cast, which hid missing required fields and, in some places, values of the wrong type. The casts are gone, every required field is filled, and `registerMockClient` checks each mock class against the real client it replaces. This changes what some mocks return:
+  - **Test:** `outcome` on test results, points, action results and iteration details is the outcome name (`"Passed"`, `"Failed"`) instead of a number. A test run's `state` is `"Completed"` instead of `3`. An attachment's `attachmentType` is the `AttachmentType` enum value instead of the string `"GeneralAttachment"`.
+  - **Release:** `ReleaseDefinition.environments` holds `ReleaseDefinitionEnvironment` objects (ranks 1 to 3, no `status`, `releaseId` or `deploySteps`) instead of release environments. Nested `release`, `releaseDefinition` and `releaseEnvironment` objects are full shallow references. `_links` is gone from release environments and approvals, which do not declare it.
+  - **Git:** `getCommit` returns a `GitCommit` with `treeId`, `getRefs` returns a `PagedList<GitRef>` with a `continuationToken`, and `getBlob` returns a `GitBlobRef`. Pull requests, repositories, refs, commits, items, pushes and comment threads carry every declared field the service always returns.
+  - **TaskAgent:** agents inside job requests and cloud requests are `TaskAgentReference` objects without the full agent fields. Pools, queues, task groups and deployment groups lose `_links`, which their types do not declare, and task groups carry the full task definition fields.
+  - **Core, Dashboard and Pipelines:** a team's `identity` is an `Identity` instead of an identity reference. A pipeline's `configuration.type` is `ConfigurationType.Yaml` instead of the string `"yaml"`. A widget's `dashboard` is a dashboard with no widgets instead of `null`.
+  - **Build:** builds carry every declared field the service always returns.
+  - **Fields the service leaves out stay out.** A fixture does not set a field that only appears under a condition the fixture does not model: an active pull request has no `closedBy`, `autoCompleteSetBy` or `forkSource`, an unlocked ref has no `isLockedBy`, a repository that is not a fork has no `parentRepository`, an idle agent has no `assignedRequest`, and a build has no `triggeredByBuild`.
+  - **Everywhere:** makers draw more random values than before, so the values produced under a fixed `fake.seed` differ from earlier releases.
 - The peer range for `azure-devops-extension-api` is now `^5.273.0`. The previous range, `^4.0.0 || ^5.272.3`, claimed support that never worked: every 1.x release requires `azure-devops-extension-api/Pipelines`, which v4 and 5.271 do not ship, so the package failed to load there, and 5.272 lacks a type the TaskAgent mock imports.
 - The peer range for `azure-devops-extension-sdk` is now `^4.0.2 || ^5.0.0`. Versions 4.0.0 and 4.0.1 are published without usable type declarations.
 
