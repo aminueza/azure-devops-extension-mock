@@ -124,7 +124,7 @@ registerMockClient(WorkItemTrackingProcessRestClient, MockWorkItemTrackingProces
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient);
 registerMockClient(WorkRestClient, MockBoardsRestClient);
 
-const serviceDictionary: { [key: string]: any } = {
+const serviceDictionary: { [key: string]: unknown } = {
     [CommonServiceIds.ExtensionDataService]: MockExtensionDataService,
     [CommonServiceIds.GlobalMessagesService]: MockGlobalMessagesService,
     [CommonServiceIds.HostNavigationService]: MockHostNavigationService,
@@ -137,6 +137,7 @@ const serviceDictionary: { [key: string]: any } = {
  * Returns a mock implementation for a given service id. Register additional
  * services via `registerMockService`.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getService = <T = any>(serviceId: string): T => {
     if (Object.prototype.hasOwnProperty.call(serviceDictionary, serviceId)) {
         return serviceDictionary[serviceId] as T;
@@ -158,6 +159,7 @@ export const registerMockService = (serviceId: string, service: unknown): void =
  * Pass `overrides` to pin specific method responses for a test.
  */
 export function getClient<T extends object>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     clientClass: new (...args: any[]) => T,
     overrides: MockOverrides<T> = {}
 ): T {

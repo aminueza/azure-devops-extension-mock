@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The mock classes no longer use `any`. Parameters and return values that the real clients type as `any` are `unknown` in the `Mock*RestClient` classes. `getClient` still returns the real client's type, so code that goes through `getClient` is unaffected; code that calls a `Mock*RestClient` class directly may need a type annotation.
+
+### Fixed
+
+- `WorkItemTrackingRestClient.deleteWorkItem` returns a `WorkItemDelete` with the deleted work item in `resource`. It used to return `{ id, deleted: true }`, which is not the declared type.
+- `BuildRestClient.getBuildLogs` is typed as `BuildLog[]`.
+- `BuildRestClient.updateBuildProperties` and `updateDefinitionProperties` ignore a document that is not a list of operations; they used to throw.
+
 ## [2.0.0] - 2026-10-13
 
 This release mocks every REST client in `azure-devops-extension-api` and lets the compiler check the fixtures. It is a major version because some mocks return different values than in 1.x and the supported peer range is narrower; both are listed under "Changed".

@@ -1,5 +1,6 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
+import { patchOperations } from "../common/jsonPatch";
 import {
     Attachment,
     BuildRestClient,
@@ -7,6 +8,7 @@ import {
     BuildBadge,
     BuildController,
     BuildDefinition,
+    BuildLog,
     BuildDefinitionReference,
     BuildDefinitionRevision,
     BuildDefinitionTemplate,
@@ -196,7 +198,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(["Starting: Build", "Finishing: Build"].join("\n"));
     }
 
-    getBuildLogs(): Promise<any[]> {
+    getBuildLogs(): Promise<BuildLog[]> {
         return Promise.resolve([]);
     }
 
@@ -353,17 +355,16 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(buildMetrics.filter(metric => metric.date >= since));
     }
 
-    getDefinitionProperties(_project: string, _definitionId: number, filter?: string[]): Promise<any> {
+    getDefinitionProperties(_project: string, _definitionId: number, filter?: string[]): Promise<unknown> {
         const properties: Record<string, unknown> = { ...definitionProperties };
         const keys = filter ?? Object.keys(properties);
         return Promise.resolve(Object.fromEntries(keys.map(key => [key, properties[key]])));
     }
 
-    updateDefinitionProperties(document: JsonPatchDocument, _project: string, _definitionId: number): Promise<any> {
-        const operations = document as unknown as Array<{ path: string; value: unknown }>;
+    updateDefinitionProperties(document: JsonPatchDocument, _project: string, _definitionId: number): Promise<unknown> {
         const properties: Record<string, unknown> = { ...definitionProperties };
-        for (const operation of operations) {
-            properties[operation.path.slice(1)] = operation.value;
+        for (const operation of patchOperations(document)) {
+            properties[String(operation.path).slice(1)] = operation.value;
         }
         return Promise.resolve(properties);
     }
@@ -481,17 +482,16 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(encode(`logs-${buildId}`));
     }
 
-    getBuildProperties(_project: string, _buildId: number, filter?: string[]): Promise<any> {
+    getBuildProperties(_project: string, _buildId: number, filter?: string[]): Promise<unknown> {
         const properties: Record<string, unknown> = { ...buildProperties };
         const keys = filter ?? Object.keys(properties);
         return Promise.resolve(Object.fromEntries(keys.map(key => [key, properties[key]])));
     }
 
-    updateBuildProperties(document: JsonPatchDocument, _project: string, _buildId: number): Promise<any> {
-        const operations = document as unknown as Array<{ path: string; value: unknown }>;
+    updateBuildProperties(document: JsonPatchDocument, _project: string, _buildId: number): Promise<unknown> {
         const properties: Record<string, unknown> = { ...buildProperties };
-        for (const operation of operations) {
-            properties[operation.path.slice(1)] = operation.value;
+        for (const operation of patchOperations(document)) {
+            properties[String(operation.path).slice(1)] = operation.value;
         }
         return Promise.resolve(properties);
     }
@@ -502,7 +502,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(type === undefined ? report : { ...report, type });
     }
 
-    getBuildReportHtmlContent(_project: string, buildId: number, type?: string): Promise<any> {
+    getBuildReportHtmlContent(_project: string, buildId: number, type?: string): Promise<unknown> {
         const found = buildReports.find(report => report.buildId === buildId);
         const label = type ?? (found === undefined ? "build" : found.type);
         return Promise.resolve(`<html><body><h1>${label} report ${buildId}</h1></body></html>`);

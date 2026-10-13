@@ -1,5 +1,8 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
+import { patchOperations } from "../common/jsonPatch";
+import { fake } from "../common/fixtures";
+import { makeIdentityRef } from "../core/Data";
 import {
     WorkItemTrackingRestClient,
     AccountMyWorkResult,
@@ -124,10 +127,10 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeWorkItem(id));
     }
 
-    createWorkItem(document: any, _project: string, type: string): Promise<WorkItem> {
+    createWorkItem(document: unknown, _project: string, type: string): Promise<WorkItem> {
         const wi = makeWorkItem();
-        const workItemFields: Record<string, any> = { ...wi.fields, "System.WorkItemType": type };
-        for (const op of document ?? []) {
+        const workItemFields: Record<string, unknown> = { ...wi.fields, "System.WorkItemType": type };
+        for (const op of patchOperations(document)) {
             if (op.op === "add" && typeof op.path === "string" && op.path.startsWith("/fields/")) {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;
             }
@@ -135,10 +138,10 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve({ ...wi, fields: workItemFields });
     }
 
-    updateWorkItem(document: any, id: number, _project?: string): Promise<WorkItem> {
+    updateWorkItem(document: unknown, id: number, _project?: string): Promise<WorkItem> {
         const existing = workItems.find(w => w.id === id) ?? makeWorkItem(id);
-        const workItemFields: Record<string, any> = { ...existing.fields };
-        for (const op of document ?? []) {
+        const workItemFields: Record<string, unknown> = { ...existing.fields };
+        for (const op of patchOperations(document)) {
             if (
                 (op.op === "add" || op.op === "replace") &&
                 typeof op.path === "string" &&
@@ -150,8 +153,20 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve({ ...existing, fields: workItemFields, rev: (existing.rev ?? 0) + 1 });
     }
 
-    deleteWorkItem(_id: number, _project?: string): Promise<any> {
-        return Promise.resolve({ id: _id, deleted: true });
+    deleteWorkItem(id: number, project?: string): Promise<WorkItemDelete> {
+        const resource = workItems.find(w => w.id === id) ?? makeWorkItem(id);
+        return Promise.resolve({
+            id,
+            code: 200,
+            deletedBy: makeIdentityRef().displayName,
+            deletedDate: fake.date.recent().toISOString(),
+            message: "",
+            name: String(resource.fields["System.Title"]),
+            project: project ?? String(resource.fields["System.TeamProject"]),
+            type: String(resource.fields["System.WorkItemType"]),
+            url: resource.url,
+            resource
+        });
     }
 
     getWorkItemTypes(_project: string): Promise<WorkItemType[]> {
@@ -340,7 +355,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     createAttachment(
-        _content: any,
+        _content: unknown,
         _project?: string,
         _fileName?: string,
         _uploadType?: string,
@@ -481,11 +496,11 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         _expand?: WorkItemExpand
     ): Promise<WorkItem> {
         const template = makeWorkItem();
-        const all: Record<string, any> = { ...template.fields, "System.WorkItemType": type };
+        const all: Record<string, unknown> = { ...template.fields, "System.WorkItemType": type };
         if (fields === undefined) {
             return Promise.resolve({ ...template, fields: all });
         }
-        const picked: Record<string, any> = {};
+        const picked: Record<string, unknown> = {};
         for (const name of fields.split(",")) {
             picked[name] = all[name];
         }
@@ -576,11 +591,11 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeWorkItemIcon(icon));
     }
 
-    getWorkItemIconSvg(icon: string, color?: string, _v?: number): Promise<any> {
+    getWorkItemIconSvg(icon: string, color?: string, _v?: number): Promise<unknown> {
         return Promise.resolve(makeIconSvg(icon, color ?? "000000"));
     }
 
-    getWorkItemIconXaml(icon: string, color?: string, _v?: number): Promise<any> {
+    getWorkItemIconXaml(icon: string, color?: string, _v?: number): Promise<unknown> {
         return Promise.resolve(makeIconXaml(icon, color ?? "000000"));
     }
 

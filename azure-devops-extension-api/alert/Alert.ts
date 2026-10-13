@@ -92,11 +92,11 @@ export class MockAlertRestClient extends RestClientBase {
         super(options);
     }
 
-    getAiMetadataContent(_project: string, alertId: number, _repository: string): Promise<any> {
+    getAiMetadataContent(_project: string, alertId: number, _repository: string): Promise<unknown> {
         return Promise.resolve(makeBuffer(JSON.stringify({ alertId, title: findAlert(alertId).title })));
     }
 
-    getSarifContent(_submissionId: number): Promise<any> {
+    getSarifContent(_submissionId: number): Promise<unknown> {
         return Promise.resolve(makeBuffer(makeSarif(alerts)));
     }
 
@@ -271,7 +271,7 @@ export class MockAlertRestClient extends RestClientBase {
         return Promise.resolve(alertInstances);
     }
 
-    createJob(body: any, _project: string, _repository: string): Promise<AlertJob> {
+    createJob(body: object, _project: string, _repository: string): Promise<AlertJob> {
         return Promise.resolve({ ...makeAlertJob(), ...body });
     }
 
@@ -279,7 +279,7 @@ export class MockAlertRestClient extends RestClientBase {
         return Promise.resolve(findJob(jobId));
     }
 
-    updateJob(patch: any, _project: string, _repository: string, jobId: string): Promise<AlertJob> {
+    updateJob(patch: object, _project: string, _repository: string, jobId: string): Promise<AlertJob> {
         return Promise.resolve({ ...findJob(jobId), ...patch, jobId });
     }
 
@@ -323,7 +323,7 @@ export class MockAlertRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    exportSarif(_project: string, _repository: string, alertIds: number[], _branchName?: string): Promise<any> {
+    exportSarif(_project: string, _repository: string, alertIds: number[], _branchName?: string): Promise<unknown> {
         return Promise.resolve(makeBuffer(makeSarif(alertIds.map(findAlert))));
     }
 

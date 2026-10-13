@@ -350,7 +350,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(`pool-${poolId}-metadata`);
     }
 
-    setAgentPoolMetadata(_agentPoolMetadata: any, _poolId: number): Promise<void> {
+    setAgentPoolMetadata(_agentPoolMetadata: unknown, _poolId: number): Promise<void> {
         return Promise.resolve();
     }
 
@@ -1227,7 +1227,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
     }
 
     uploadSecureFile(
-        _content: any,
+        _content: unknown,
         _project: string,
         name: string,
         _authorizePipelines?: boolean
@@ -1401,7 +1401,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(machines.map(m => ({ ...makeVirtualMachine(), ...m })));
     }
 
-    getYamlSchema(_validateTaskNames?: boolean): Promise<any> {
+    getYamlSchema(_validateTaskNames?: boolean): Promise<unknown> {
         return Promise.resolve(yamlSchema);
     }
 }

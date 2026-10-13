@@ -1186,7 +1186,7 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(scoped);
     }
 
-    getTestSessionLayout(_project: string, _sessionId: string): Promise<any[]> {
+    getTestSessionLayout(_project: string, _sessionId: string): Promise<unknown[]> {
         return Promise.resolve(sessionLayout);
     }
 
@@ -1220,7 +1220,7 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getTestSessionLayoutBySessionId(_project: string, _sessionId: number): Promise<any[]> {
+    getTestSessionLayoutBySessionId(_project: string, _sessionId: number): Promise<unknown[]> {
         return Promise.resolve(sessionLayout);
     }
 

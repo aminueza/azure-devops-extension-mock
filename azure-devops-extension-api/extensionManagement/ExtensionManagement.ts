@@ -96,13 +96,13 @@ export class MockExtensionManagementRestClient extends RestClientBase {
     }
 
     createDocumentByName(
-        doc: any,
+        doc: object,
         _publisherName: string,
         _extensionName: string,
         _scopeType: string,
         _scopeValue: string,
         _collectionName: string
-    ): Promise<any> {
+    ): Promise<unknown> {
         return Promise.resolve({ ...makeExtensionDocument(), ...doc });
     }
 
@@ -124,7 +124,7 @@ export class MockExtensionManagementRestClient extends RestClientBase {
         _scopeValue: string,
         _collectionName: string,
         documentId: string
-    ): Promise<any> {
+    ): Promise<unknown> {
         return Promise.resolve(findDocument(documentId));
     }
 
@@ -134,29 +134,29 @@ export class MockExtensionManagementRestClient extends RestClientBase {
         _scopeType: string,
         _scopeValue: string,
         _collectionName: string
-    ): Promise<any[]> {
+    ): Promise<unknown[]> {
         return Promise.resolve(documents);
     }
 
     setDocumentByName(
-        doc: any,
+        doc: object,
         _publisherName: string,
         _extensionName: string,
         _scopeType: string,
         _scopeValue: string,
         _collectionName: string
-    ): Promise<any> {
+    ): Promise<unknown> {
         return Promise.resolve({ ...makeExtensionDocument(), ...doc });
     }
 
     updateDocumentByName(
-        doc: any,
+        doc: object,
         _publisherName: string,
         _extensionName: string,
         _scopeType: string,
         _scopeValue: string,
         _collectionName: string
-    ): Promise<any> {
+    ): Promise<unknown> {
         return Promise.resolve({ ...makeExtensionDocument(), ...doc });
     }
 

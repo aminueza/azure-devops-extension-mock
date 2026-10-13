@@ -1,5 +1,6 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Class<T = unknown> = new (...args: any[]) => T;
 
 export type MockOverrides<T> = Partial<{

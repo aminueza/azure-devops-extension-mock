@@ -246,7 +246,7 @@ export class MockGraphRestClient extends RestClientBase {
         );
     }
 
-    requestAccess(_jsondocument: any): Promise<void> {
+    requestAccess(_jsondocument: unknown): Promise<void> {
         return Promise.resolve();
     }
 

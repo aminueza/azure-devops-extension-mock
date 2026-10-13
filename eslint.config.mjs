@@ -7,7 +7,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
     {
         rules: {
-            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-explicit-any": "error",
             "@typescript-eslint/no-unused-vars": [
                 "error",
                 { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }
@@ -31,7 +31,10 @@ export default tseslint.config(
     },
     {
         files: ["__tests__/**"],
-        rules: { "@typescript-eslint/no-require-imports": "off" }
+        rules: {
+            "@typescript-eslint/no-require-imports": "off",
+            "@typescript-eslint/no-explicit-any": "off"
+        }
     },
     {
         files: ["eslint.config.mjs"],

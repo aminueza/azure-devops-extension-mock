@@ -59,7 +59,7 @@ export class MockWikiRestClient extends RestClientBase {
     }
 
     createCommentAttachment(
-        _content: any,
+        _content: unknown,
         _project: string,
         _wikiIdentifier: string,
         _pageId: number

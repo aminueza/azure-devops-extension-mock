@@ -148,7 +148,10 @@ import {
     trees
 } from "./Data";
 
-const applyPropertyPatch = (base: Record<string, any>, patchDocument: JsonPatchDocument): Record<string, any> => {
+const applyPropertyPatch = (
+    base: Record<string, unknown>,
+    patchDocument: JsonPatchDocument
+): Record<string, unknown> => {
     const operations: JsonPatchOperation[] = Array.isArray(patchDocument) ? patchDocument : [];
     return operations.reduce(
         (properties, operation) => ({
@@ -1016,7 +1019,7 @@ export class MockGitRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getPullRequestProperties(_repositoryId: string, _pullRequestId: number, _project?: string): Promise<any> {
+    getPullRequestProperties(_repositoryId: string, _pullRequestId: number, _project?: string): Promise<unknown> {
         return Promise.resolve({ ...pullRequestProperties });
     }
 
@@ -1025,7 +1028,7 @@ export class MockGitRestClient extends RestClientBase {
         _repositoryId: string,
         _pullRequestId: number,
         _project?: string
-    ): Promise<any> {
+    ): Promise<unknown> {
         return Promise.resolve(applyPropertyPatch(pullRequestProperties, patchDocument));
     }
 
@@ -1485,7 +1488,7 @@ export class MockGitRestClient extends RestClientBase {
     }
 
     createAttachment(
-        content: any,
+        content: unknown,
         fileName: string,
         _repositoryId: string,
         _pullRequestId: number,

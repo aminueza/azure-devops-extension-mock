@@ -357,7 +357,7 @@ export const testLogs: TestLog[] = fake.helpers.distinct(4, makeTestLog, item =>
 
 export const testResultsSessions: TestResultsSession[] = Array.from({ length: 2 }, makeTestResultsSession);
 
-export const sessionLayout: any[] = [
+export const sessionLayout: unknown[] = [
     { uid: fake.string.uuid(), name: "root", children: [{ uid: fake.string.uuid(), name: "suite" }] }
 ];
 

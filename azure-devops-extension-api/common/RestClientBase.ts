@@ -3,12 +3,12 @@ import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 export interface RestClientRequestParams {
     routeTemplate: string;
     apiVersion: string;
-    routeValues?: { [key: string]: any };
-    body?: any;
-    queryParams?: { [key: string]: any };
+    routeValues?: { [key: string]: unknown };
+    body?: unknown;
+    queryParams?: { [key: string]: unknown };
     method?: string;
     httpResponseType?: string;
-    customHeaders?: { [headerName: string]: any };
+    customHeaders?: { [headerName: string]: unknown };
     returnRawResponse?: boolean;
     isRawData?: boolean;
     command?: string;

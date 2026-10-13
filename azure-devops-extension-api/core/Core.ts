@@ -155,7 +155,7 @@ export class MockCoreRestClient extends RestClientBase {
     }
 
     getProjects(
-        stateFilter?: any,
+        stateFilter?: unknown,
         top?: number,
         skip?: number,
         continuationToken?: number,

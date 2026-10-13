@@ -59,7 +59,7 @@ export interface AlertJob {
     jobType: number;
     lastUpdatedBy: string;
     lastUpdatedDate: Date;
-    properties: any;
+    properties: unknown;
     provider: string;
     revision: number;
 }
