@@ -1,0 +1,17 @@
+name: Feature request
+description: A missing mock, a missing fixture field, or a new helper.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you are trying to test
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: Name the client and method if this is about a specific mock.
+    validations:
+      required: true

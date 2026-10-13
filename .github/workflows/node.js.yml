@@ -50,3 +50,18 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run compat -- ${{ matrix.target }}
+
+  example:
+    name: example extension
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+      - run: npm run example

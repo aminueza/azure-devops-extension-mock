@@ -15,6 +15,8 @@ jobs:
     environment: npm
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24.x
@@ -30,8 +32,20 @@ jobs:
             echo "Tag v$TAG does not match package.json version $PKG"
             exit 1
           fi
+      - name: Check that the tagged commit is on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Tag $GITHUB_REF_NAME points at a commit that is not on main"
+            exit 1
+          fi
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm run build
       - run: npm test
+      - run: npm run compat -- floor
+      - run: npm run compat -- latest
+      - run: npm run example
       - run: npm run audit:prod
       - run: npm publish --provenance --access public
       - name: Create GitHub release

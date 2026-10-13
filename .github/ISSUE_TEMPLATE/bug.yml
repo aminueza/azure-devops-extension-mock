@@ -1,0 +1,39 @@
+name: Bug report
+description: A mock behaves wrongly, differs from the real client, or the package fails to load.
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: The version of azure-devops-extension-mock you use.
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: peers
+    attributes:
+      label: Peer versions
+      description: Your versions of azure-devops-extension-api and azure-devops-extension-sdk.
+      placeholder: "azure-devops-extension-api 5.279.1, azure-devops-extension-sdk 4.2.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: Include the error message or the value the mock returns.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: If the mock differs from the real service, say what the real service returns.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Code to reproduce
+      render: ts

@@ -6,6 +6,9 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "ut
 const lockfile = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
 const renovate = JSON.parse(fs.readFileSync(path.join(root, "renovate.json"), "utf8"));
 const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "node.js.yml"), "utf8");
+const releaseWorkflow = fs.readFileSync(path.join(root, ".github", "workflows", "release.yml"), "utf8");
+const readme = fs.readFileSync(path.join(root, "readme.md"), "utf8");
+const jestConfig = require("../jest.config.js") as { coverageThreshold: { global: Record<string, number> } };
 const compat = require("../scripts/compat") as {
     PEERS: string[];
     TARGETS: string[];
@@ -105,6 +108,41 @@ describe("package manifest", () => {
     it("checks formatting in CI", () => {
         expect(manifest.scripts["format:check"]).toBe("prettier --check .");
         expect(workflow).toContain("- run: npm run format:check");
+    });
+
+    it("requires full coverage", () => {
+        expect(jestConfig.coverageThreshold.global).toEqual({
+            statements: 100,
+            branches: 100,
+            functions: 100,
+            lines: 100
+        });
+    });
+
+    it("runs the example extension in CI with the configuration the readme documents", () => {
+        const exampleConfig = fs.readFileSync(path.join(root, "examples", "consumer", "jest.config.js"), "utf8").trim();
+        expect(readme).toContain(`\`\`\`js\n${exampleConfig}\n\`\`\``);
+        expect(manifest.scripts.example).toBe("node scripts/example.js");
+        expect(workflow).toContain("- run: npm run example");
+    });
+
+    it("runs every check before publishing and only publishes from main", () => {
+        const steps = [
+            "git merge-base --is-ancestor",
+            "- run: npm run lint",
+            "- run: npm run format:check",
+            "- run: npm run build",
+            "- run: npm test",
+            "- run: npm run compat -- floor",
+            "- run: npm run compat -- latest",
+            "- run: npm run example",
+            "- run: npm run audit:prod",
+            "- run: npm publish --provenance --access public"
+        ];
+        const positions = steps.map(step => releaseWorkflow.indexOf(step));
+        expect(positions.every(position => position >= 0)).toBe(true);
+        expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+        expect(releaseWorkflow).toContain("fetch-depth: 0");
     });
 
     it("tests the oldest supported node version in CI", () => {
