@@ -3,10 +3,16 @@ import * as build from "../azure-devops-extension-api/build/Data";
 import * as core from "../azure-devops-extension-api/core/Data";
 import * as dashboard from "../azure-devops-extension-api/dashboard/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
+import * as graph from "../azure-devops-extension-api/graph/Data";
 import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
+import * as policy from "../azure-devops-extension-api/policy/Data";
 import * as release from "../azure-devops-extension-api/release/Data";
+import * as serviceEndpoint from "../azure-devops-extension-api/serviceEndpoint/Data";
 import * as taskAgent from "../azure-devops-extension-api/taskAgent/Data";
 import * as test from "../azure-devops-extension-api/test/Data";
+import * as testPlan from "../azure-devops-extension-api/testPlan/Data";
+import * as testResults from "../azure-devops-extension-api/testResults/Data";
+import * as tfvc from "../azure-devops-extension-api/tfvc/Data";
 import * as wiki from "../azure-devops-extension-api/wiki/Data";
 import * as workItemTracking from "../azure-devops-extension-api/workItemTracking/Data";
 import { fake } from "../azure-devops-extension-api/common/fixtures";
@@ -17,10 +23,16 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["core", core],
     ["dashboard", dashboard],
     ["git", git],
+    ["graph", graph],
     ["pipelines", pipelines],
+    ["policy", policy],
     ["release", release],
+    ["serviceEndpoint", serviceEndpoint],
     ["taskAgent", taskAgent],
     ["test", test],
+    ["testPlan", testPlan],
+    ["testResults", testResults],
+    ["tfvc", tfvc],
     ["wiki", wiki],
     ["workItemTracking", workItemTracking]
 ];
@@ -28,8 +40,14 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
 const hasNumericId = (value: unknown): value is { id: number; rev?: number } =>
     typeof value === "object" && value !== null && typeof (value as { id?: unknown }).id === "number";
 
-const keyOf = (item: { id: number; rev?: number }): string =>
-    typeof item.rev === "number" ? `${item.id}:${item.rev}` : String(item.id);
+const REVISION_KEYED = new Set(["policy/configurationRevisions"]);
+
+const keyOf = (item: { id: number; rev?: number; revision?: number }, list: string): string => {
+    if (typeof item.rev === "number") {
+        return `${item.id}:${item.rev}`;
+    }
+    return REVISION_KEYED.has(list) ? `${item.id}:${item.revision}` : String(item.id);
+};
 
 const seededLists = (): Array<[string, string[]]> => {
     const lists: Array<[string, string[]]> = [];
@@ -38,7 +56,7 @@ const seededLists = (): Array<[string, string[]]> => {
             if (!Array.isArray(value) || value.length < 2 || !value.every(hasNumericId)) {
                 continue;
             }
-            lists.push([`${area}/${name}`, value.map(keyOf)]);
+            lists.push([`${area}/${name}`, value.map(item => keyOf(item, `${area}/${name}`))]);
         }
     }
     return lists;

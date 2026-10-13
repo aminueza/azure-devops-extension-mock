@@ -18,9 +18,9 @@ const CLIENTS = [
     { area: "ServiceEndpoint", real: "ServiceEndpointRestClient", mock: "serviceEndpoint/ServiceEndpoint.ts" },
     { area: "TaskAgent", real: "TaskAgentRestClient", mock: "taskAgent/TaskAgent.ts" },
     { area: "Test", real: "TestRestClient", mock: "test/Test.ts" },
-    { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },
     { area: "TestPlan", real: "TestPlanRestClient", mock: "testPlan/TestPlan.ts" },
     { area: "TestResults", real: "TestResultsRestClient", mock: "testResults/TestResults.ts" },
+    { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
     { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" }
 ];

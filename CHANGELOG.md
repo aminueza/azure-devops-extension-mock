@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hand-written mocks for the last 19 `GitRestClient` methods: the Advanced Security enablement and billing methods and the ref favorite methods.
 - Hand-written mocks for the last 48 `TaskAgentRestClient` methods: environments, Kubernetes resources, virtual machine groups, secure files, task groups, task definitions, packages, Azure subscriptions and management groups, endpoint queries and the YAML schema. Every method of the twelve mocked clients now returns fixtures.
+- Hand-written mocks for six more clients, registered with `getClient` like the existing ones: `GraphRestClient` (40 methods), `PolicyRestClient` (12), `ServiceEndpointRestClient` (27), `TestPlanRestClient` (48), `TestResultsRestClient` (140) and `TfvcRestClient` (24). The mock classes are exported as `MockGraphRestClient`, `MockPolicyRestClient`, `MockServiceEndpointRestClient`, `MockTestPlanRestClient`, `MockTestResultsRestClient` and `MockTfvcRestClient`.
 
 ### Changed
 

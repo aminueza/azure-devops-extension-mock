@@ -17,7 +17,6 @@ import {
     MappingResult,
     ResolveDisconnectedUsersResponse
 } from "azure-devops-extension-api/Graph";
-import { GroupScopeType } from "azure-devops-extension-api/Identities";
 import { Avatar, AvatarSize } from "azure-devops-extension-api/Profile";
 
 export interface GraphStorageKey {
@@ -113,7 +112,7 @@ export const makeGraphScope = (): GraphScope => ({
     administratorDescriptor: `vssgp.${fake.string.alphanumeric(24)}${fake.number.id()}`,
     isGlobal: false,
     parentDescriptor: `scp.${fake.string.alphanumeric(24)}${fake.number.id()}`,
-    scopeType: GroupScopeType.TeamProject,
+    scopeType: 2,
     securingHostDescriptor: `scp.${fake.string.alphanumeric(24)}${fake.number.id()}`,
     _links: {}
 });
@@ -207,7 +206,7 @@ export const servicePrincipals: GraphServicePrincipal[] = fake.helpers.distinct(
 
 export const scopes: GraphScope[] = fake.helpers
     .distinct(2, makeGraphScope, scope => scope.displayName)
-    .map((scope, index) => (index === 0 ? { ...scope, scopeType: GroupScopeType.ServiceHost, isGlobal: true } : scope));
+    .map((scope, index) => (index === 0 ? { ...scope, scopeType: 1, isGlobal: true } : scope));
 
 export const members: GraphMember[] = [...users, ...groups, ...servicePrincipals];
 

@@ -12,9 +12,9 @@ import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
-import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
 import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
+import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 
@@ -39,9 +39,9 @@ import { MockReleaseRestClient } from "./release/Release";
 import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
-import { MockTfvcRestClient } from "./tfvc/Tfvc";
 import { MockTestPlanRestClient } from "./testPlan/TestPlan";
 import { MockTestResultsRestClient } from "./testResults/TestResults";
+import { MockTfvcRestClient } from "./tfvc/Tfvc";
 import { MockWikiRestClient } from "./wiki/Wiki";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
 
@@ -66,9 +66,9 @@ registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
 registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient as any);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
 registerMockClient(TestRestClient, MockTestRestClient as any);
-registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
 registerMockClient(TestPlanRestClient, MockTestPlanRestClient as any);
 registerMockClient(TestResultsRestClient, MockTestResultsRestClient as any);
+registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
 registerMockClient(WikiRestClient, MockWikiRestClient as any);
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient as any);
 
@@ -129,9 +129,9 @@ export {
     MockServiceEndpointRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
-    MockTfvcRestClient,
     MockTestPlanRestClient,
     MockTestResultsRestClient,
+    MockTfvcRestClient,
     MockWikiRestClient,
     MockWorkItemTrackingRestClient
 };
