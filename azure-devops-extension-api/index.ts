@@ -9,6 +9,7 @@ import { FileContainerRestClient } from "azure-devops-extension-api/FileContaine
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement";
 import { FeatureAvailabilityRestClient } from "azure-devops-extension-api/FeatureAvailability";
 import { FeatureManagementRestClient } from "azure-devops-extension-api/FeatureManagement";
+import { GalleryRestClient } from "azure-devops-extension-api/Gallery";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
@@ -46,6 +47,7 @@ import { MockFileContainerRestClient } from "./fileContainer/FileContainer";
 import { MockExtensionManagementRestClient } from "./extensionManagement/ExtensionManagement";
 import { MockFeatureAvailabilityRestClient } from "./featureAvailability/FeatureAvailability";
 import { MockFeatureManagementRestClient } from "./featureManagement/FeatureManagement";
+import { MockGalleryRestClient } from "./gallery/Gallery";
 import { MockGitRestClient } from "./git/Git";
 import { MockGraphRestClient } from "./graph/Graph";
 import { MockOperationsRestClient } from "./operations/Operations";
@@ -83,6 +85,7 @@ registerMockClient(FileContainerRestClient, MockFileContainerRestClient);
 registerMockClient(ExtensionManagementRestClient, MockExtensionManagementRestClient);
 registerMockClient(FeatureAvailabilityRestClient, MockFeatureAvailabilityRestClient);
 registerMockClient(FeatureManagementRestClient, MockFeatureManagementRestClient);
+registerMockClient(GalleryRestClient, MockGalleryRestClient);
 registerMockClient(GitRestClient, MockGitRestClient);
 registerMockClient(GraphRestClient, MockGraphRestClient);
 registerMockClient(OperationsRestClient, MockOperationsRestClient);
@@ -156,6 +159,7 @@ export {
     MockExtensionManagementRestClient,
     MockFeatureAvailabilityRestClient,
     MockFeatureManagementRestClient,
+    MockGalleryRestClient,
     MockGitRestClient,
     MockGraphRestClient,
     MockOperationsRestClient,

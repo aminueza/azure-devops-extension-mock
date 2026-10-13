@@ -7,6 +7,7 @@ import * as fileContainer from "../azure-devops-extension-api/fileContainer/Data
 import * as extensionManagement from "../azure-devops-extension-api/extensionManagement/Data";
 import * as featureAvailability from "../azure-devops-extension-api/featureAvailability/Data";
 import * as featureManagement from "../azure-devops-extension-api/featureManagement/Data";
+import * as gallery from "../azure-devops-extension-api/gallery/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
 import * as graph from "../azure-devops-extension-api/graph/Data";
 import * as operations from "../azure-devops-extension-api/operations/Data";
@@ -37,6 +38,7 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["extensionManagement", extensionManagement],
     ["featureAvailability", featureAvailability],
     ["featureManagement", featureManagement],
+    ["gallery", gallery],
     ["git", git],
     ["graph", graph],
     ["operations", operations],

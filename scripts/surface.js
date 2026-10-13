@@ -15,6 +15,7 @@ const CLIENTS = [
     { area: "ExtensionManagement", real: "ExtensionManagementRestClient", mock: "extensionManagement/ExtensionManagement.ts" },
     { area: "FeatureAvailability", real: "FeatureAvailabilityRestClient", mock: "featureAvailability/FeatureAvailability.ts" },
     { area: "FeatureManagement", real: "FeatureManagementRestClient", mock: "featureManagement/FeatureManagement.ts" },
+    { area: "Gallery", real: "GalleryRestClient", mock: "gallery/Gallery.ts" },
     { area: "Git", real: "GitRestClient", mock: "git/Git.ts" },
     { area: "Graph", real: "GraphRestClient", mock: "graph/Graph.ts" },
     { area: "Operations", real: "OperationsRestClient", mock: "operations/Operations.ts" },

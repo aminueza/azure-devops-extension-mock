@@ -163,6 +163,7 @@ describe("index re-exports", () => {
             api.MockExtensionManagementRestClient,
             api.MockFeatureAvailabilityRestClient,
             api.MockFeatureManagementRestClient,
+            api.MockGalleryRestClient,
             api.MockGitRestClient,
             api.MockGraphRestClient,
             api.MockOperationsRestClient,

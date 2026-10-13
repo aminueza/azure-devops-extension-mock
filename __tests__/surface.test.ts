@@ -8,6 +8,7 @@ import { FileContainerRestClient } from "azure-devops-extension-api/FileContaine
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement";
 import { FeatureAvailabilityRestClient } from "azure-devops-extension-api/FeatureAvailability";
 import { FeatureManagementRestClient } from "azure-devops-extension-api/FeatureManagement";
+import { GalleryRestClient } from "azure-devops-extension-api/Gallery";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
@@ -43,6 +44,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     ExtensionManagementRestClient,
     FeatureAvailabilityRestClient,
     FeatureManagementRestClient,
+    GalleryRestClient,
     GitRestClient,
     GraphRestClient,
     OperationsRestClient,
