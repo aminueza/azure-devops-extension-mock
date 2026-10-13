@@ -11,6 +11,11 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true
+    },
+    {
+      "matchPackageNames": ["js-yaml"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ],
   "dependencyDashboard": false
