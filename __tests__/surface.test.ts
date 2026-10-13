@@ -25,6 +25,7 @@ import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 import { WorkItemTrackingProcessDefinitionsRestClient } from "azure-devops-extension-api/WorkItemTrackingProcessDefinitions";
+import { WorkItemTrackingProcessRestClient } from "azure-devops-extension-api/WorkItemTrackingProcess";
 import { getClient, getRegisteredMockClient } from "../azure-devops-extension-api";
 import { RestClientBase } from "../azure-devops-extension-api/common/RestClientBase";
 import * as sdkMock from "../azure-devops-extension-sdk";
@@ -59,6 +60,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     WikiRestClient,
     WorkItemTrackingRestClient,
     WorkItemTrackingProcessDefinitionsRestClient
+    WorkItemTrackingProcessRestClient
 };
 
 const BASE_METHODS = new Set(Object.getOwnPropertyNames(RestClientBase.prototype));

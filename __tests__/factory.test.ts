@@ -180,6 +180,7 @@ describe("index re-exports", () => {
             api.MockWikiRestClient,
             api.MockWorkItemTrackingRestClient,
             api.MockWorkItemTrackingProcessDefinitionsRestClient
+            api.MockWorkItemTrackingProcessRestClient
         ];
         classes.forEach(cls => {
             expect(typeof cls).toBe("function");

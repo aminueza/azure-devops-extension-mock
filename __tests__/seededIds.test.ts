@@ -24,6 +24,7 @@ import * as tfvc from "../azure-devops-extension-api/tfvc/Data";
 import * as wiki from "../azure-devops-extension-api/wiki/Data";
 import * as workItemTracking from "../azure-devops-extension-api/workItemTracking/Data";
 import * as workItemTrackingProcessDefinitions from "../azure-devops-extension-api/workItemTrackingProcessDefinitions/Data";
+import * as workItemTrackingProcess from "../azure-devops-extension-api/workItemTrackingProcess/Data";
 import { fake } from "../azure-devops-extension-api/common/fixtures";
 
 const MODULES: Array<[string, Record<string, unknown>]> = [
@@ -53,6 +54,7 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["wiki", wiki],
     ["workItemTracking", workItemTracking],
     ["workItemTrackingProcessDefinitions", workItemTrackingProcessDefinitions]
+    ["workItemTrackingProcess", workItemTrackingProcess]
 ];
 
 const hasNumericId = (value: unknown): value is { id: number; rev?: number } =>

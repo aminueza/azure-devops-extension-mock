@@ -32,6 +32,7 @@ const CLIENTS = [
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
     { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" },
     { area: "WorkItemTrackingProcessDefinitions", real: "WorkItemTrackingProcessDefinitionsRestClient", mock: "workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions.ts" }
+    { area: "WorkItemTrackingProcess", real: "WorkItemTrackingProcessRestClient", mock: "workItemTrackingProcess/WorkItemTrackingProcess.ts" }
 ];
 
 const methodNames = (source) => {
