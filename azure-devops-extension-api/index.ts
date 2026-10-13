@@ -2,9 +2,13 @@ import { CommonServiceIds } from "azure-devops-extension-api/Common";
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
 import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
+import { ContributionsRestClient } from "azure-devops-extension-api/Contributions";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
+import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement";
+import { FeatureAvailabilityRestClient } from "azure-devops-extension-api/FeatureAvailability";
+import { FeatureManagementRestClient } from "azure-devops-extension-api/FeatureManagement";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
@@ -33,9 +37,13 @@ import {
 import { MockAccountsRestClient } from "./accounts/Accounts";
 import { MockBoardsRestClient } from "./boards/Boards";
 import { MockBuildRestClient } from "./build/Build";
+import { MockContributionsRestClient } from "./contributions/Contributions";
 import { MockCoreRestClient } from "./core/Core";
 import { MockDashboardRestClient } from "./dashboard/Dashboard";
 import { MockFileContainerRestClient } from "./fileContainer/FileContainer";
+import { MockExtensionManagementRestClient } from "./extensionManagement/ExtensionManagement";
+import { MockFeatureAvailabilityRestClient } from "./featureAvailability/FeatureAvailability";
+import { MockFeatureManagementRestClient } from "./featureManagement/FeatureManagement";
 import { MockGitRestClient } from "./git/Git";
 import { MockGraphRestClient } from "./graph/Graph";
 import { MockOperationsRestClient } from "./operations/Operations";
@@ -64,9 +72,13 @@ import {
 registerMockClient(AccountsRestClient, MockAccountsRestClient);
 registerMockClient(WorkRestClient, MockBoardsRestClient);
 registerMockClient(BuildRestClient, MockBuildRestClient);
+registerMockClient(ContributionsRestClient, MockContributionsRestClient);
 registerMockClient(CoreRestClient, MockCoreRestClient);
 registerMockClient(DashboardRestClient, MockDashboardRestClient);
 registerMockClient(FileContainerRestClient, MockFileContainerRestClient);
+registerMockClient(ExtensionManagementRestClient, MockExtensionManagementRestClient);
+registerMockClient(FeatureAvailabilityRestClient, MockFeatureAvailabilityRestClient);
+registerMockClient(FeatureManagementRestClient, MockFeatureManagementRestClient);
 registerMockClient(GitRestClient, MockGitRestClient);
 registerMockClient(GraphRestClient, MockGraphRestClient);
 registerMockClient(OperationsRestClient, MockOperationsRestClient);
@@ -131,9 +143,13 @@ export {
     MockAccountsRestClient,
     MockBoardsRestClient,
     MockBuildRestClient,
+    MockContributionsRestClient,
     MockCoreRestClient,
     MockDashboardRestClient,
     MockFileContainerRestClient,
+    MockExtensionManagementRestClient,
+    MockFeatureAvailabilityRestClient,
+    MockFeatureManagementRestClient,
     MockGitRestClient,
     MockGraphRestClient,
     MockOperationsRestClient,

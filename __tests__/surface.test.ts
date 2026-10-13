@@ -1,9 +1,13 @@
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
 import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
+import { ContributionsRestClient } from "azure-devops-extension-api/Contributions";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
+import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement";
+import { FeatureAvailabilityRestClient } from "azure-devops-extension-api/FeatureAvailability";
+import { FeatureManagementRestClient } from "azure-devops-extension-api/FeatureManagement";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
@@ -30,9 +34,13 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     AccountsRestClient,
     WorkRestClient,
     BuildRestClient,
+    ContributionsRestClient,
     CoreRestClient,
     DashboardRestClient,
     FileContainerRestClient,
+    ExtensionManagementRestClient,
+    FeatureAvailabilityRestClient,
+    FeatureManagementRestClient,
     GitRestClient,
     GraphRestClient,
     OperationsRestClient,

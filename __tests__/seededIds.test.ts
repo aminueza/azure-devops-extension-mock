@@ -1,8 +1,12 @@
 import * as boards from "../azure-devops-extension-api/boards/Data";
 import * as build from "../azure-devops-extension-api/build/Data";
+import * as contributions from "../azure-devops-extension-api/contributions/Data";
 import * as core from "../azure-devops-extension-api/core/Data";
 import * as dashboard from "../azure-devops-extension-api/dashboard/Data";
 import * as fileContainer from "../azure-devops-extension-api/fileContainer/Data";
+import * as extensionManagement from "../azure-devops-extension-api/extensionManagement/Data";
+import * as featureAvailability from "../azure-devops-extension-api/featureAvailability/Data";
+import * as featureManagement from "../azure-devops-extension-api/featureManagement/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
 import * as graph from "../azure-devops-extension-api/graph/Data";
 import * as operations from "../azure-devops-extension-api/operations/Data";
@@ -24,9 +28,13 @@ import { fake } from "../azure-devops-extension-api/common/fixtures";
 const MODULES: Array<[string, Record<string, unknown>]> = [
     ["boards", boards],
     ["build", build],
+    ["contributions", contributions],
     ["core", core],
     ["dashboard", dashboard],
     ["fileContainer", fileContainer],
+    ["extensionManagement", extensionManagement],
+    ["featureAvailability", featureAvailability],
+    ["featureManagement", featureManagement],
     ["git", git],
     ["graph", graph],
     ["operations", operations],
