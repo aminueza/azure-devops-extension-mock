@@ -42,7 +42,9 @@ describe("fixtures number", () => {
     });
 
     it("accepts a partial range", () => {
-        repeat(50, () => fake.number.int({ min: 999_990 })).forEach(value => expect(value).toBeGreaterThanOrEqual(999_990));
+        repeat(50, () => fake.number.int({ min: 999_990 })).forEach(value =>
+            expect(value).toBeGreaterThanOrEqual(999_990)
+        );
         repeat(50, () => fake.number.int({ max: 1 })).forEach(value => expect(value).toBeLessThanOrEqual(1));
     });
 });
@@ -184,7 +186,13 @@ describe("fixtures helpers", () => {
 
     it("returns the drawn items unchanged when no key is given", () => {
         expect(fake.helpers.distinct(2, () => "same")).toEqual(["same", "same"]);
-        expect(fake.helpers.distinct(0, () => "unused", value => value)).toEqual([]);
+        expect(
+            fake.helpers.distinct(
+                0,
+                () => "unused",
+                value => value
+            )
+        ).toEqual([]);
     });
 
     it("stands in for a field the service leaves out", () => {
@@ -194,9 +202,13 @@ describe("fixtures helpers", () => {
     });
 
     it("gives up when the maker cannot produce enough distinct items", () => {
-        expect(() => fake.helpers.distinct(2, () => "same", value => value)).toThrow(
-            "Could not make 2 distinct items in 1000 attempts"
-        );
+        expect(() =>
+            fake.helpers.distinct(
+                2,
+                () => "same",
+                value => value
+            )
+        ).toThrow("Could not make 2 distinct items in 1000 attempts");
     });
 });
 

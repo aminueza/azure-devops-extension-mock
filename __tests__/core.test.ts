@@ -37,11 +37,15 @@ import {
     teams
 } from "../azure-devops-extension-api/core/Data";
 
-const teamContextOf = (projectId: string) => ({ projectId } as any);
+const teamContextOf = (projectId: string) => ({ projectId }) as any;
 
 describe("CoreRestClient mock projects", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(CoreRestClient);
 
@@ -133,13 +137,19 @@ describe("CoreRestClient mock projects", () => {
     });
 
     it("sets project properties", async () => {
-        await expect(client.setProjectProperties("proj", [{ op: "add", path: "/x", value: 1 }] as any)).resolves.toBeUndefined();
+        await expect(
+            client.setProjectProperties("proj", [{ op: "add", path: "/x", value: 1 }] as any)
+        ).resolves.toBeUndefined();
     });
 });
 
 describe("CoreRestClient mock teams", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(CoreRestClient);
 
@@ -188,14 +198,22 @@ describe("CoreRestClient mock teams", () => {
     it("pages team members", async () => {
         expect(await client.getTeamMembersWithExtendedProperties("proj", "team")).toEqual(teamMembers);
         expect(await client.getTeamMembersWithExtendedProperties("proj", "team", 2)).toEqual(teamMembers.slice(0, 2));
-        expect(await client.getTeamMembersWithExtendedProperties("proj", "team", undefined, 3)).toEqual(teamMembers.slice(3));
-        expect(await client.getTeamMembersWithExtendedProperties("proj", "team", 2, 1)).toEqual(teamMembers.slice(1, 3));
+        expect(await client.getTeamMembersWithExtendedProperties("proj", "team", undefined, 3)).toEqual(
+            teamMembers.slice(3)
+        );
+        expect(await client.getTeamMembersWithExtendedProperties("proj", "team", 2, 1)).toEqual(
+            teamMembers.slice(1, 3)
+        );
     });
 });
 
 describe("CoreRestClient mock processes, identities, services and proxies", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(CoreRestClient);
 
@@ -244,7 +262,10 @@ describe("CoreRestClient mock processes, identities, services and proxies", () =
     it("lists proxies, optionally by url, and creates or deletes them", async () => {
         expect(await client.getProxies()).toBe(proxies);
         expect(await client.getProxies(proxies[1].url)).toEqual([proxies[1]]);
-        const created = await client.createOrUpdateProxy({ url: "https://proxy.example.com", friendlyName: "edge" } as any);
+        const created = await client.createOrUpdateProxy({
+            url: "https://proxy.example.com",
+            friendlyName: "edge"
+        } as any);
         expect(created).toMatchObject({ url: "https://proxy.example.com", friendlyName: "edge" });
         expect(created).toHaveProperty("authorization");
         await expect(client.deleteProxy("https://proxy.example.com")).resolves.toBeUndefined();
@@ -253,8 +274,12 @@ describe("CoreRestClient mock processes, identities, services and proxies", () =
 });
 
 describe("core data factories", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("makes an aad identity ref", () => {
         const ref = makeIdentityRef();

@@ -1,8 +1,4 @@
-import {
-    GitAsyncOperationStatus,
-    GitRefUpdateStatus,
-    GitRestClient
-} from "azure-devops-extension-api/Git";
+import { GitAsyncOperationStatus, GitRefUpdateStatus, GitRestClient } from "azure-devops-extension-api/Git";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -41,49 +37,59 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     } as any;
 
     const cases: Array<[string, () => Promise<unknown>]> = [
-        ["getAccessibleRepositories", () => client.getAccessibleRepositories({
-            permission: "read",
-            repositoryIds: [repositories[0].id]
-        })],
+        [
+            "getAccessibleRepositories",
+            () =>
+                client.getAccessibleRepositories({
+                    permission: "read",
+                    repositoryIds: [repositories[0].id]
+                })
+        ],
         ["getRepositoriesPaged", () => client.getRepositoriesPaged("project-id")],
         ["getRepositoryWithParent", () => client.getRepositoryWithParent("repo-id", true)],
         ["getDeletedRepositories", () => client.getDeletedRepositories("proj")],
         ["getRecycleBinRepositories", () => client.getRecycleBinRepositories("proj")],
-        ["restoreRepositoryFromRecycleBin", () => client.restoreRepositoryFromRecycleBin(
-            { deleted: false },
-            "proj",
-            "repo-id"
-        )],
-        ["createForkSyncRequest", () => client.createForkSyncRequest({
-            source: { collectionId: "c", projectId: "p", repositoryId: "r" },
-            sourceToTargetRefs: []
-        }, "repo-id")],
+        [
+            "restoreRepositoryFromRecycleBin",
+            () => client.restoreRepositoryFromRecycleBin({ deleted: false }, "proj", "repo-id")
+        ],
+        [
+            "createForkSyncRequest",
+            () =>
+                client.createForkSyncRequest(
+                    {
+                        source: { collectionId: "c", projectId: "p", repositoryId: "r" },
+                        sourceToTargetRefs: []
+                    },
+                    "repo-id"
+                )
+        ],
         ["getForkSyncRequest", () => client.getForkSyncRequest("repo-id", 42)],
         ["getForkSyncRequests", () => client.getForkSyncRequests("repo-id")],
         ["getForks", () => client.getForks("repo-id", "collection-id")],
-        ["createImportRequest", () => client.createImportRequest(
-            makeImportRequest(),
-            "proj",
-            "repo-id"
-        )],
+        ["createImportRequest", () => client.createImportRequest(makeImportRequest(), "proj", "repo-id")],
         ["getImportRequest", () => client.getImportRequest("proj", "repo-id", 7)],
         ["queryImportRequests", () => client.queryImportRequests("proj", "repo-id")],
-        ["updateImportRequest", () => client.updateImportRequest(
-            makeImportRequest(),
-            "proj",
-            "repo-id",
-            7
-        )],
+        ["updateImportRequest", () => client.updateImportRequest(makeImportRequest(), "proj", "repo-id", 7)],
         ["getPermission", () => client.getPermission("proj", repositories[0].id, "read")],
         ["getSuggestions", () => client.getSuggestions("repo-id")],
         ["getBranchStatsBatch", () => client.getBranchStatsBatch(branchCriteria, "repo-id")],
-        ["updateRefs", () => client.updateRefs([{
-            isLocked: false,
-            name: "refs/heads/main",
-            newObjectId: "b".repeat(40),
-            oldObjectId: "a".repeat(40),
-            repositoryId: "ignored"
-        }], "repo-id")],
+        [
+            "updateRefs",
+            () =>
+                client.updateRefs(
+                    [
+                        {
+                            isLocked: false,
+                            name: "refs/heads/main",
+                            newObjectId: "b".repeat(40),
+                            oldObjectId: "a".repeat(40),
+                            repositoryId: "ignored"
+                        }
+                    ],
+                    "repo-id"
+                )
+        ],
         ["getTree", () => client.getTree("repo-id", "sha")],
         ["getTreeZip", () => client.getTreeZip("repo-id", "sha")]
     ];
@@ -121,15 +127,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("filters and resumes from a continuation token", async () => {
-        const page = await client.getRepositoriesPaged(
-            "project-id",
-            false,
-            false,
-            true,
-            repositories[0].name,
-            5,
-            "0"
-        );
+        const page = await client.getRepositoriesPaged("project-id", false, false, true, repositories[0].name, 5, "0");
         expect(page.length).toBeGreaterThan(0);
         expect(page.every(r => r.name.includes(repositories[0].name))).toBe(true);
     });
@@ -153,11 +151,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
 
     it("restores a known deleted repository by name", async () => {
         const deleted = deletedRepositories[1];
-        const restored = await client.restoreRepositoryFromRecycleBin(
-            { deleted: false },
-            "proj",
-            deleted.id
-        );
+        const restored = await client.restoreRepositoryFromRecycleBin({ deleted: false }, "proj", deleted.id);
         expect(restored.id).toBe(deleted.id);
         expect(restored.name).toBe(deleted.name);
         expect(restored.project).toBe(deleted.project);
@@ -165,11 +159,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("restores an unknown repository with a fabricated name", async () => {
-        const restored = await client.restoreRepositoryFromRecycleBin(
-            { deleted: true },
-            "proj",
-            "missing-repo"
-        );
+        const restored = await client.restoreRepositoryFromRecycleBin({ deleted: true }, "proj", "missing-repo");
         expect(restored.id).toBe("missing-repo");
         expect(restored.isDisabled).toBe(true);
         expect(restored.name).not.toBe("");
@@ -204,8 +194,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("includes abandoned fork sync requests on request", async () => {
-        await expect(client.getForkSyncRequests("repo-id", "proj", true, false))
-            .resolves.toBe(forkSyncRequests);
+        await expect(client.getForkSyncRequests("repo-id", "proj", true, false)).resolves.toBe(forkSyncRequests);
     });
 
     it("scopes forks to the requested collection", async () => {
@@ -225,8 +214,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
 
     it("returns a known import request", async () => {
         const known = importRequests[0];
-        await expect(client.getImportRequest("proj", "repo-id", known.importRequestId))
-            .resolves.toBe(known);
+        await expect(client.getImportRequest("proj", "repo-id", known.importRequestId)).resolves.toBe(known);
     });
 
     it("fabricates an import request for an unknown id", async () => {
@@ -241,8 +229,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("includes abandoned import requests on request", async () => {
-        await expect(client.queryImportRequests("proj", "repo-id", true))
-            .resolves.toBe(importRequests);
+        await expect(client.queryImportRequests("proj", "repo-id", true)).resolves.toBe(importRequests);
     });
 
     it("echoes the updated import request under the requested id", async () => {
@@ -281,15 +268,20 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("reports ref updates as succeeded against the target repository", async () => {
-        const results = await client.updateRefs([
-            {
-                isLocked: true,
-                name: "refs/heads/main",
-                newObjectId: "b".repeat(40),
-                oldObjectId: "a".repeat(40),
-                repositoryId: "ignored"
-            }
-        ], "repo-id", "proj", "project-id");
+        const results = await client.updateRefs(
+            [
+                {
+                    isLocked: true,
+                    name: "refs/heads/main",
+                    newObjectId: "b".repeat(40),
+                    oldObjectId: "a".repeat(40),
+                    repositoryId: "ignored"
+                }
+            ],
+            "repo-id",
+            "proj",
+            "project-id"
+        );
         expect(results.length).toBe(1);
         expect(results[0].repositoryId).toBe("repo-id");
         expect(results[0].isLocked).toBe(true);
@@ -310,14 +302,7 @@ describe("GitRestClient mock repositories, forks and imports", () => {
     });
 
     it("rewrites tree entries when a file name is given", async () => {
-        const tree = await client.getTree(
-            "repo-id",
-            trees[1].objectId,
-            "proj",
-            "project-id",
-            true,
-            "src/index.ts"
-        );
+        const tree = await client.getTree("repo-id", trees[1].objectId, "proj", "project-id", true, "src/index.ts");
         expect(tree.treeEntries.every(e => e.relativePath === "src/index.ts")).toBe(true);
     });
 

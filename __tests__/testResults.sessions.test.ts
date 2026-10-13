@@ -11,8 +11,12 @@ import {
 } from "../azure-devops-extension-api/testResults/Data";
 
 describe("TestResultsRestClient mock sessions, settings and work item links", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestResultsRestClient);
 
@@ -52,9 +56,16 @@ describe("TestResultsRestClient mock sessions, settings and work item links", ()
             {
                 analysisEngine: "engine",
                 analysisType: "type",
-                analysisFailureGroups: [{ failureGroupId: 1, uid: "group-1" }, { failureGroupId: 2, uid: "group-2" }]
+                analysisFailureGroups: [
+                    { failureGroupId: 1, uid: "group-1" },
+                    { failureGroupId: 2, uid: "group-2" }
+                ]
             },
-            { analysisEngine: "engine", analysisType: "type", analysisFailureGroups: [{ failureGroupId: 3, uid: "group-3" }] }
+            {
+                analysisEngine: "engine",
+                analysisType: "type",
+                analysisFailureGroups: [{ failureGroupId: 3, uid: "group-3" }]
+            }
         ] as any;
         await expect(client.createAnalysis(analysis, "proj", 9)).resolves.toEqual([
             { analysisFailureGroupId: 1, failureGroupUid: "group-1" },
@@ -66,13 +77,18 @@ describe("TestResultsRestClient mock sessions, settings and work item links", ()
     it("creates environments and machines", async () => {
         const environments = [{ displayName: "Windows", processorArchitecture: "x64", uid: "env-1" }];
         await expect(client.createEnvironment(environments, "proj")).resolves.toBeUndefined();
-        await expect(client.createEnvironmentAndMachine({ environments, machines: [] }, "proj", 9)).resolves.toBeUndefined();
+        await expect(
+            client.createEnvironmentAndMachine({ environments, machines: [] }, "proj", 9)
+        ).resolves.toBeUndefined();
         await expect(client.createTestResultMachines(testResultMachines, "proj", 1)).resolves.toBeUndefined();
     });
 
     it("creates notifications and returns one id each", async () => {
         const ids = await client.createNotification(
-            [{ body: "a", severity: "Info", title: "A" }, { body: "b", severity: "Error", title: "B" }],
+            [
+                { body: "a", severity: "Info", title: "A" },
+                { body: "b", severity: "Error", title: "B" }
+            ],
             "proj",
             9
         );
@@ -98,7 +114,9 @@ describe("TestResultsRestClient mock sessions, settings and work item links", ()
 
     it("gets test session results with paging", async () => {
         await expect(client.getTestSessionResults("proj", 1)).resolves.toEqual(testResults);
-        await expect(client.getTestSessionResults("proj", 1, undefined, 2, 2)).resolves.toEqual(testResults.slice(2, 4));
+        await expect(client.getTestSessionResults("proj", 1, undefined, 2, 2)).resolves.toEqual(
+            testResults.slice(2, 4)
+        );
     });
 
     it("updates test results of a test run session and returns their ids", async () => {
@@ -139,7 +157,13 @@ describe("TestResultsRestClient mock sessions, settings and work item links", ()
     });
 
     it("adds work item to test links", async () => {
-        const workItem = { id: "17", name: "Bug", type: "Bug", url: "https://example.test/17", webUrl: "https://example.test/w/17" };
+        const workItem = {
+            id: "17",
+            name: "Bug",
+            type: "Bug",
+            url: "https://example.test/17",
+            webUrl: "https://example.test/w/17"
+        };
         const links = await client.addWorkItemToTestLinks({ executedIn: Service.Tfs, tests: [], workItem }, "proj");
         expect(links).toEqual({ executedIn: Service.Tfs, tests: [], workItem });
     });

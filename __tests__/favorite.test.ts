@@ -55,7 +55,9 @@ describe("FavoriteRestClient mock", () => {
     });
 
     it("deletes a favorite", async () => {
-        await expect(client.deleteFavoriteById(favorites[0].id, REPOSITORY, "Project", "scope-1")).resolves.toBeUndefined();
+        await expect(
+            client.deleteFavoriteById(favorites[0].id, REPOSITORY, "Project", "scope-1")
+        ).resolves.toBeUndefined();
     });
 
     it("deletes a favorite of an owner", async () => {
@@ -133,9 +135,9 @@ describe("FavoriteRestClient mock", () => {
 
     it("lists the favorites of an owner with the same filters", async () => {
         expect(await client.getFavoritesOfOwner("Team", "team-1")).toEqual(favorites);
-        expect(await client.getFavoritesOfOwner("Team", "team-1", REPOSITORY, "Collection", favoriteScopes[1].id)).toEqual([
-            favorites[3]
-        ]);
+        expect(
+            await client.getFavoritesOfOwner("Team", "team-1", REPOSITORY, "Collection", favoriteScopes[1].id)
+        ).toEqual([favorites[3]]);
         expect(await client.getFavoritesOfOwner("Team", "team-1", "Missing.Type")).toEqual([]);
     });
 });

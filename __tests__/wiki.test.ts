@@ -135,7 +135,14 @@ describe("WikiRestClient mock", () => {
     });
 
     it("gets page text for a known path", async () => {
-        const text = await client.getPageText("proj", "wiki", "/API/Overview", VersionControlRecursionType.None, version, true);
+        const text = await client.getPageText(
+            "proj",
+            "wiki",
+            "/API/Overview",
+            VersionControlRecursionType.None,
+            version,
+            true
+        );
         expect(text).toContain("# Overview");
     });
 
@@ -151,7 +158,11 @@ describe("WikiRestClient mock", () => {
     });
 
     it("gets page text by known id", async () => {
-        const batch = await client.getPagesBatch({ top: 10, continuationToken: "", pageViewsForDays: 1 }, "proj", "wiki");
+        const batch = await client.getPagesBatch(
+            { top: 10, continuationToken: "", pageViewsForDays: 1 },
+            "proj",
+            "wiki"
+        );
         const faq = batch.find(d => d.path === "/FAQ")!;
         const text = await client.getPageByIdText("proj", "wiki", faq.id, VersionControlRecursionType.Full, true);
         expect(text).toContain("# FAQ");
@@ -163,7 +174,11 @@ describe("WikiRestClient mock", () => {
     });
 
     it("gets page zip by id", async () => {
-        const batch = await client.getPagesBatch({ top: 10, continuationToken: "", pageViewsForDays: 1 }, "proj", "wiki");
+        const batch = await client.getPagesBatch(
+            { top: 10, continuationToken: "", pageViewsForDays: 1 },
+            "proj",
+            "wiki"
+        );
         const zip = await client.getPageByIdZip("proj", "wiki", batch[0].id);
         expect(zip).toBeInstanceOf(ArrayBuffer);
         expect(decode(zip)).toContain("# Home");
@@ -181,7 +196,12 @@ describe("WikiRestClient mock", () => {
     });
 
     it("gets a batch of page details limited by top", async () => {
-        const batch = await client.getPagesBatch({ top: 2, continuationToken: "", pageViewsForDays: 7 }, "proj", "wiki", version);
+        const batch = await client.getPagesBatch(
+            { top: 2, continuationToken: "", pageViewsForDays: 7 },
+            "proj",
+            "wiki",
+            version
+        );
         expect(batch.length).toBe(2);
         expect(batch.continuationToken).toBeNull();
         for (const detail of batch) {

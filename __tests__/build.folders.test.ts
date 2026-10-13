@@ -1,8 +1,4 @@
-import {
-    BuildRestClient,
-    DefinitionQueueStatus,
-    FolderQueryOrder
-} from "azure-devops-extension-api/Build";
+import { BuildRestClient, DefinitionQueueStatus, FolderQueryOrder } from "azure-devops-extension-api/Build";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -36,10 +32,7 @@ describe("BuildRestClient mock folders, templates and resources", () => {
         ["updateFolder", () => client.updateFolder({ description: "moved" } as any, "proj", "\\shared")],
         ["getTemplate", () => client.getTemplate("proj", definitionTemplates[0].id)],
         ["getTemplates", () => client.getTemplates("proj")],
-        [
-            "saveTemplate",
-            () => client.saveTemplate({ name: "saved" } as any, "proj", "template-classic")
-        ],
+        ["saveTemplate", () => client.saveTemplate({ name: "saved" } as any, "proj", "template-classic")],
         ["restoreDefinition", () => client.restoreDefinition("proj", buildDefinitions[0].id, false)],
         ["getDefinitionMetrics", () => client.getDefinitionMetrics("proj", 1)],
         ["getDefinitionProperties", () => client.getDefinitionProperties("proj", 1)],
@@ -52,12 +45,7 @@ describe("BuildRestClient mock folders, templates and resources", () => {
         ["getDefinitionResources", () => client.getDefinitionResources("proj", 1)],
         [
             "authorizeDefinitionResources",
-            () =>
-                client.authorizeDefinitionResources(
-                    [{ id: "endpoint-9", type: "endpoint" } as any],
-                    "proj",
-                    1
-                )
+            () => client.authorizeDefinitionResources([{ id: "endpoint-9", type: "endpoint" } as any], "proj", 1)
         ],
         [
             "authorizeProjectResources",
@@ -145,11 +133,7 @@ describe("BuildRestClient mock folders, templates and resources", () => {
     });
 
     it("saves a template under the id argument", async () => {
-        const saved = await client.saveTemplate(
-            { id: "ignored", name: "my-template" } as any,
-            "proj",
-            "template-yaml"
-        );
+        const saved = await client.saveTemplate({ id: "ignored", name: "my-template" } as any, "proj", "template-yaml");
         expect(saved.id).toBe("template-yaml");
         expect(saved.name).toBe("my-template");
         expect(saved.defaultHostedQueue).toBe("Azure Pipelines");
@@ -175,11 +159,7 @@ describe("BuildRestClient mock folders, templates and resources", () => {
     });
 
     it("filters definition metrics from a minimum time", async () => {
-        const recent = await client.getDefinitionMetrics(
-            "proj",
-            1,
-            new Date("2024-12-01T00:00:00.000Z")
-        );
+        const recent = await client.getDefinitionMetrics("proj", 1, new Date("2024-12-01T00:00:00.000Z"));
         expect(recent).toHaveLength(1);
         expect(recent[0].name).toBe("FailedBuilds");
     });
@@ -300,11 +280,7 @@ describe("BuildRestClient mock folders, templates and resources", () => {
     });
 
     it("filters project metrics from a minimum time", async () => {
-        const recent = await client.getProjectMetrics(
-            "proj",
-            undefined,
-            new Date("2024-06-01T00:00:00.000Z")
-        );
+        const recent = await client.getProjectMetrics("proj", undefined, new Date("2024-06-01T00:00:00.000Z"));
         expect(recent).toHaveLength(2);
         expect(recent.map(metric => metric.name)).toEqual(["SuccessfulBuilds", "FailedBuilds"]);
     });

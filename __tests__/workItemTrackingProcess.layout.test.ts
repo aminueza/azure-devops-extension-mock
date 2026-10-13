@@ -1,4 +1,10 @@
-import { Control, Group, Page, PageType, WorkItemTrackingProcessRestClient } from "azure-devops-extension-api/WorkItemTrackingProcess";
+import {
+    Control,
+    Group,
+    Page,
+    PageType,
+    WorkItemTrackingProcessRestClient
+} from "azure-devops-extension-api/WorkItemTrackingProcess";
 import { getClient } from "../azure-devops-extension-api";
 import {
     AGILE_PROCESS_ID,
@@ -128,7 +134,13 @@ describe("WorkItemTrackingProcessRestClient mock layout", () => {
         });
 
         it("fills a partially posted group from a fixture", async () => {
-            const added = await client.addGroup({ label: "Partial" } as Group, AGILE_PROCESS_ID, BUG, details.id, "Section2");
+            const added = await client.addGroup(
+                { label: "Partial" } as Group,
+                AGILE_PROCESS_ID,
+                BUG,
+                details.id,
+                "Section2"
+            );
             expect(added.label).toBe("Partial");
             expect(typeof added.id).toBe("string");
             expect(added.controls.length).toBe(2);
@@ -259,7 +271,11 @@ describe("WorkItemTrackingProcessRestClient mock layout", () => {
         });
 
         it("updates an unknown page", async () => {
-            const updated = await client.updatePage({ id: "missing-page", visible: false } as Page, AGILE_PROCESS_ID, BUG);
+            const updated = await client.updatePage(
+                { id: "missing-page", visible: false } as Page,
+                AGILE_PROCESS_ID,
+                BUG
+            );
             expect(updated.id).toBe("missing-page");
             expect(updated.visible).toBe(false);
             expect(updated.pageType).toBe(PageType.Custom);

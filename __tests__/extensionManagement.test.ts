@@ -236,7 +236,9 @@ describe("ExtensionManagementRestClient mock", () => {
 
     it("gets a known installed extension by name", async () => {
         const target = installedExtensions[1];
-        expect(await client.getInstalledExtensionByName(target.publisherId, target.extensionId, ["asset"])).toBe(target);
+        expect(await client.getInstalledExtensionByName(target.publisherId, target.extensionId, ["asset"])).toBe(
+            target
+        );
         expect(target.flags).toBe(ExtensionFlags.BuiltIn | ExtensionFlags.Trusted);
     });
 
@@ -284,10 +286,17 @@ describe("ExtensionManagementRestClient mock", () => {
     it("resolves every request of an extension", async () => {
         const target = requestedExtensions[1];
         expect(
-            await client.resolveAllRequests("", target.publisherName, target.extensionName, ExtensionRequestState.Accepted)
+            await client.resolveAllRequests(
+                "",
+                target.publisherName,
+                target.extensionName,
+                ExtensionRequestState.Accepted
+            )
         ).toBe(2);
         expect(await client.resolveAllRequests("", "missing", "missing", ExtensionRequestState.Accepted)).toBe(1);
-        expect(await client.resolveAllRequests("", "missing", target.extensionName, ExtensionRequestState.Accepted)).toBe(1);
+        expect(
+            await client.resolveAllRequests("", "missing", target.extensionName, ExtensionRequestState.Accepted)
+        ).toBe(1);
     });
 
     it("deletes a request", async () => {

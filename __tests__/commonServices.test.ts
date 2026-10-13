@@ -10,13 +10,20 @@ import {
 } from "azure-devops-extension-api/Common";
 import { getService } from "../azure-devops-extension-api";
 import { RestClientBase, RestClientRequestParams } from "../azure-devops-extension-api/common/RestClientBase";
-import { WorkItemNotificationListener, instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
+import {
+    WorkItemNotificationListener,
+    instanceObjects
+} from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 
 let logSpy: jest.SpyInstance;
 
 describe("MockProjectPageService", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const svc = getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
 
@@ -28,8 +35,12 @@ describe("MockProjectPageService", () => {
 });
 
 describe("MockLocationService", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const svc = getService<ILocationService>(CommonServiceIds.LocationService);
 
@@ -65,14 +76,20 @@ describe("MockLocationService", () => {
 });
 
 describe("MockHostPageLayoutService", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-    beforeEach(() => { logSpy.mockClear(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        logSpy.mockClear();
+    });
 
     const svc = getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
 
     it("reports full screen mode as a boolean", async () => {
-        expect(typeof await svc.getFullScreenMode()).toBe("boolean");
+        expect(typeof (await svc.getFullScreenMode())).toBe("boolean");
     });
 
     it("opens a custom dialog without options", () => {
@@ -84,7 +101,7 @@ describe("MockHostPageLayoutService", () => {
     it("opens a custom dialog with options", () => {
         svc.openCustomDialog("dialog-id", { title: "T" });
         expect(logSpy).toHaveBeenCalledTimes(2);
-        expect(logSpy).toHaveBeenLastCalledWith(expect.stringContaining("\"title\":\"T\""));
+        expect(logSpy).toHaveBeenLastCalledWith(expect.stringContaining('"title":"T"'));
     });
 
     it("opens a message dialog without options", () => {
@@ -96,7 +113,7 @@ describe("MockHostPageLayoutService", () => {
     it("opens a message dialog with options", () => {
         svc.openMessageDialog("hello", { okText: "Go" });
         expect(logSpy).toHaveBeenCalledTimes(2);
-        expect(logSpy).toHaveBeenLastCalledWith(expect.stringContaining("\"okText\":\"Go\""));
+        expect(logSpy).toHaveBeenLastCalledWith(expect.stringContaining('"okText":"Go"'));
     });
 
     it("opens a panel", () => {
@@ -112,9 +129,15 @@ describe("MockHostPageLayoutService", () => {
 });
 
 describe("MockHostNavigationService", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-    beforeEach(() => { logSpy.mockClear(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        logSpy.mockClear();
+    });
 
     const svc = getService<IHostNavigationService>(CommonServiceIds.HostNavigationService);
 
@@ -178,30 +201,36 @@ describe("MockHostNavigationService", () => {
 
     it("sets query params", () => {
         svc.setQueryParams({ q: "1" });
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\"q\":\"1\""));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"q":"1"'));
     });
 });
 
 describe("MockGlobalMessagesService", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-    beforeEach(() => { logSpy.mockClear(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        logSpy.mockClear();
+    });
 
     const svc = getService<IGlobalMessagesService>(CommonServiceIds.GlobalMessagesService);
 
     it("adds a banner", () => {
         svc.addBanner({ message: "b" } as any);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\"message\":\"b\""));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"message":"b"'));
     });
 
     it("adds a dialog", () => {
         svc.addDialog({ title: "d" } as any);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\"title\":\"d\""));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"title":"d"'));
     });
 
     it("adds a toast", () => {
         svc.addToast({ message: "t" } as any);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\"message\":\"t\""));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"message":"t"'));
     });
 
     it("closes the banner", () => {
@@ -216,9 +245,15 @@ describe("MockGlobalMessagesService", () => {
 });
 
 describe("MockExtensionDataService and MockExtensionDataManager", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-    beforeEach(() => { logSpy.mockClear(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        logSpy.mockClear();
+    });
 
     const svc = getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
     let manager: IExtensionDataManager;
@@ -236,7 +271,7 @@ describe("MockExtensionDataService and MockExtensionDataManager", () => {
     it("gets a value", async () => {
         const value = await manager.getValue<string>("k", { scopeType: "User" });
         expect(value).toEqual(expect.any(String));
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\"scopeType\":\"User\""));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"scopeType":"User"'));
     });
 
     it("echoes the value on set", async () => {
@@ -261,7 +296,9 @@ describe("MockExtensionDataService and MockExtensionDataManager", () => {
     });
 
     it("echoes collections on query", async () => {
-        const collections = [{ collectionName: "c", scopeType: "Default", scopeValue: "Current", documents: [] }] as any;
+        const collections = [
+            { collectionName: "c", scopeType: "Default", scopeValue: "Current", documents: [] }
+        ] as any;
         await expect(manager.queryCollections(collections)).resolves.toBe(collections);
     });
 
@@ -292,9 +329,15 @@ describe("MockExtensionDataService and MockExtensionDataManager", () => {
 });
 
 describe("WorkItemNotificationListener", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-    beforeEach(() => { logSpy.mockClear(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        logSpy.mockClear();
+    });
 
     it("exposes an empty instance registry", () => {
         expect(instanceObjects).toEqual({});
@@ -312,28 +355,32 @@ describe("WorkItemNotificationListener", () => {
 
     it("logs on saved", () => {
         WorkItemNotificationListener.onSaved({ id: 3 } as any);
-        expect(logSpy).toHaveBeenCalledWith("onSaved: {\"id\":3}");
+        expect(logSpy).toHaveBeenCalledWith('onSaved: {"id":3}');
     });
 
     it("logs on refreshed", () => {
         WorkItemNotificationListener.onRefreshed({ id: 4 } as any);
-        expect(logSpy).toHaveBeenCalledWith("onRefreshed: {\"id\":4}");
+        expect(logSpy).toHaveBeenCalledWith('onRefreshed: {"id":4}');
     });
 
     it("logs on reset", () => {
         WorkItemNotificationListener.onReset({ id: 5 } as any);
-        expect(logSpy).toHaveBeenCalledWith("onReset: {\"id\":5}");
+        expect(logSpy).toHaveBeenCalledWith('onReset: {"id":5}');
     });
 
     it("logs on unloaded", () => {
         WorkItemNotificationListener.onUnloaded({ id: 6 } as any);
-        expect(logSpy).toHaveBeenCalledWith("onUnloaded: {\"id\":6}");
+        expect(logSpy).toHaveBeenCalledWith('onUnloaded: {"id":6}');
     });
 });
 
 describe("RestClientBase", () => {
-    beforeAll(() => { logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const params: RestClientRequestParams = { routeTemplate: "/_apis/x", apiVersion: "7.1" };
 

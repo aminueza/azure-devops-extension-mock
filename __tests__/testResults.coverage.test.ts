@@ -1,4 +1,10 @@
-import { BranchType, CustomTestFieldScope, CustomTestFieldType, Metrics, ResultMetaDataDetails } from "azure-devops-extension-api/Test";
+import {
+    BranchType,
+    CustomTestFieldScope,
+    CustomTestFieldType,
+    Metrics,
+    ResultMetaDataDetails
+} from "azure-devops-extension-api/Test";
 import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -13,8 +19,12 @@ import {
 import { flakyBranchInfos, sourceViewBuildCoverages } from "../azure-devops-extension-api/testResults/Data";
 
 describe("TestResultsRestClient mock coverage, custom fields, flakiness and metadata", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestResultsRestClient);
 
@@ -70,11 +80,23 @@ describe("TestResultsRestClient mock coverage, custom fields, flakiness and meta
 
     it("adds custom fields", async () => {
         const added = await client.addCustomFields(
-            [{ fieldId: 0, fieldName: "flakyOwner", fieldType: CustomTestFieldType.String, scope: CustomTestFieldScope.TestRun }],
+            [
+                {
+                    fieldId: 0,
+                    fieldName: "flakyOwner",
+                    fieldType: CustomTestFieldType.String,
+                    scope: CustomTestFieldScope.TestRun
+                }
+            ],
             "proj"
         );
         expect(added).toEqual([
-            { fieldId: 1, fieldName: "flakyOwner", fieldType: CustomTestFieldType.String, scope: CustomTestFieldScope.TestRun }
+            {
+                fieldId: 1,
+                fieldName: "flakyOwner",
+                fieldType: CustomTestFieldType.String,
+                scope: CustomTestFieldScope.TestRun
+            }
         ]);
     });
 
@@ -103,19 +125,29 @@ describe("TestResultsRestClient mock coverage, custom fields, flakiness and meta
 
     it("gets file level code coverage as text", async () => {
         const text = await client.getFileLevelCodeCoverage(
-            { filePath: "/src/app.ts", pullRequestBaseIterationId: 1, pullRequestId: 2, pullRequestIterationId: 3, repoId: "repo" },
+            {
+                filePath: "/src/app.ts",
+                pullRequestBaseIterationId: 1,
+                pullRequestId: 2,
+                pullRequestIterationId: 3,
+                repoId: "repo"
+            },
             "proj"
         );
         expect(text).toBe("file-coverage-/src/app.ts");
     });
 
     it("deletes flaky test case references by branch", async () => {
-        await expect(client.deleteFlakyTestCaseRefIdsByBranch("proj", "repo", branchInfo)).resolves.toBe(flakyBranchInfos.length);
+        await expect(client.deleteFlakyTestCaseRefIdsByBranch("proj", "repo", branchInfo)).resolves.toBe(
+            flakyBranchInfos.length
+        );
     });
 
     it("gets flaky test case references for a branch", async () => {
         const infos = await client.getFlakyTestCaseRefIdsByBranch("proj", "repo", branchInfo);
-        expect(infos.map(info => info.testCaseReferenceId)).toEqual(flakyBranchInfos.map(info => info.testCaseReferenceId));
+        expect(infos.map(info => info.testCaseReferenceId)).toEqual(
+            flakyBranchInfos.map(info => info.testCaseReferenceId)
+        );
         for (const info of infos) {
             expect(info.flakyBranches).toEqual(["refs/heads/main"]);
         }
@@ -199,7 +231,11 @@ describe("TestResultsRestClient mock coverage, custom fields, flakiness and meta
     });
 
     it("queries test results meta data by reference id", async () => {
-        const metaData = await client.queryTestResultsMetaData(["101", "102"], "proj", ResultMetaDataDetails.FlakyIdentifiers);
+        const metaData = await client.queryTestResultsMetaData(
+            ["101", "102"],
+            "proj",
+            ResultMetaDataDetails.FlakyIdentifiers
+        );
         expect(metaData.map(entry => entry.testCaseReferenceId)).toEqual([101, 102]);
     });
 

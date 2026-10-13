@@ -139,11 +139,7 @@ export class MockTestRestClient extends RestClientBase {
         });
     }
 
-    updateTestRun(
-        _runUpdateModel: RunUpdateModel,
-        _project: string,
-        runId: number
-    ): Promise<TestRun> {
+    updateTestRun(_runUpdateModel: RunUpdateModel, _project: string, runId: number): Promise<TestRun> {
         return Promise.resolve(makeTestRun(runId));
     }
 
@@ -155,19 +151,12 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(testResults);
     }
 
-    getTestResultById(
-        _project: string,
-        _runId: number,
-        testCaseResultId: number
-    ): Promise<TestCaseResult> {
+    getTestResultById(_project: string, _runId: number, testCaseResultId: number): Promise<TestCaseResult> {
         const found = testResults.find(r => r.id === testCaseResultId);
         return Promise.resolve(found ?? makeTestCaseResult(testCaseResultId));
     }
 
-    getTestResultsByBuild(
-        _project: string,
-        _buildId: number
-    ): Promise<PagedList<ShallowTestCaseResult>> {
+    getTestResultsByBuild(_project: string, _buildId: number): Promise<PagedList<ShallowTestCaseResult>> {
         return Promise.resolve(shallowResults);
     }
 
@@ -207,9 +196,7 @@ export class MockTestRestClient extends RestClientBase {
         top?: number
     ): Promise<TestPoint[]> {
         const wanted = testPointIds ? testPointIds.split(",").map(Number) : [];
-        const matched = wanted.length
-            ? testPoints.filter(p => wanted.includes(p.id))
-            : testPoints;
+        const matched = wanted.length ? testPoints.filter(p => wanted.includes(p.id)) : testPoints;
         return Promise.resolve(matched.slice(skip ?? 0, top ?? matched.length));
     }
 
@@ -292,42 +279,25 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(suiteTestCases);
     }
 
-    getTestCaseById(
-        _project: string,
-        _planId: number,
-        _suiteId: number,
-        testCaseIds: number
-    ): Promise<SuiteTestCase> {
+    getTestCaseById(_project: string, _planId: number, _suiteId: number, testCaseIds: number): Promise<SuiteTestCase> {
         const id = String(testCaseIds);
         const found = suiteTestCases.find(c => c.testCase.id === id);
-        return Promise.resolve(
-            found ?? { ...makeSuiteTestCase(), testCase: { ...makeWorkItemReference(), id } }
-        );
+        return Promise.resolve(found ?? { ...makeSuiteTestCase(), testCase: { ...makeWorkItemReference(), id } });
     }
 
     deleteTestCase(_project: string, _testCaseId: number): Promise<void> {
         return Promise.resolve();
     }
 
-    addWorkItemToTestLinks(
-        workItemToTestLinks: WorkItemToTestLinks,
-        _project: string
-    ): Promise<WorkItemToTestLinks> {
+    addWorkItemToTestLinks(workItemToTestLinks: WorkItemToTestLinks, _project: string): Promise<WorkItemToTestLinks> {
         return Promise.resolve({ ...makeWorkItemToTestLinks(), ...workItemToTestLinks });
     }
 
-    deleteTestMethodToWorkItemLink(
-        _project: string,
-        _testName: string,
-        _workItemId: number
-    ): Promise<boolean> {
+    deleteTestMethodToWorkItemLink(_project: string, _testName: string, _workItemId: number): Promise<boolean> {
         return Promise.resolve(true);
     }
 
-    queryTestMethodLinkedWorkItems(
-        _project: string,
-        testName: string
-    ): Promise<TestToWorkItemLinks> {
+    queryTestMethodLinkedWorkItems(_project: string, testName: string): Promise<TestToWorkItemLinks> {
         const links = makeTestToWorkItemLinks();
         return Promise.resolve({ ...links, test: { ...links.test, name: testName } });
     }
@@ -373,20 +343,12 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    addTestResultsToTestRun(
-        results: TestCaseResult[],
-        _project: string,
-        _runId: number
-    ): Promise<TestCaseResult[]> {
+    addTestResultsToTestRun(results: TestCaseResult[], _project: string, _runId: number): Promise<TestCaseResult[]> {
         const added = results.map(result => ({ ...makeTestCaseResult(), ...result }));
         return Promise.resolve(added);
     }
 
-    updateTestResults(
-        results: TestCaseResult[],
-        _project: string,
-        _runId: number
-    ): Promise<TestCaseResult[]> {
+    updateTestResults(results: TestCaseResult[], _project: string, _runId: number): Promise<TestCaseResult[]> {
         const updated = results.map(result => ({
             ...makeTestCaseResult(),
             ...result,
@@ -506,11 +468,7 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(makeBuffer(`result-attachment-zip-${attachmentId}`));
     }
 
-    getTestResultAttachments(
-        _project: string,
-        _runId: number,
-        _testCaseResultId: number
-    ): Promise<TestAttachment[]> {
+    getTestResultAttachments(_project: string, _runId: number, _testCaseResultId: number): Promise<TestAttachment[]> {
         return Promise.resolve(attachments);
     }
 
@@ -543,19 +501,11 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(attachments);
     }
 
-    getTestRunAttachmentContent(
-        _project: string,
-        _runId: number,
-        attachmentId: number
-    ): Promise<ArrayBuffer> {
+    getTestRunAttachmentContent(_project: string, _runId: number, attachmentId: number): Promise<ArrayBuffer> {
         return Promise.resolve(makeBuffer(`run-attachment-${attachmentId}`));
     }
 
-    getTestRunAttachmentZip(
-        _project: string,
-        _runId: number,
-        attachmentId: number
-    ): Promise<ArrayBuffer> {
+    getTestRunAttachmentZip(_project: string, _runId: number, attachmentId: number): Promise<ArrayBuffer> {
         return Promise.resolve(makeBuffer(`run-attachment-zip-${attachmentId}`));
     }
 
@@ -595,42 +545,27 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeTestSettings(), testSettingsId });
     }
 
-    getBuildCodeCoverage(
-        _project: string,
-        _buildId: number,
-        _flags: number
-    ): Promise<BuildCoverage[]> {
+    getBuildCodeCoverage(_project: string, _buildId: number, _flags: number): Promise<BuildCoverage[]> {
         return Promise.resolve(buildCoverages);
     }
 
-    getCodeCoverageSummary(
-        _project: string,
-        buildId: number,
-        deltaBuildId?: number
-    ): Promise<CodeCoverageSummary> {
+    getCodeCoverageSummary(_project: string, buildId: number, deltaBuildId?: number): Promise<CodeCoverageSummary> {
         const found = codeCoverageSummaries.find(summary => summary.build.id === String(buildId));
         const summary = found ?? makeCodeCoverageSummary(String(buildId));
         return Promise.resolve({
             ...summary,
-            deltaBuild: deltaBuildId === undefined
-                ? summary.deltaBuild
-                : { ...makeShallowReference(), id: String(deltaBuildId) }
+            deltaBuild:
+                deltaBuildId === undefined
+                    ? summary.deltaBuild
+                    : { ...makeShallowReference(), id: String(deltaBuildId) }
         });
     }
 
-    updateCodeCoverageSummary(
-        _coverageData: CodeCoverageData,
-        _project: string,
-        _buildId: number
-    ): Promise<void> {
+    updateCodeCoverageSummary(_coverageData: CodeCoverageData, _project: string, _buildId: number): Promise<void> {
         return Promise.resolve();
     }
 
-    getTestRunCodeCoverage(
-        _project: string,
-        runId: number,
-        _flags: number
-    ): Promise<TestRunCoverage[]> {
+    getTestRunCodeCoverage(_project: string, runId: number, _flags: number): Promise<TestRunCoverage[]> {
         const scoped = testRunCoverages.map(coverage => ({
             ...coverage,
             testRun: { ...coverage.testRun, id: String(runId) }
@@ -638,10 +573,7 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(scoped);
     }
 
-    addCustomFields(
-        newFields: CustomTestFieldDefinition[],
-        _project: string
-    ): Promise<CustomTestFieldDefinition[]> {
+    addCustomFields(newFields: CustomTestFieldDefinition[], _project: string): Promise<CustomTestFieldDefinition[]> {
         const added = newFields.map((field, index) => ({
             ...makeCustomTestFieldDefinition(field.scope),
             ...field,
@@ -650,10 +582,7 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(added);
     }
 
-    queryCustomFields(
-        _project: string,
-        scopeFilter: CustomTestFieldScope
-    ): Promise<CustomTestFieldDefinition[]> {
+    queryCustomFields(_project: string, scopeFilter: CustomTestFieldScope): Promise<CustomTestFieldDefinition[]> {
         return Promise.resolve(customFields.filter(field => field.scope === scopeFilter));
     }
 
@@ -687,9 +616,7 @@ export class MockTestRestClient extends RestClientBase {
         const groups = fields
             ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName }))
             : resultGroups;
-        return Promise.resolve(
-            Object.assign([...groups], { continuationToken: null })
-        );
+        return Promise.resolve(Object.assign([...groups], { continuationToken: null }));
     }
 
     getResultGroupsByRelease(
@@ -703,15 +630,10 @@ export class MockTestRestClient extends RestClientBase {
         const groups = fields
             ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName }))
             : resultGroups;
-        return Promise.resolve(
-            Object.assign([...groups], { continuationToken: null })
-        );
+        return Promise.resolve(Object.assign([...groups], { continuationToken: null }));
     }
 
-    queryTestResultsMetaData(
-        testReferenceIds: string[],
-        _project: string
-    ): Promise<TestResultMetaData[]> {
+    queryTestResultsMetaData(testReferenceIds: string[], _project: string): Promise<TestResultMetaData[]> {
         const matched = testReferenceIds.map(id => ({
             ...makeTestResultMetaData(),
             testCaseReferenceId: Number(id)
@@ -763,10 +685,7 @@ export class MockTestRestClient extends RestClientBase {
         });
     }
 
-    queryTestResultsSummaryForReleases(
-        releases: ReleaseReference[],
-        _project: string
-    ): Promise<TestResultSummary[]> {
+    queryTestResultsSummaryForReleases(releases: ReleaseReference[], _project: string): Promise<TestResultSummary[]> {
         const summaries = releases.map(release => ({
             ...makeTestResultSummary(),
             testResultsContext: {
@@ -791,10 +710,7 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve(summaries);
     }
 
-    queryResultTrendForBuild(
-        filter: TestResultTrendFilter,
-        _project: string
-    ): Promise<AggregatedDataForResultTrend[]> {
+    queryResultTrendForBuild(filter: TestResultTrendFilter, _project: string): Promise<AggregatedDataForResultTrend[]> {
         return Promise.resolve(resultTrendData.slice(0, filter.buildCount));
     }
 
@@ -831,13 +747,10 @@ export class MockTestRestClient extends RestClientBase {
     ): Promise<PagedList<TestRun>> {
         const matched = queryableTestRuns.filter(run => {
             const updated = run.lastUpdatedDate.getTime();
-            const inRange =
-                updated >= minLastUpdatedDate.getTime() && updated <= maxLastUpdatedDate.getTime();
+            const inRange = updated >= minLastUpdatedDate.getTime() && updated <= maxLastUpdatedDate.getTime();
             return inRange && (state === undefined || run.state === TestRunState[state]);
         });
-        return Promise.resolve(
-            Object.assign([...matched], { continuationToken: null })
-        );
+        return Promise.resolve(Object.assign([...matched], { continuationToken: null }));
     }
 
     queryTestHistory(filter: TestHistoryQuery, _project: string): Promise<TestHistoryQuery> {

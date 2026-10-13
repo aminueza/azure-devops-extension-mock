@@ -214,7 +214,9 @@ export const subjects: GraphSubject[] = [...members, ...scopes];
 
 export const memberships: GraphMembership[] = [
     ...users.map((user, index) => makeGraphMembership(user.descriptor, groups[index % groups.length].descriptor)),
-    ...servicePrincipals.map(servicePrincipal => makeGraphMembership(servicePrincipal.descriptor, groups[1].descriptor)),
+    ...servicePrincipals.map(servicePrincipal =>
+        makeGraphMembership(servicePrincipal.descriptor, groups[1].descriptor)
+    ),
     makeGraphMembership(groups[0].descriptor, groups[1].descriptor)
 ];
 

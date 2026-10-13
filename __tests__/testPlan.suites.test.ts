@@ -50,9 +50,11 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
         });
 
         it("seeds operations with distinct ids", () => {
-            const ids = [...data.planCloneOperations, ...data.suiteCloneOperations, ...data.testCaseCloneOperations].map(
-                o => o.cloneOperationResponse.opId
-            );
+            const ids = [
+                ...data.planCloneOperations,
+                ...data.suiteCloneOperations,
+                ...data.testCaseCloneOperations
+            ].map(o => o.cloneOperationResponse.opId);
             expect(new Set(ids).size).toBe(6);
         });
     });
@@ -127,7 +129,12 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
         it("creates suites in bulk under the requested parent", async () => {
             const created = await client.createBulkTestSuites(
                 [
-                    { ...suiteParameters, name: "First", suiteType: TestSuiteType.RequirementTestSuite, requirementId: 9 },
+                    {
+                        ...suiteParameters,
+                        name: "First",
+                        suiteType: TestSuiteType.RequirementTestSuite,
+                        requirementId: 9
+                    },
                     { ...suiteParameters, name: "Second" }
                 ],
                 "proj",
@@ -281,7 +288,10 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
         it("filters test cases by configuration", async () => {
             const configurationId = data.configurations[0].id;
             const page = await client.getTestCaseList("proj", plan.id, child.id, undefined, String(configurationId));
-            expect(page.map(t => t.workItem.id)).toEqual([data.testCases[0].workItem.id, data.testCases[3].workItem.id]);
+            expect(page.map(t => t.workItem.id)).toEqual([
+                data.testCases[0].workItem.id,
+                data.testCases[3].workItem.id
+            ]);
         });
 
         it("returns no test case that lacks one of the configurations", async () => {
@@ -293,7 +303,14 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
 
         it("gets a known test case", async () => {
             const known = data.testCases[2];
-            const found = await client.getTestCase("proj", plan.id, child.id, String(known.workItem.id), "System.Title", true);
+            const found = await client.getTestCase(
+                "proj",
+                plan.id,
+                child.id,
+                String(known.workItem.id),
+                "System.Title",
+                true
+            );
             expect(found).toEqual([known]);
             expect(found[0]).toBe(known);
         });
@@ -337,7 +354,12 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
         it("updates the configurations of suite test cases", async () => {
             const known = data.testCases[1];
             const [updated] = await client.updateSuiteTestCases(
-                [{ workItem: { id: known.workItem.id }, pointAssignments: [{ configurationId: data.configurations[2].id }] }],
+                [
+                    {
+                        workItem: { id: known.workItem.id },
+                        pointAssignments: [{ configurationId: data.configurations[2].id }]
+                    }
+                ],
                 "proj",
                 998_013,
                 998_014
@@ -370,7 +392,10 @@ describe("TestPlanRestClient mock suites, test cases and points", () => {
                 const testCase = data.testCases[index];
                 const [assignment] = testCase.pointAssignments;
                 expect(point.id).toBe(assignment.id);
-                expect(point.configuration).toEqual({ id: assignment.configurationId, name: assignment.configurationName });
+                expect(point.configuration).toEqual({
+                    id: assignment.configurationId,
+                    name: assignment.configurationName
+                });
                 expect(point.tester).toBe(assignment.tester);
                 expect(point.testCaseReference.id).toBe(testCase.workItem.id);
                 expect(point.testCaseReference.name).toBe(testCase.workItem.name);

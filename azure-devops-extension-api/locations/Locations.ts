@@ -53,7 +53,11 @@ export class MockLocationsRestClient extends RestClientBase {
         return Promise.resolve(findResourceArea(areaId));
     }
 
-    getResourceAreaByInstanceId(areaId: string, _instanceId: string, _accessMapping: string): Promise<ResourceAreaInfo> {
+    getResourceAreaByInstanceId(
+        areaId: string,
+        _instanceId: string,
+        _accessMapping: string
+    ): Promise<ResourceAreaInfo> {
         return Promise.resolve(findResourceArea(areaId));
     }
 
@@ -90,9 +94,7 @@ export class MockLocationsRestClient extends RestClientBase {
         );
     }
 
-    updateServiceDefinitions(
-        _serviceDefinitions: VssJsonCollectionWrapperV<ServiceDefinition[]>
-    ): Promise<void> {
+    updateServiceDefinitions(_serviceDefinitions: VssJsonCollectionWrapperV<ServiceDefinition[]>): Promise<void> {
         return Promise.resolve();
     }
 }

@@ -105,7 +105,9 @@ describe("WorkRestClient mock", () => {
     });
 
     it("gets a board badge", async () => {
-        const badge = await client.getBoardBadge(teamContext, "board-1", BoardBadgeColumnOptions.CustomColumns, ["Active"]);
+        const badge = await client.getBoardBadge(teamContext, "board-1", BoardBadgeColumnOptions.CustomColumns, [
+            "Active"
+        ]);
         expect(badge.boardId).toBe("board-1");
         expect(badge.imageUrl).toMatch(/\.svg$/);
     });
@@ -194,7 +196,9 @@ describe("WorkRestClient mock", () => {
 
     it("replaces capacities", async () => {
         const capacities = [{ activities: [], daysOff: [] } as any];
-        await expect(client.replaceCapacitiesWithIdentityRef(capacities, teamContext, "iter-1")).resolves.toBe(capacities);
+        await expect(client.replaceCapacitiesWithIdentityRef(capacities, teamContext, "iter-1")).resolves.toBe(
+            capacities
+        );
     });
 
     it("updates a team member's capacity", async () => {
@@ -378,7 +382,13 @@ describe("WorkRestClient mock", () => {
 
     it("updates a plan forcing the requested id", async () => {
         const plan = await client.updatePlan(
-            { name: "Renamed", description: "d", properties: { a: 1 }, revision: 4, type: PlanType.DeliveryTimelineView },
+            {
+                name: "Renamed",
+                description: "d",
+                properties: { a: 1 },
+                revision: 4,
+                type: PlanType.DeliveryTimelineView
+            },
             "proj",
             "plan-42"
         );
@@ -435,7 +445,9 @@ describe("WorkRestClient mock", () => {
     });
 
     it("updates a work item column", async () => {
-        await expect(client.updateWorkItemColumn({ newColumn: "Done" }, teamContext, "iter-1", 42)).resolves.toBeUndefined();
+        await expect(
+            client.updateWorkItemColumn({ newColumn: "Done" }, teamContext, "iter-1", 42)
+        ).resolves.toBeUndefined();
     });
 
     it("gets team days off", async () => {
@@ -556,7 +568,9 @@ describe("boards fixtures", () => {
         const column = makeBoardColumn();
         expect(["New", "Active", "Resolved", "Closed"]).toContain(column.name);
         expect(column.stateMappings.Bug).toBe(column.name);
-        expect([BoardColumnType.Incoming, BoardColumnType.InProgress, BoardColumnType.Outgoing]).toContain(column.columnType);
+        expect([BoardColumnType.Incoming, BoardColumnType.InProgress, BoardColumnType.Outgoing]).toContain(
+            column.columnType
+        );
     });
 
     it("defaults a board row name", () => {

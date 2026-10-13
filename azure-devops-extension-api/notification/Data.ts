@@ -75,7 +75,9 @@ export const makeSubscriptionUserSettings = (): SubscriptionUserSettings => ({
     optedOut: false
 });
 
-export const makeNotificationEventPublisher = (id = "ms.vss-work.work-event-publisher"): NotificationEventPublisher => ({
+export const makeNotificationEventPublisher = (
+    id = "ms.vss-work.work-event-publisher"
+): NotificationEventPublisher => ({
     id,
     subscriptionManagementInfo: {
         serviceInstanceType: fake.string.uuid(),

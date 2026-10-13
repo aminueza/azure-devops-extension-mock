@@ -2,8 +2,12 @@ import { TestRestClient } from "azure-devops-extension-api/Test";
 import { getClient } from "../azure-devops-extension-api";
 
 describe("TestRestClient mock", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestRestClient);
 

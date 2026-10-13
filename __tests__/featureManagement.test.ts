@@ -150,7 +150,10 @@ describe("FeatureManagementRestClient mock", () => {
 describe("feature management fixtures", () => {
     it("makes a host scope by default", () => {
         expect(makeContributedFeatureSettingScope()).toEqual({ userScoped: false, settingScope: undefined });
-        expect(makeContributedFeatureSettingScope("me", "project")).toEqual({ userScoped: true, settingScope: "project" });
+        expect(makeContributedFeatureSettingScope("me", "project")).toEqual({
+            userScoped: true,
+            settingScope: "project"
+        });
     });
 
     it("makes a state for a fresh feature", () => {

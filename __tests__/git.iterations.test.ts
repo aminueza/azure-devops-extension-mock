@@ -37,60 +37,72 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
     const unknownPullRequestId = Number.MAX_SAFE_INTEGER;
 
     const cases: Array<[string, () => Promise<unknown>]> = [
-        ["getPullRequestIteration", () => client.getPullRequestIteration("repo-id", knownPullRequestId, knownIterationId)],
+        [
+            "getPullRequestIteration",
+            () => client.getPullRequestIteration("repo-id", knownPullRequestId, knownIterationId)
+        ],
         ["getPullRequestIterations", () => client.getPullRequestIterations("repo-id", knownPullRequestId)],
-        ["getPullRequestIterationChanges", () => client.getPullRequestIterationChanges("repo-id", knownPullRequestId, knownIterationId)],
-        ["getPullRequestIterationCommits", () => client.getPullRequestIterationCommits("repo-id", knownPullRequestId, knownIterationId)],
+        [
+            "getPullRequestIterationChanges",
+            () => client.getPullRequestIterationChanges("repo-id", knownPullRequestId, knownIterationId)
+        ],
+        [
+            "getPullRequestIterationCommits",
+            () => client.getPullRequestIterationCommits("repo-id", knownPullRequestId, knownIterationId)
+        ],
         ["getPullRequestCommits", () => client.getPullRequestCommits("repo-id", knownPullRequestId)],
         ["getPullRequestFilesDiff", () => client.getPullRequestFilesDiff("repo-id", knownPullRequestId)],
-        ["getPullRequestIterationStatuses", () => client.getPullRequestIterationStatuses("repo-id", knownPullRequestId, 5001)],
-        ["getPullRequestIterationStatus", () => client.getPullRequestIterationStatus("repo-id", knownPullRequestId, 5001, 5101)],
-        ["createPullRequestIterationStatus", () => client.createPullRequestIterationStatus(
-            makePullRequestStatus(5150, GitStatusState.Pending, 5001),
-            "repo-id",
-            knownPullRequestId,
-            5001
-        )],
+        [
+            "getPullRequestIterationStatuses",
+            () => client.getPullRequestIterationStatuses("repo-id", knownPullRequestId, 5001)
+        ],
+        [
+            "getPullRequestIterationStatus",
+            () => client.getPullRequestIterationStatus("repo-id", knownPullRequestId, 5001, 5101)
+        ],
+        [
+            "createPullRequestIterationStatus",
+            () =>
+                client.createPullRequestIterationStatus(
+                    makePullRequestStatus(5150, GitStatusState.Pending, 5001),
+                    "repo-id",
+                    knownPullRequestId,
+                    5001
+                )
+        ],
         ["getPullRequestConflict", () => client.getPullRequestConflict("repo-id", knownPullRequestId, 5201)],
         ["getPullRequestConflicts", () => client.getPullRequestConflicts("repo-id", knownPullRequestId)],
-        ["updatePullRequestConflict", () => client.updatePullRequestConflict(
-            pullRequestConflicts[0],
-            "repo-id",
-            knownPullRequestId,
-            5201
-        )],
-        ["updatePullRequestConflicts", () => client.updatePullRequestConflicts(
-            [pullRequestConflicts[0]],
-            "repo-id",
-            knownPullRequestId
-        )],
+        [
+            "updatePullRequestConflict",
+            () => client.updatePullRequestConflict(pullRequestConflicts[0], "repo-id", knownPullRequestId, 5201)
+        ],
+        [
+            "updatePullRequestConflicts",
+            () => client.updatePullRequestConflicts([pullRequestConflicts[0]], "repo-id", knownPullRequestId)
+        ],
         ["getPullRequestThread", () => client.getPullRequestThread("repo-id", knownPullRequestId, 5301)],
-        ["updateThread", () => client.updateThread(
-            pullRequestThreads[0],
-            "repo-id",
-            knownPullRequestId,
-            5301
-        )],
+        ["updateThread", () => client.updateThread(pullRequestThreads[0], "repo-id", knownPullRequestId, 5301)],
         ["getComments", () => client.getComments("repo-id", knownPullRequestId, 5301)],
         ["getComment", () => client.getComment("repo-id", knownPullRequestId, 5301, 5401)],
-        ["updateComment", () => client.updateComment(
-            makeComment(5401),
-            "repo-id",
-            knownPullRequestId,
-            5301,
-            5401
-        )]
+        ["updateComment", () => client.updateComment(makeComment(5401), "repo-id", knownPullRequestId, 5301, 5401)]
     ];
 
     const voidCases: Array<[string, () => Promise<void>]> = [
-        ["deletePullRequestIterationStatus", () => client.deletePullRequestIterationStatus("repo-id", knownPullRequestId, 5001, 5101)],
+        [
+            "deletePullRequestIterationStatus",
+            () => client.deletePullRequestIterationStatus("repo-id", knownPullRequestId, 5001, 5101)
+        ],
         ["deleteComment", () => client.deleteComment("repo-id", knownPullRequestId, 5301, 5401)],
-        ["updatePullRequestIterationStatuses", () => client.updatePullRequestIterationStatuses(
-            [{ op: Operation.Remove, path: "/0", value: null, from: "" }],
-            "repo-id",
-            knownPullRequestId,
-            5001
-        )]
+        [
+            "updatePullRequestIterationStatuses",
+            () =>
+                client.updatePullRequestIterationStatuses(
+                    [{ op: Operation.Remove, path: "/0", value: null, from: "" }],
+                    "repo-id",
+                    knownPullRequestId,
+                    5001
+                )
+        ]
     ];
 
     it.each(cases)("%s resolves", async (_name, call) => {
@@ -127,20 +139,41 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
     });
 
     it("reports the next page of change entries", async () => {
-        const changes = await client.getPullRequestIterationChanges("repo-id", knownPullRequestId, knownIterationId, "proj", 2);
+        const changes = await client.getPullRequestIterationChanges(
+            "repo-id",
+            knownPullRequestId,
+            knownIterationId,
+            "proj",
+            2
+        );
         expect(changes.changeEntries).toHaveLength(2);
         expect(changes.nextSkip).toBe(2);
         expect(changes.nextTop).toBe(2);
     });
 
     it("skips change entries", async () => {
-        const changes = await client.getPullRequestIterationChanges("repo-id", knownPullRequestId, knownIterationId, "proj", 5, 1);
+        const changes = await client.getPullRequestIterationChanges(
+            "repo-id",
+            knownPullRequestId,
+            knownIterationId,
+            "proj",
+            5,
+            1
+        );
         expect(changes.changeEntries).toHaveLength(2);
         expect(changes.nextSkip).toBe(0);
     });
 
     it("stamps compareTo onto change entries", async () => {
-        const changes = await client.getPullRequestIterationChanges("repo-id", knownPullRequestId, knownIterationId, "proj", undefined, undefined, 7);
+        const changes = await client.getPullRequestIterationChanges(
+            "repo-id",
+            knownPullRequestId,
+            knownIterationId,
+            "proj",
+            undefined,
+            undefined,
+            7
+        );
         expect(changes.changeEntries.map(entry => entry.changeTrackingId)).toEqual([7, 7, 7]);
     });
 
@@ -156,12 +189,23 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
     it("pages iteration commits", async () => {
         const all = await client.getPullRequestIterationCommits("repo-id", knownPullRequestId, knownIterationId);
         expect(all).toEqual(pullRequestIterations[0].commits);
-        const paged = await client.getPullRequestIterationCommits("repo-id", knownPullRequestId, knownIterationId, "proj", 1, 1);
+        const paged = await client.getPullRequestIterationCommits(
+            "repo-id",
+            knownPullRequestId,
+            knownIterationId,
+            "proj",
+            1,
+            1
+        );
         expect(paged).toEqual([pullRequestIterations[0].commits[1]]);
     });
 
     it("fabricates commits for an unknown iteration", async () => {
-        const fabricated = await client.getPullRequestIterationCommits("repo-id", knownPullRequestId, unknownIterationId);
+        const fabricated = await client.getPullRequestIterationCommits(
+            "repo-id",
+            knownPullRequestId,
+            unknownIterationId
+        );
         expect(fabricated).toHaveLength(3);
     });
 
@@ -200,7 +244,13 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
     });
 
     it("fabricates an iteration status for an unknown id", async () => {
-        const status = await client.getPullRequestIterationStatus("repo-id", knownPullRequestId, 5001, Number.MAX_SAFE_INTEGER, "proj");
+        const status = await client.getPullRequestIterationStatus(
+            "repo-id",
+            knownPullRequestId,
+            5001,
+            Number.MAX_SAFE_INTEGER,
+            "proj"
+        );
         expect(status.id).toBe(Number.MAX_SAFE_INTEGER);
         expect(status.state).toBe(GitStatusState.NotSet);
         expect(status.iterationId).toBe(5001);
@@ -213,7 +263,13 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
 
     it("echoes the created iteration status", async () => {
         const input = makePullRequestStatus(5199, GitStatusState.Succeeded, 1);
-        const created = await client.createPullRequestIterationStatus(input, "repo-id", knownPullRequestId, 5002, "proj");
+        const created = await client.createPullRequestIterationStatus(
+            input,
+            "repo-id",
+            knownPullRequestId,
+            5002,
+            "proj"
+        );
         expect(created.id).toBe(5199);
         expect(created.state).toBe(GitStatusState.Succeeded);
         expect(created.iterationId).toBe(5002);
@@ -236,12 +292,30 @@ describe("GitRestClient mock iterations, conflicts and comments", () => {
     });
 
     it("keeps only resolved conflicts", async () => {
-        const conflicts = await client.getPullRequestConflicts("repo-id", knownPullRequestId, "proj", undefined, undefined, false, false, true);
+        const conflicts = await client.getPullRequestConflicts(
+            "repo-id",
+            knownPullRequestId,
+            "proj",
+            undefined,
+            undefined,
+            false,
+            false,
+            true
+        );
         expect(conflicts.map(c => c.conflictId)).toEqual([5202, 5204]);
     });
 
     it("drops resolved conflicts", async () => {
-        const conflicts = await client.getPullRequestConflicts("repo-id", knownPullRequestId, "proj", undefined, undefined, true, true, false);
+        const conflicts = await client.getPullRequestConflicts(
+            "repo-id",
+            knownPullRequestId,
+            "proj",
+            undefined,
+            undefined,
+            true,
+            true,
+            false
+        );
         expect(conflicts.map(c => c.conflictId)).toEqual([5201, 5203]);
     });
 

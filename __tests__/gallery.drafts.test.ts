@@ -164,7 +164,9 @@ describe("GalleryRestClient mock: drafts and assets", () => {
         expect(decode(await client.getAssetAuthenticated("pub", "ext", "1.0.0", "Icon", "token", "header"))).toBe(
             "pub/ext/1.0.0/Icon"
         );
-        expect(decode(await client.getAssetWithToken("pub", "ext", "1.0.0", "Manifest"))).toBe("pub/ext/1.0.0/Manifest");
+        expect(decode(await client.getAssetWithToken("pub", "ext", "1.0.0", "Manifest"))).toBe(
+            "pub/ext/1.0.0/Manifest"
+        );
         expect(
             decode(await client.getAssetWithToken("pub", "ext", "1.0.0", "Icon", "asset", "token", true, "header"))
         ).toBe("pub/ext/1.0.0/Icon");

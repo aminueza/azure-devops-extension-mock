@@ -1,11 +1,7 @@
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { fake } from "../common/fixtures";
-import {
-    FileContainer,
-    FileContainerItem,
-    FileContainerRestClient
-} from "azure-devops-extension-api/FileContainer";
+import { FileContainer, FileContainerItem, FileContainerRestClient } from "azure-devops-extension-api/FileContainer";
 import { VssJsonCollectionWrapperV } from "azure-devops-extension-api/WebApi";
 import { containerItems, containers, makeContainerItemBlobReference, makeFileContainerItem } from "./Data";
 

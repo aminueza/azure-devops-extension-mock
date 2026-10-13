@@ -122,7 +122,13 @@ describe("AlertRestClient mock", () => {
     });
 
     it("filters the alerts by type", async () => {
-        const list = await client.getAlerts("proj", "repo", undefined, undefined, criteria({ alertType: AlertType.Code }));
+        const list = await client.getAlerts(
+            "proj",
+            "repo",
+            undefined,
+            undefined,
+            criteria({ alertType: AlertType.Code })
+        );
         expect([...list]).toEqual([code, fixed]);
     });
 
@@ -465,7 +471,9 @@ describe("AlertRestClient mock", () => {
     });
 
     it("exports the SARIF of the requested alerts", async () => {
-        const sarif = decode(await client.exportSarif("proj", "repo", [code.alertId, fixed.alertId], "refs/heads/main"));
+        const sarif = decode(
+            await client.exportSarif("proj", "repo", [code.alertId, fixed.alertId], "refs/heads/main")
+        );
         expect(sarif.runs[0].results.map((r: any) => r.properties.alertId)).toEqual([code.alertId, fixed.alertId]);
     });
 
@@ -500,6 +508,8 @@ describe("AlertRestClient mock", () => {
     });
 
     it("initiates a validation", async () => {
-        expect(await client.initiateValidation("proj", "repo", secret.alertId)).toBe(AlertValidationRequestStatus.Created);
+        expect(await client.initiateValidation("proj", "repo", secret.alertId)).toBe(
+            AlertValidationRequestStatus.Created
+        );
     });
 });

@@ -48,11 +48,9 @@ const findPage = (path?: string): WikiPage => {
     return pages.find(p => p.path === target) ?? makeWikiPage(target);
 };
 
-const findPageById = (id: number): WikiPage =>
-    pages.find(p => p.id === id) ?? { ...makeWikiPage("/Home"), id };
+const findPageById = (id: number): WikiPage => pages.find(p => p.id === id) ?? { ...makeWikiPage("/Home"), id };
 
-const findComment = (id: number): Comment =>
-    comments.find(c => c.id === id) ?? { ...makeComment(), id };
+const findComment = (id: number): Comment => comments.find(c => c.id === id) ?? { ...makeComment(), id };
 
 export class MockWikiRestClient extends RestClientBase {
     public TYPE = WikiRestClient;

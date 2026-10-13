@@ -42,8 +42,12 @@ const expectShallowReference = (reference: { id: string; name: string; url: stri
 };
 
 describe("Test fixtures are fully populated", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("builds a build reference with every field", () => {
         const reference = makeBuildReference();
@@ -88,9 +92,7 @@ describe("Test fixtures are fully populated", () => {
     });
 
     it("builds a results context of the requested type", () => {
-        expect(makeTestResultsContext(TestResultsContextType.Release).contextType).toBe(
-            TestResultsContextType.Release
-        );
+        expect(makeTestResultsContext(TestResultsContextType.Release).contextType).toBe(TestResultsContextType.Release);
     });
 
     it("builds a custom test field", () => {
@@ -248,8 +250,12 @@ describe("Test fixtures are fully populated", () => {
 });
 
 describe("TestRestClient mock builds full result contexts", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestRestClient);
 

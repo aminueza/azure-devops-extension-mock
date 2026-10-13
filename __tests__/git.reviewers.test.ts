@@ -1,8 +1,4 @@
-import {
-    GitPullRequestQueryType,
-    GitRestClient,
-    GitStatusState
-} from "azure-devops-extension-api/Git";
+import { GitPullRequestQueryType, GitRestClient, GitStatusState } from "azure-devops-extension-api/Git";
 import { Operation } from "azure-devops-extension-api/WebApi";
 
 import { getClient } from "../azure-devops-extension-api";
@@ -48,83 +44,109 @@ describe("GitRestClient mock reviewers, labels, statuses and properties", () => 
     const cases: Array<[string, () => Promise<unknown>]> = [
         ["getPullRequestReviewers", () => client.getPullRequestReviewers("repo-id", pullRequestId)],
         ["getPullRequestReviewer", () => client.getPullRequestReviewer("repo-id", pullRequestId, knownReviewerId)],
-        ["createPullRequestReviewer", () => client.createPullRequestReviewer(
-            makeIdentityRefWithVote("reviewer-new", 5),
-            "repo-id",
-            pullRequestId,
-            "reviewer-new"
-        )],
-        ["createPullRequestReviewers", () => client.createPullRequestReviewers(
-            [makeIdentityRefWithVote("reviewer-a", 0), makeIdentityRefWithVote("reviewer-b", 0)],
-            "repo-id",
-            pullRequestId
-        )],
-        ["createUnmaterializedPullRequestReviewer", () => client.createUnmaterializedPullRequestReviewer(
-            makeIdentityRefWithVote("reviewer-unmaterialized", 0),
-            "repo-id",
-            pullRequestId
-        )],
-        ["updatePullRequestReviewer", () => client.updatePullRequestReviewer(
-            makeIdentityRefWithVote(knownReviewerId, 10),
-            "repo-id",
-            pullRequestId,
-            knownReviewerId
-        )],
+        [
+            "createPullRequestReviewer",
+            () =>
+                client.createPullRequestReviewer(
+                    makeIdentityRefWithVote("reviewer-new", 5),
+                    "repo-id",
+                    pullRequestId,
+                    "reviewer-new"
+                )
+        ],
+        [
+            "createPullRequestReviewers",
+            () =>
+                client.createPullRequestReviewers(
+                    [makeIdentityRefWithVote("reviewer-a", 0), makeIdentityRefWithVote("reviewer-b", 0)],
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
+        [
+            "createUnmaterializedPullRequestReviewer",
+            () =>
+                client.createUnmaterializedPullRequestReviewer(
+                    makeIdentityRefWithVote("reviewer-unmaterialized", 0),
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
+        [
+            "updatePullRequestReviewer",
+            () =>
+                client.updatePullRequestReviewer(
+                    makeIdentityRefWithVote(knownReviewerId, 10),
+                    "repo-id",
+                    pullRequestId,
+                    knownReviewerId
+                )
+        ],
         ["getPullRequestLabels", () => client.getPullRequestLabels("repo-id", pullRequestId)],
         ["getPullRequestLabel", () => client.getPullRequestLabel("repo-id", pullRequestId, "label-bug")],
-        ["createPullRequestLabel", () => client.createPullRequestLabel(
-            { name: "regression" },
-            "repo-id",
-            pullRequestId
-        )],
+        [
+            "createPullRequestLabel",
+            () => client.createPullRequestLabel({ name: "regression" }, "repo-id", pullRequestId)
+        ],
         ["getPullRequestStatus", () => client.getPullRequestStatus("repo-id", pullRequestId, 301)],
-        ["createPullRequestStatus", () => client.createPullRequestStatus(
-            makePullRequestStatus(401, GitStatusState.Succeeded, 4),
-            "repo-id",
-            pullRequestId
-        )],
+        [
+            "createPullRequestStatus",
+            () =>
+                client.createPullRequestStatus(
+                    makePullRequestStatus(401, GitStatusState.Succeeded, 4),
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
         ["getPullRequestStatuses", () => client.getPullRequestStatuses("repo-id", pullRequestId)],
         ["getPullRequestProperties", () => client.getPullRequestProperties("repo-id", pullRequestId)],
-        ["updatePullRequestProperties", () => client.updatePullRequestProperties(
-            [{ from: "", op: Operation.Add, path: "/riskLevel", value: "high" }],
-            "repo-id",
-            pullRequestId
-        )],
+        [
+            "updatePullRequestProperties",
+            () =>
+                client.updatePullRequestProperties(
+                    [{ from: "", op: Operation.Add, path: "/riskLevel", value: "high" }],
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
         ["getPullRequestQuery", () => client.getPullRequestQuery(commitQuery, "repo-id")],
         ["getPullRequestWorkItemRefs", () => client.getPullRequestWorkItemRefs("repo-id", pullRequestId)]
     ];
 
     const voidCases: Array<[string, () => Promise<void>]> = [
-        ["updatePullRequestReviewers", () => client.updatePullRequestReviewers(
-            [makeIdentityRefWithVote(knownReviewerId, 10)],
-            "repo-id",
-            pullRequestId
-        )],
-        ["deletePullRequestReviewer", () => client.deletePullRequestReviewer(
-            "repo-id",
-            pullRequestId,
-            knownReviewerId
-        )],
-        ["deletePullRequestLabels", () => client.deletePullRequestLabels(
-            "repo-id",
-            pullRequestId,
-            "label-bug"
-        )],
-        ["deletePullRequestStatus", () => client.deletePullRequestStatus(
-            "repo-id",
-            pullRequestId,
-            301
-        )],
-        ["updatePullRequestStatuses", () => client.updatePullRequestStatuses(
-            [{ from: "", op: Operation.Remove, path: "/0", value: null }],
-            "repo-id",
-            pullRequestId
-        )],
-        ["sharePullRequest", () => client.sharePullRequest(
-            { message: "please review", receivers: [makeIdentityRefWithVote("reviewer-a", 0)] },
-            "repo-id",
-            pullRequestId
-        )]
+        [
+            "updatePullRequestReviewers",
+            () =>
+                client.updatePullRequestReviewers(
+                    [makeIdentityRefWithVote(knownReviewerId, 10)],
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
+        [
+            "deletePullRequestReviewer",
+            () => client.deletePullRequestReviewer("repo-id", pullRequestId, knownReviewerId)
+        ],
+        ["deletePullRequestLabels", () => client.deletePullRequestLabels("repo-id", pullRequestId, "label-bug")],
+        ["deletePullRequestStatus", () => client.deletePullRequestStatus("repo-id", pullRequestId, 301)],
+        [
+            "updatePullRequestStatuses",
+            () =>
+                client.updatePullRequestStatuses(
+                    [{ from: "", op: Operation.Remove, path: "/0", value: null }],
+                    "repo-id",
+                    pullRequestId
+                )
+        ],
+        [
+            "sharePullRequest",
+            () =>
+                client.sharePullRequest(
+                    { message: "please review", receivers: [makeIdentityRefWithVote("reviewer-a", 0)] },
+                    "repo-id",
+                    pullRequestId
+                )
+        ]
     ];
 
     it.each(cases)("%s resolves", async (_name, call) => {
@@ -136,8 +158,9 @@ describe("GitRestClient mock reviewers, labels, statuses and properties", () => 
     });
 
     it("lists every seeded reviewer", async () => {
-        await expect(client.getPullRequestReviewers("repo-id", pullRequestId, "proj"))
-            .resolves.toBe(pullRequestReviewers);
+        await expect(client.getPullRequestReviewers("repo-id", pullRequestId, "proj")).resolves.toBe(
+            pullRequestReviewers
+        );
     });
 
     it("returns a seeded reviewer by id", async () => {
@@ -219,8 +242,9 @@ describe("GitRestClient mock reviewers, labels, statuses and properties", () => 
     });
 
     it("lists every seeded label", async () => {
-        await expect(client.getPullRequestLabels("repo-id", pullRequestId, "proj", "project-id"))
-            .resolves.toBe(pullRequestLabels);
+        await expect(client.getPullRequestLabels("repo-id", pullRequestId, "proj", "project-id")).resolves.toBe(
+            pullRequestLabels
+        );
     });
 
     it("returns a seeded label by id", async () => {
@@ -288,8 +312,9 @@ describe("GitRestClient mock reviewers, labels, statuses and properties", () => 
         expect(status.description).toBe("build passed");
     });
     it("lists every seeded status", async () => {
-        await expect(client.getPullRequestStatuses("repo-id", pullRequestId, "proj"))
-            .resolves.toBe(pullRequestStatuses);
+        await expect(client.getPullRequestStatuses("repo-id", pullRequestId, "proj")).resolves.toBe(
+            pullRequestStatuses
+        );
     });
 
     it("copies the seeded properties", async () => {
@@ -338,7 +363,8 @@ describe("GitRestClient mock reviewers, labels, statuses and properties", () => 
     });
 
     it("lists every seeded work item ref", async () => {
-        await expect(client.getPullRequestWorkItemRefs("repo-id", pullRequestId, "proj"))
-            .resolves.toBe(pullRequestWorkItemRefs);
+        await expect(client.getPullRequestWorkItemRefs("repo-id", pullRequestId, "proj")).resolves.toBe(
+            pullRequestWorkItemRefs
+        );
     });
 });

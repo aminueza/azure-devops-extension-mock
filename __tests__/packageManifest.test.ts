@@ -102,6 +102,11 @@ describe("package manifest", () => {
         expect(workflow).toContain("- run: npm run lint");
     });
 
+    it("checks formatting in CI", () => {
+        expect(manifest.scripts["format:check"]).toBe("prettier --check .");
+        expect(workflow).toContain("- run: npm run format:check");
+    });
+
     it("tests the oldest supported node version in CI", () => {
         const oldest = `${manifest.engines.node.match(/^>=(\d+)\./)[1]}.x`;
         const versions = workflow.match(/node-version: \[(.+)\]/)![1].split(", ");
@@ -114,8 +119,7 @@ describe("package manifest", () => {
         const devAutomerge = rules.findIndex(rule => JSON.stringify(rule.matchDepTypes) === '["devDependencies"]');
         const peerReview = rules.findIndex(
             rule =>
-                JSON.stringify(rule.matchPackageNames) ===
-                '["azure-devops-extension-api","azure-devops-extension-sdk"]'
+                JSON.stringify(rule.matchPackageNames) === '["azure-devops-extension-api","azure-devops-extension-sdk"]'
         );
         expect(devAutomerge).toBeGreaterThanOrEqual(0);
         expect(peerReview).toBeGreaterThan(devAutomerge);
@@ -142,8 +146,8 @@ describe("package manifest", () => {
     });
 
     it("detects a test framework import when one is present", () => {
-        expect(TEST_FRAMEWORK_IMPORT.test("const { expect } = require(\"@jest/globals\");")).toBe(true);
-        expect(TEST_FRAMEWORK_IMPORT.test("import { vi } from \"vitest\";")).toBe(true);
-        expect(TEST_FRAMEWORK_IMPORT.test("const crypto = require(\"crypto\");")).toBe(false);
+        expect(TEST_FRAMEWORK_IMPORT.test('const { expect } = require("@jest/globals");')).toBe(true);
+        expect(TEST_FRAMEWORK_IMPORT.test('import { vi } from "vitest";')).toBe(true);
+        expect(TEST_FRAMEWORK_IMPORT.test('const crypto = require("crypto");')).toBe(false);
     });
 });

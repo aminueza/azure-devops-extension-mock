@@ -261,7 +261,14 @@ describe("pipelines fixtures checked by the compiler", () => {
         const client = getClient(PipelinesRestClient);
         const variables = { "system.debug": { isSecret: false, value: "true" } };
         const run = await client.runPipeline(
-            { previewRun: false, resources: {}, stagesToSkip: [], templateParameters: {}, variables, yamlOverride: "" } as any,
+            {
+                previewRun: false,
+                resources: {},
+                stagesToSkip: [],
+                templateParameters: {},
+                variables,
+                yamlOverride: ""
+            } as any,
             "proj",
             2
         );

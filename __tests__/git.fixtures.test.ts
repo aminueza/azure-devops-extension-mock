@@ -205,9 +205,7 @@ describe("Git fixtures without casts", () => {
         expect(thread.threadContext.rightFileEnd).toEqual({ line: 1, offset: 10 });
         expect(thread.threadContext.leftFileStart).toEqual({ line: 1, offset: 1 });
         expect(thread.threadContext.leftFileEnd).toEqual({ line: 1, offset: 10 });
-        expect(thread.pullRequestThreadContext.trackingCriteria.origFilePath).toBe(
-            thread.threadContext.filePath
-        );
+        expect(thread.pullRequestThreadContext.trackingCriteria.origFilePath).toBe(thread.threadContext.filePath);
         expect(thread.pullRequestThreadContext.trackingCriteria.firstComparingIteration).toBe(1);
         expect(thread.pullRequestThreadContext.trackingCriteria.secondComparingIteration).toBe(2);
         expect(comment.id).toBe(1);

@@ -57,7 +57,13 @@ describe("FeatureAvailabilityRestClient mock", () => {
     });
 
     it("updates an unknown flag", async () => {
-        const updated = await client.updateFeatureFlag({ state: "Off" }, "Missing.Updated", "a@example.com", true, true);
+        const updated = await client.updateFeatureFlag(
+            { state: "Off" },
+            "Missing.Updated",
+            "a@example.com",
+            true,
+            true
+        );
         expect(updated.name).toBe("Missing.Updated");
         expect(updated.explicitState).toBe("Off");
         expect(updated.effectiveState).toBe("Off");

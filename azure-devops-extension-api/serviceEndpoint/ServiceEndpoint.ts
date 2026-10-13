@@ -97,7 +97,11 @@ export class MockServiceEndpointRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    updateServiceEndpoint(endpoint: ServiceEndpoint, endpointId: string, _operation?: string): Promise<ServiceEndpoint> {
+    updateServiceEndpoint(
+        endpoint: ServiceEndpoint,
+        endpointId: string,
+        _operation?: string
+    ): Promise<ServiceEndpoint> {
         return Promise.resolve({ ...findEndpoint(endpointId), ...endpoint, id: endpointId });
     }
 
@@ -212,9 +216,7 @@ export class MockServiceEndpointRestClient extends RestClientBase {
     getServiceEndpointTypes(type?: string, scheme?: string): Promise<ServiceEndpointType[]> {
         return Promise.resolve(
             endpointTypes.filter(
-                t =>
-                    (!type || t.name === type) &&
-                    (!scheme || t.authenticationSchemes.some(s => s.scheme === scheme))
+                t => (!type || t.name === type) && (!scheme || t.authenticationSchemes.some(s => s.scheme === scheme))
             )
         );
     }

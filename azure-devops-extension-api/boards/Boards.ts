@@ -37,8 +37,7 @@ import {
     rowSuggestedValues
 } from "./Data";
 
-const findBoard = (id: string): Work.Board | undefined =>
-    boards.find(b => b.id === id || b.name === id);
+const findBoard = (id: string): Work.Board | undefined => boards.find(b => b.id === id || b.name === id);
 
 const badgeSvg = (id: string): string =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="20"><title>${id}</title></svg>`;
@@ -49,7 +48,10 @@ export class MockBoardsRestClient extends RestClientBase {
         super(options);
     }
 
-    updateAutomationRule(_ruleRequestModel: Work.TeamAutomationRulesSettingsRequestModel, _teamContext: TeamContext): Promise<void> {
+    updateAutomationRule(
+        _ruleRequestModel: Work.TeamAutomationRulesSettingsRequestModel,
+        _teamContext: TeamContext
+    ): Promise<void> {
         return Promise.resolve();
     }
 
@@ -70,11 +72,21 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(backlogs);
     }
 
-    getBoardBadge(_teamContext: TeamContext, id: string, _columnOptions?: Work.BoardBadgeColumnOptions, _columns?: string[]): Promise<Work.BoardBadge> {
+    getBoardBadge(
+        _teamContext: TeamContext,
+        id: string,
+        _columnOptions?: Work.BoardBadgeColumnOptions,
+        _columns?: string[]
+    ): Promise<Work.BoardBadge> {
         return Promise.resolve(makeBoardBadge(id));
     }
 
-    getBoardBadgeData(_teamContext: TeamContext, id: string, _columnOptions?: Work.BoardBadgeColumnOptions, _columns?: string[]): Promise<string> {
+    getBoardBadgeData(
+        _teamContext: TeamContext,
+        id: string,
+        _columnOptions?: Work.BoardBadgeColumnOptions,
+        _columns?: string[]
+    ): Promise<string> {
         return Promise.resolve(badgeSvg(id));
     }
 
@@ -82,7 +94,11 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(columnSuggestedValues);
     }
 
-    getBoardMappingParentItems(_teamContext: TeamContext, _childBacklogContextCategoryRefName: string, workitemIds: number[]): Promise<Work.ParentChildWIMap[]> {
+    getBoardMappingParentItems(
+        _teamContext: TeamContext,
+        _childBacklogContextCategoryRefName: string,
+        workitemIds: number[]
+    ): Promise<Work.ParentChildWIMap[]> {
         return Promise.resolve([{ ...makeParentChildWIMap(), childWorkItemIds: workitemIds }]);
     }
 
@@ -98,7 +114,11 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(boards.map(({ id, name, url }) => ({ id, name, url })));
     }
 
-    setBoardOptions(options: { [key: string]: string }, _teamContext: TeamContext, _id: string): Promise<{ [key: string]: string }> {
+    setBoardOptions(
+        options: { [key: string]: string },
+        _teamContext: TeamContext,
+        _id: string
+    ): Promise<{ [key: string]: string }> {
         return Promise.resolve(options);
     }
 
@@ -106,7 +126,11 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeBoardUserSettings());
     }
 
-    updateBoardUserSettings(boardUserSettings: { [key: string]: string }, _teamContext: TeamContext, _board: string): Promise<Work.BoardUserSettings> {
+    updateBoardUserSettings(
+        boardUserSettings: { [key: string]: string },
+        _teamContext: TeamContext,
+        _board: string
+    ): Promise<Work.BoardUserSettings> {
         return Promise.resolve({ autoRefreshState: boardUserSettings.autoRefreshState === "true" });
     }
 
@@ -114,27 +138,51 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeTeamCapacity());
     }
 
-    getCapacityWithIdentityRef(_teamContext: TeamContext, _iterationId: string, teamMemberId: string): Promise<Work.TeamMemberCapacityIdentityRef> {
+    getCapacityWithIdentityRef(
+        _teamContext: TeamContext,
+        _iterationId: string,
+        teamMemberId: string
+    ): Promise<Work.TeamMemberCapacityIdentityRef> {
         return Promise.resolve({ ...makeTeamMemberCapacity(), teamMember: { ...makeIdentityRef(), id: teamMemberId } });
     }
 
-    replaceCapacitiesWithIdentityRef(capacities: Work.TeamMemberCapacityIdentityRef[], _teamContext: TeamContext, _iterationId: string): Promise<Work.TeamMemberCapacityIdentityRef[]> {
+    replaceCapacitiesWithIdentityRef(
+        capacities: Work.TeamMemberCapacityIdentityRef[],
+        _teamContext: TeamContext,
+        _iterationId: string
+    ): Promise<Work.TeamMemberCapacityIdentityRef[]> {
         return Promise.resolve(capacities);
     }
 
-    updateCapacityWithIdentityRef(patch: Work.CapacityPatch, _teamContext: TeamContext, _iterationId: string, teamMemberId: string): Promise<Work.TeamMemberCapacityIdentityRef> {
-        return Promise.resolve({ ...makeTeamMemberCapacity(), ...patch, teamMember: { ...makeIdentityRef(), id: teamMemberId } });
+    updateCapacityWithIdentityRef(
+        patch: Work.CapacityPatch,
+        _teamContext: TeamContext,
+        _iterationId: string,
+        teamMemberId: string
+    ): Promise<Work.TeamMemberCapacityIdentityRef> {
+        return Promise.resolve({
+            ...makeTeamMemberCapacity(),
+            ...patch,
+            teamMember: { ...makeIdentityRef(), id: teamMemberId }
+        });
     }
 
     getBoardCardRuleSettings(_teamContext: TeamContext, _board: string): Promise<Work.BoardCardRuleSettings> {
         return Promise.resolve(makeBoardCardRuleSettings());
     }
 
-    updateBoardCardRuleSettings(boardCardRuleSettings: Work.BoardCardRuleSettings, _teamContext: TeamContext, _board: string): Promise<Work.BoardCardRuleSettings> {
+    updateBoardCardRuleSettings(
+        boardCardRuleSettings: Work.BoardCardRuleSettings,
+        _teamContext: TeamContext,
+        _board: string
+    ): Promise<Work.BoardCardRuleSettings> {
         return Promise.resolve(boardCardRuleSettings);
     }
 
-    updateTaskboardCardRuleSettings(_boardCardRuleSettings: Work.BoardCardRuleSettings, _teamContext: TeamContext): Promise<void> {
+    updateTaskboardCardRuleSettings(
+        _boardCardRuleSettings: Work.BoardCardRuleSettings,
+        _teamContext: TeamContext
+    ): Promise<void> {
         return Promise.resolve();
     }
 
@@ -142,11 +190,18 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeBoardCardSettings());
     }
 
-    updateBoardCardSettings(boardCardSettingsToSave: Work.BoardCardSettings, _teamContext: TeamContext, _board: string): Promise<Work.BoardCardSettings> {
+    updateBoardCardSettings(
+        boardCardSettingsToSave: Work.BoardCardSettings,
+        _teamContext: TeamContext,
+        _board: string
+    ): Promise<Work.BoardCardSettings> {
         return Promise.resolve(boardCardSettingsToSave);
     }
 
-    updateTaskboardCardSettings(_boardCardSettingsToSave: Work.BoardCardSettings, _teamContext: TeamContext): Promise<void> {
+    updateTaskboardCardSettings(
+        _boardCardSettingsToSave: Work.BoardCardSettings,
+        _teamContext: TeamContext
+    ): Promise<void> {
         return Promise.resolve();
     }
 
@@ -158,7 +213,12 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(boardCharts);
     }
 
-    updateBoardChart(chart: Work.BoardChart, _teamContext: TeamContext, _board: string, name: string): Promise<Work.BoardChart> {
+    updateBoardChart(
+        chart: Work.BoardChart,
+        _teamContext: TeamContext,
+        _board: string,
+        name: string
+    ): Promise<Work.BoardChart> {
         return Promise.resolve({ ...makeBoardChart(name), ...chart, name });
     }
 
@@ -166,11 +226,21 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve((findBoard(board) ?? makeBoard()).columns);
     }
 
-    updateBoardColumns(boardColumns: Work.BoardColumn[], _teamContext: TeamContext, _board: string): Promise<Work.BoardColumn[]> {
+    updateBoardColumns(
+        boardColumns: Work.BoardColumn[],
+        _teamContext: TeamContext,
+        _board: string
+    ): Promise<Work.BoardColumn[]> {
         return Promise.resolve(boardColumns);
     }
 
-    getDeliveryTimelineData(_project: string, id: string, revision?: number, startDate?: Date, endDate?: Date): Promise<Work.DeliveryViewData> {
+    getDeliveryTimelineData(
+        _project: string,
+        id: string,
+        revision?: number,
+        startDate?: Date,
+        endDate?: Date
+    ): Promise<Work.DeliveryViewData> {
         const data = makeDeliveryViewData();
         return Promise.resolve({
             ...data,
@@ -199,7 +269,10 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(iterations.filter(i => i.attributes.timeFrame === Work.TimeFrame.Current));
     }
 
-    postTeamIteration(iteration: Work.TeamSettingsIteration, _teamContext: TeamContext): Promise<Work.TeamSettingsIteration> {
+    postTeamIteration(
+        iteration: Work.TeamSettingsIteration,
+        _teamContext: TeamContext
+    ): Promise<Work.TeamSettingsIteration> {
         return Promise.resolve({ ...makeIteration(), ...iteration });
     }
 
@@ -240,7 +313,10 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeTaskboardColumns());
     }
 
-    updateColumns(updateColumns: Work.UpdateTaskboardColumn[], _teamContext: TeamContext): Promise<Work.TaskboardColumns> {
+    updateColumns(
+        updateColumns: Work.UpdateTaskboardColumn[],
+        _teamContext: TeamContext
+    ): Promise<Work.TaskboardColumns> {
         return Promise.resolve({ ...makeTaskboardColumns(), columns: updateColumns, isCustomized: true });
     }
 
@@ -248,7 +324,12 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(Array.from({ length: 3 }, makeTaskboardWorkItemColumn));
     }
 
-    updateWorkItemColumn(_updateColumn: Work.UpdateTaskboardWorkItemColumn, _teamContext: TeamContext, _iterationId: string, _workItemId: number): Promise<void> {
+    updateWorkItemColumn(
+        _updateColumn: Work.UpdateTaskboardWorkItemColumn,
+        _teamContext: TeamContext,
+        _iterationId: string,
+        _workItemId: number
+    ): Promise<void> {
         return Promise.resolve();
     }
 
@@ -256,7 +337,11 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeTeamDaysOff());
     }
 
-    updateTeamDaysOff(daysOffPatch: Work.TeamSettingsDaysOffPatch, _teamContext: TeamContext, _iterationId: string): Promise<Work.TeamSettingsDaysOff> {
+    updateTeamDaysOff(
+        daysOffPatch: Work.TeamSettingsDaysOffPatch,
+        _teamContext: TeamContext,
+        _iterationId: string
+    ): Promise<Work.TeamSettingsDaysOff> {
         return Promise.resolve({ ...makeTeamDaysOff(), ...daysOffPatch });
     }
 
@@ -272,7 +357,10 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeTeamSetting());
     }
 
-    updateTeamSettings(teamSettingsPatch: Work.TeamSettingsPatch, _teamContext: TeamContext): Promise<Work.TeamSetting> {
+    updateTeamSettings(
+        teamSettingsPatch: Work.TeamSettingsPatch,
+        _teamContext: TeamContext
+    ): Promise<Work.TeamSetting> {
         const settings = makeTeamSetting();
         return Promise.resolve({
             ...settings,
@@ -286,11 +374,18 @@ export class MockBoardsRestClient extends RestClientBase {
         return Promise.resolve(makeIterationWorkItems());
     }
 
-    reorderBacklogWorkItems(operation: Work.ReorderOperation, _teamContext: TeamContext): Promise<Work.ReorderResult[]> {
+    reorderBacklogWorkItems(
+        operation: Work.ReorderOperation,
+        _teamContext: TeamContext
+    ): Promise<Work.ReorderResult[]> {
         return Promise.resolve(operation.ids.map(makeReorderResult));
     }
 
-    reorderIterationWorkItems(operation: Work.ReorderOperation, _teamContext: TeamContext, _iterationId: string): Promise<Work.ReorderResult[]> {
+    reorderIterationWorkItems(
+        operation: Work.ReorderOperation,
+        _teamContext: TeamContext,
+        _iterationId: string
+    ): Promise<Work.ReorderResult[]> {
         return Promise.resolve(operation.ids.map(makeReorderResult));
     }
 }

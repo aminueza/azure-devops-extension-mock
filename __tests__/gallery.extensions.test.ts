@@ -274,7 +274,14 @@ describe("GalleryRestClient mock: extensions", () => {
         expect(await client.updateExtensionById(known.extensionId)).toBe(known);
         expect((await client.updateExtensionById("missing-id", "token")).extensionId).toBe("missing-id");
         expect(await client.updateExtension("vsix", publisherName, known.extensionName)).toBe(known);
-        const made = await client.updateExtension("vsix", "missing-publisher", "missing-extension", "type", "token", true);
+        const made = await client.updateExtension(
+            "vsix",
+            "missing-publisher",
+            "missing-extension",
+            "type",
+            "token",
+            true
+        );
         expect(made.extensionName).toBe("missing-extension");
     });
 
@@ -290,8 +297,17 @@ describe("GalleryRestClient mock: extensions", () => {
     });
 
     it("publishes an extension with a publisher signature", async () => {
-        expect(await client.publishExtensionWithPublisherSignature("vsix", publisherName, known.extensionName)).toBe(known);
-        const made = await client.publishExtensionWithPublisherSignature("vsix", "missing", "ext", "type", "token", false);
+        expect(await client.publishExtensionWithPublisherSignature("vsix", publisherName, known.extensionName)).toBe(
+            known
+        );
+        const made = await client.publishExtensionWithPublisherSignature(
+            "vsix",
+            "missing",
+            "ext",
+            "type",
+            "token",
+            false
+        );
         expect(made.publisher.publisherName).toBe("missing");
     });
 
@@ -305,7 +321,10 @@ describe("GalleryRestClient mock: extensions", () => {
         await expect(
             client.extensionValidator({
                 assetDetails: {
-                    answers: { vsMarketplaceExtensionName: known.extensionName, vsMarketplacePublisherName: publisherName },
+                    answers: {
+                        vsMarketplaceExtensionName: known.extensionName,
+                        vsMarketplacePublisherName: publisherName
+                    },
                     publisherNaturalIdentifier: publisherName
                 },
                 assetId: "asset",
@@ -333,9 +352,22 @@ describe("GalleryRestClient mock: extensions", () => {
     });
 
     it("gets one type of event", async () => {
-        const result = await client.getExtensionEvents(publisherName, known.extensionName, undefined, undefined, "install");
+        const result = await client.getExtensionEvents(
+            publisherName,
+            known.extensionName,
+            undefined,
+            undefined,
+            "install"
+        );
         expect(result.events).toEqual({ install: events.install });
-        const none = await client.getExtensionEvents(publisherName, known.extensionName, 5, undefined, "missing", "prop");
+        const none = await client.getExtensionEvents(
+            publisherName,
+            known.extensionName,
+            5,
+            undefined,
+            "missing",
+            "prop"
+        );
         expect(none.events).toEqual({});
     });
 
@@ -343,7 +375,12 @@ describe("GalleryRestClient mock: extensions", () => {
         const counted = await client.getExtensionEvents(publisherName, known.extensionName, 1);
         expect(Object.values(counted.events).map(list => list.length)).toEqual([1, 1, 1]);
         expect(counted.events.install[0]).toBe(events.install[0]);
-        const later = await client.getExtensionEvents(publisherName, "missing", undefined, new Date(Date.now() + DAY_MS));
+        const later = await client.getExtensionEvents(
+            publisherName,
+            "missing",
+            undefined,
+            new Date(Date.now() + DAY_MS)
+        );
         expect(later.extensionName).toBe("missing");
         expect(later.events).toEqual({ install: [], uninstall: [], review: [] });
         const earlier = await client.getExtensionEvents(publisherName, "missing", undefined, new Date(0));
@@ -386,7 +423,9 @@ describe("GalleryRestClient mock: extensions", () => {
         expect(stats.statCount).toBe(30);
         expect(stats.dailyStats.length).toBe(30);
         expect(stats.dailyStats.every(s => s.version === "2.0.0")).toBe(true);
-        expect(stats.dailyStats[0].statisticDate.getTime()).toBeGreaterThan(stats.dailyStats[1].statisticDate.getTime());
+        expect(stats.dailyStats[0].statisticDate.getTime()).toBeGreaterThan(
+            stats.dailyStats[1].statisticDate.getTime()
+        );
     });
 
     it("limits the daily stats by days and date", async () => {
@@ -416,7 +455,13 @@ describe("GalleryRestClient mock: extensions", () => {
         expect(report.extensionId).toBe(known.extensionId);
         expect(report.statCount).toBe(30);
         expect(report.reviewSummary.ratingCount).toBe(6);
-        const short = await client.getExtensionReports(publisherName, "missing", 4, 10, new Date(Date.now() - 2.5 * DAY_MS));
+        const short = await client.getExtensionReports(
+            publisherName,
+            "missing",
+            4,
+            10,
+            new Date(Date.now() - 2.5 * DAY_MS)
+        );
         expect(short.extensionName).toBe("missing");
         expect(short.statCount).toBe(3);
     });

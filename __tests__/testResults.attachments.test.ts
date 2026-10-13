@@ -7,8 +7,12 @@ import { blobStoreAttachments } from "../azure-devops-extension-api/testResults/
 const decode = (buffer: ArrayBuffer): string => new TextDecoder().decode(buffer);
 
 describe("TestResultsRestClient mock attachments", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestResultsRestClient);
 
@@ -30,12 +34,18 @@ describe("TestResultsRestClient mock attachments", () => {
     };
 
     const references: Array<[string, () => Promise<{ id: number; url: string }>]> = [
-        ["createTestIterationResultAttachment", () => client.createTestIterationResultAttachment(request, "proj", 1, 2, 3, "path")],
+        [
+            "createTestIterationResultAttachment",
+            () => client.createTestIterationResultAttachment(request, "proj", 1, 2, 3, "path")
+        ],
         ["createTestResultAttachment", () => client.createTestResultAttachment(request, "proj", 1, 2)],
         ["createTestSubResultAttachment", () => client.createTestSubResultAttachment(request, "proj", 1, 2, 3)],
         ["createTestRunAttachment", () => client.createTestRunAttachment(request, "proj", 1)],
         ["createTestResultAttachmentMetadata", () => client.createTestResultAttachmentMetadata(metadata, "proj", 1, 2)],
-        ["createTestSubResultAttachmentMetadata", () => client.createTestSubResultAttachmentMetadata(metadata, "proj", 1, 2, 3)],
+        [
+            "createTestSubResultAttachmentMetadata",
+            () => client.createTestSubResultAttachmentMetadata(metadata, "proj", 1, 2, 3)
+        ],
         ["createTestRunAttachmentMetadata", () => client.createTestRunAttachmentMetadata(metadata, "proj", 1)]
     ];
 
@@ -55,12 +65,36 @@ describe("TestResultsRestClient mock attachments", () => {
     });
 
     const buffers: Array<[string, () => Promise<ArrayBuffer>, string]> = [
-        ["getTestIterationAttachmentContent", () => client.getTestIterationAttachmentContent("proj", 1, 2, 9, 4), "iteration-attachment-9"],
-        ["getTestIterationAttachmentZip", () => client.getTestIterationAttachmentZip("proj", 1, 2, 9, 4), "iteration-attachment-zip-9"],
-        ["getTestResultAttachmentContent", () => client.getTestResultAttachmentContent("proj", 1, 2, 9), "result-attachment-9"],
-        ["getTestResultAttachmentZip", () => client.getTestResultAttachmentZip("proj", 1, 2, 9), "result-attachment-zip-9"],
-        ["getTestSubResultAttachmentContent", () => client.getTestSubResultAttachmentContent("proj", 1, 2, 9, 4), "sub-attachment-9"],
-        ["getTestSubResultAttachmentZip", () => client.getTestSubResultAttachmentZip("proj", 1, 2, 9, 4), "sub-attachment-zip-9"],
+        [
+            "getTestIterationAttachmentContent",
+            () => client.getTestIterationAttachmentContent("proj", 1, 2, 9, 4),
+            "iteration-attachment-9"
+        ],
+        [
+            "getTestIterationAttachmentZip",
+            () => client.getTestIterationAttachmentZip("proj", 1, 2, 9, 4),
+            "iteration-attachment-zip-9"
+        ],
+        [
+            "getTestResultAttachmentContent",
+            () => client.getTestResultAttachmentContent("proj", 1, 2, 9),
+            "result-attachment-9"
+        ],
+        [
+            "getTestResultAttachmentZip",
+            () => client.getTestResultAttachmentZip("proj", 1, 2, 9),
+            "result-attachment-zip-9"
+        ],
+        [
+            "getTestSubResultAttachmentContent",
+            () => client.getTestSubResultAttachmentContent("proj", 1, 2, 9, 4),
+            "sub-attachment-9"
+        ],
+        [
+            "getTestSubResultAttachmentZip",
+            () => client.getTestSubResultAttachmentZip("proj", 1, 2, 9, 4),
+            "sub-attachment-zip-9"
+        ],
         ["getTestRunAttachmentContent", () => client.getTestRunAttachmentContent("proj", 1, 9), "run-attachment-9"],
         ["getTestRunAttachmentZip", () => client.getTestRunAttachmentZip("proj", 1, 9), "run-attachment-zip-9"]
     ];
@@ -81,10 +115,29 @@ describe("TestResultsRestClient mock attachments", () => {
         await expect(call()).resolves.toBe(attachments);
     });
 
-    const queries: Array<[string, (prefix?: string, id?: number) => Promise<Array<{ id: number; fileName: string; dedupId: string; domainId: string }>>]> = [
-        ["queryTestResultAttachmentsMetadata", (prefix, id) => client.queryTestResultAttachmentsMetadata("proj", 1, 2, "GeneralAttachment", prefix, id, true)],
-        ["queryTestSubResultAttachmentsMetadata", (prefix, id) => client.queryTestSubResultAttachmentsMetadata("proj", 1, 2, 3, "GeneralAttachment", prefix, id, true)],
-        ["queryTestRunAttachmentsMetadata", (prefix, id) => client.queryTestRunAttachmentsMetadata("proj", 1, "GeneralAttachment", prefix, id, true)]
+    const queries: Array<
+        [
+            string,
+            (
+                prefix?: string,
+                id?: number
+            ) => Promise<Array<{ id: number; fileName: string; dedupId: string; domainId: string }>>
+        ]
+    > = [
+        [
+            "queryTestResultAttachmentsMetadata",
+            (prefix, id) =>
+                client.queryTestResultAttachmentsMetadata("proj", 1, 2, "GeneralAttachment", prefix, id, true)
+        ],
+        [
+            "queryTestSubResultAttachmentsMetadata",
+            (prefix, id) =>
+                client.queryTestSubResultAttachmentsMetadata("proj", 1, 2, 3, "GeneralAttachment", prefix, id, true)
+        ],
+        [
+            "queryTestRunAttachmentsMetadata",
+            (prefix, id) => client.queryTestRunAttachmentsMetadata("proj", 1, "GeneralAttachment", prefix, id, true)
+        ]
     ];
 
     describe.each(queries)("%s", (_name, query) => {

@@ -18,8 +18,12 @@ import {
 import { testResultsSettings } from "../azure-devops-extension-api/testResults/Data";
 
 describe("TestResultsRestClient mock results, runs and reports", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestResultsRestClient);
 
@@ -29,7 +33,17 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
 
     it("gets test result details for a build, a release and a pipeline", async () => {
         const forBuild = await client.getTestResultDetailsForBuild("proj", 1, "CI", "TestRun", "", "", true, false);
-        const forRelease = await client.getTestResultDetailsForRelease("proj", 1, 2, "CD", "TestRun", "", "", true, false);
+        const forRelease = await client.getTestResultDetailsForRelease(
+            "proj",
+            1,
+            2,
+            "CD",
+            "TestRun",
+            "",
+            "",
+            true,
+            false
+        );
         const forPipeline = await client.testResultsGroupDetails("proj", 1, "stage", "phase", "job", true, false);
         for (const details of [forBuild, forRelease, forPipeline]) {
             expect(details.groupByField).toBe("TestRun");
@@ -84,11 +98,15 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
     });
 
     it("gets shallow results by build, pipeline and release", async () => {
-        await expect(client.getTestResultsByBuild("proj", 1, "CI", [TestOutcome.Failed], 5, "token")).resolves.toBe(shallowResults);
+        await expect(client.getTestResultsByBuild("proj", 1, "CI", [TestOutcome.Failed], 5, "token")).resolves.toBe(
+            shallowResults
+        );
         await expect(
             client.getTestResultsByPipeline("proj", 1, "stage", "phase", "job", [TestOutcome.Failed], true, 5, "token")
         ).resolves.toBe(shallowResults);
-        await expect(client.getTestResultsByRelease("proj", 1, 2, "CD", [TestOutcome.Failed], 5, "token")).resolves.toBe(shallowResults);
+        await expect(
+            client.getTestResultsByRelease("proj", 1, 2, "CD", [TestOutcome.Failed], 5, "token")
+        ).resolves.toBe(shallowResults);
     });
 
     it("reports test results for a build", async () => {
@@ -113,7 +131,10 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
     });
 
     it("summarises test results for releases", async () => {
-        const releases = [{ id: 51, environmentId: 61 }, { id: 52, environmentId: 62 }] as any;
+        const releases = [
+            { id: 51, environmentId: 61 },
+            { id: 52, environmentId: 62 }
+        ] as any;
         const summaries = await client.queryTestResultsSummaryForReleases(releases, "proj");
         expect(summaries.map(summary => summary.testResultsContext.release.id)).toEqual([51, 52]);
         expect(summaries.map(summary => summary.testResultsContext.release.environmentId)).toEqual([61, 62]);
@@ -184,8 +205,24 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
         const completed = await client.queryTestRuns("proj", minDate, maxDate, TestRunState.Completed);
         expect(completed.map(run => run.id)).toEqual([9001, 9002]);
         const top = await client.queryTestRuns(
-            "proj", minDate, maxDate, undefined, [1], true, undefined, [1], [1], "main", [1], [1], [1], [1], "title", 3,
-            TestRunSortOrderType.Desc, "token"
+            "proj",
+            minDate,
+            maxDate,
+            undefined,
+            [1],
+            true,
+            undefined,
+            [1],
+            [1],
+            "main",
+            [1],
+            [1],
+            [1],
+            [1],
+            "title",
+            3,
+            TestRunSortOrderType.Desc,
+            "token"
         );
         expect(top.map(run => run.id)).toEqual([9001, 9002, 9003]);
     });
@@ -234,7 +271,9 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
 
     it("gets similar test results", async () => {
         await expect(client.getSimilarTestResults("proj", 1, 2, 3)).resolves.toEqual(testResults);
-        await expect(client.getSimilarTestResults("proj", 1, 2, 3, 4, "token")).resolves.toEqual(testResults.slice(0, 4));
+        await expect(client.getSimilarTestResults("proj", 1, 2, 3, 4, "token")).resolves.toEqual(
+            testResults.slice(0, 4)
+        );
     });
 
     it("gets the coverage status badge", async () => {

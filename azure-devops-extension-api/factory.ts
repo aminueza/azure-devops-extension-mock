@@ -3,23 +3,16 @@ import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 type Class<T = unknown> = new (...args: any[]) => T;
 
 export type MockOverrides<T> = Partial<{
-    [K in keyof T]: T[K] extends (...args: infer A) => infer R
-        ? (...args: A) => R
-        : T[K];
+    [K in keyof T]: T[K] extends (...args: infer A) => infer R ? (...args: A) => R : T[K];
 }>;
 
 const registry = new Map<Class, Class>();
 
-export function registerMockClient<T extends object>(
-    real: Class<T>,
-    mock: Class<Partial<T>>
-): void {
+export function registerMockClient<T extends object>(real: Class<T>, mock: Class<Partial<T>>): void {
     registry.set(real, mock);
 }
 
-export function getRegisteredMockClient<T extends object>(
-    real: Class<T>
-): Class<T> | undefined {
+export function getRegisteredMockClient<T extends object>(real: Class<T>): Class<T> | undefined {
     return registry.get(real) as Class<T> | undefined;
 }
 
@@ -36,9 +29,7 @@ export function mockClient<T extends object>(
     options: IVssRestClientOptions = {}
 ): T {
     const registered = getRegisteredMockClient(clientClass);
-    const base: T = registered
-        ? new registered(options)
-        : new clientClass(options);
+    const base: T = registered ? new registered(options) : new clientClass(options);
 
     return new Proxy(base, {
         get(target, prop, receiver) {

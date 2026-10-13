@@ -152,10 +152,7 @@ describe("WorkItemTrackingRestClient mock", () => {
     });
 
     it("increments revision on update", async () => {
-        const wi = await client.updateWorkItem(
-            [{ op: "replace", path: "/fields/System.State", value: "Closed" }],
-            42
-        );
+        const wi = await client.updateWorkItem([{ op: "replace", path: "/fields/System.State", value: "Closed" }], 42);
         expect(wi.fields["System.State"]).toBe("Closed");
         expect(wi.rev).toBeGreaterThan(0);
     });
@@ -246,7 +243,7 @@ describe("DashboardRestClient mock", () => {
 
     it("creates a widget preserving the caller's settings", async () => {
         const widget = await client.createWidget(
-            { name: "My Widget", settings: "{\"foo\":\"bar\"}" } as any,
+            { name: "My Widget", settings: '{"foo":"bar"}' } as any,
             { projectId: "p", teamId: "t" } as any,
             "dash-id"
         );
@@ -290,9 +287,7 @@ describe("mockClient overrides", () => {
 
 describe("getService", () => {
     it("returns a service for a known service id", () => {
-        const svc = getService<{ getProject: () => Promise<unknown> }>(
-            CommonServiceIds.ProjectPageService
-        );
+        const svc = getService<{ getProject: () => Promise<unknown> }>(CommonServiceIds.ProjectPageService);
         expect(svc).toBeDefined();
         expect(typeof svc.getProject).toBe("function");
     });

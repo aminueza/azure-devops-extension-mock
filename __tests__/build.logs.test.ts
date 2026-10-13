@@ -28,10 +28,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
 
     const cases: Array<[string, () => Promise<unknown>]> = [
         ["getAttachments", () => client.getAttachments("proj", 1, attachmentType)],
-        [
-            "getAttachment",
-            () => client.getAttachment("proj", 1, "timeline-1", "record-1", "logs", "build.log")
-        ],
+        ["getAttachment", () => client.getAttachment("proj", 1, "timeline-1", "record-1", "logs", "build.log")],
         ["getBuildLogLines", () => client.getBuildLogLines("proj", 1, 2)],
         ["getBuildLogZip", () => client.getBuildLogZip("proj", 1, 2)],
         ["getBuildLogsZip", () => client.getBuildLogsZip("proj", 1)],
@@ -41,24 +38,12 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
             () => client.updateBuildProperties([{ path: "/channel", value: "stable" }] as any, "proj", 1)
         ],
         ["getBuildReport", () => client.getBuildReport("proj", buildReports[0].buildId)],
-        [
-            "getBuildReportHtmlContent",
-            () => client.getBuildReportHtmlContent("proj", buildReports[0].buildId)
-        ],
-        [
-            "getBuildStageLatestTimeline",
-            () => client.getBuildStageLatestTimeline("proj", 1, "Build")
-        ],
-        [
-            "getBuildStageTimeline",
-            () => client.getBuildStageTimeline("proj", 1, "timeline-build", "Build")
-        ],
+        ["getBuildReportHtmlContent", () => client.getBuildReportHtmlContent("proj", buildReports[0].buildId)],
+        ["getBuildStageLatestTimeline", () => client.getBuildStageLatestTimeline("proj", 1, "Build")],
+        ["getBuildStageTimeline", () => client.getBuildStageTimeline("proj", 1, "timeline-build", "Build")],
         ["getBuildOptionDefinitions", () => client.getBuildOptionDefinitions("proj")],
         ["getBuildGeneralSettings", () => client.getBuildGeneralSettings("proj")],
-        [
-            "updateBuildGeneralSettings",
-            () => client.updateBuildGeneralSettings({ ...generalSettings }, "proj")
-        ],
+        ["updateBuildGeneralSettings", () => client.updateBuildGeneralSettings({ ...generalSettings }, "proj")],
         ["getBuildSettings", () => client.getBuildSettings("proj")],
         ["updateBuildSettings", () => client.updateBuildSettings({ ...buildSettings }, "proj")],
         ["getFile", () => client.getFile("proj", 1, "drop", "file-1", "app.zip")],
@@ -93,9 +78,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
 
     it("returns seeded attachments for the known type", async () => {
         const result = await client.getAttachments("proj", 1, attachmentType);
-        expect(result.map(attachment => attachment.name)).toEqual(
-            attachments.map(attachment => attachment.name)
-        );
+        expect(result.map(attachment => attachment.name)).toEqual(attachments.map(attachment => attachment.name));
     });
 
     it("fabricates a single attachment for an unknown type", async () => {
@@ -105,14 +88,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("encodes attachment content from type and name", async () => {
-        const buffer = await client.getAttachment(
-            "proj",
-            1,
-            "timeline-1",
-            "record-1",
-            "logs",
-            "build.log"
-        );
+        const buffer = await client.getAttachment("proj", 1, "timeline-1", "record-1", "logs", "build.log");
         expect(String.fromCharCode(...new Uint8Array(buffer))).toBe("logs:build.log");
     });
 
@@ -121,15 +97,11 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("slices log lines by start and end", async () => {
-        await expect(client.getBuildLogLines("proj", 1, 2, 1, 3)).resolves.toEqual(
-            buildLogLines.slice(1, 3)
-        );
+        await expect(client.getBuildLogLines("proj", 1, 2, 1, 3)).resolves.toEqual(buildLogLines.slice(1, 3));
     });
 
     it("slices log lines from a start line only", async () => {
-        await expect(client.getBuildLogLines("proj", 1, 2, 4)).resolves.toEqual(
-            buildLogLines.slice(4)
-        );
+        await expect(client.getBuildLogLines("proj", 1, 2, 4)).resolves.toEqual(buildLogLines.slice(4));
     });
 
     it("encodes a log zip keyed by the log id alone", async () => {
@@ -163,11 +135,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("echoes patched build properties over the seeded ones", async () => {
-        const result = await client.updateBuildProperties(
-            [{ path: "/channel", value: "stable" }] as any,
-            "proj",
-            1
-        );
+        const result = await client.updateBuildProperties([{ path: "/channel", value: "stable" }] as any, "proj", 1);
         expect(result).toEqual({ ...buildProperties, channel: "stable" });
     });
 
@@ -176,9 +144,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("returns the seeded report for a known build", async () => {
-        await expect(client.getBuildReport("proj", buildReports[0].buildId)).resolves.toEqual(
-            buildReports[0]
-        );
+        await expect(client.getBuildReport("proj", buildReports[0].buildId)).resolves.toEqual(buildReports[0]);
     });
 
     it("fabricates a report for an unknown build", async () => {
@@ -194,21 +160,21 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("renders report html using the seeded type", async () => {
-        await expect(
-            client.getBuildReportHtmlContent("proj", buildReports[0].buildId)
-        ).resolves.toContain(`${buildReports[0].type} report ${buildReports[0].buildId}`);
+        await expect(client.getBuildReportHtmlContent("proj", buildReports[0].buildId)).resolves.toContain(
+            `${buildReports[0].type} report ${buildReports[0].buildId}`
+        );
     });
 
     it("renders report html with the default type for an unknown build", async () => {
-        await expect(
-            client.getBuildReportHtmlContent("proj", Number.MAX_SAFE_INTEGER)
-        ).resolves.toContain(`build report ${Number.MAX_SAFE_INTEGER}`);
+        await expect(client.getBuildReportHtmlContent("proj", Number.MAX_SAFE_INTEGER)).resolves.toContain(
+            `build report ${Number.MAX_SAFE_INTEGER}`
+        );
     });
 
     it("renders report html with an explicit type", async () => {
-        await expect(
-            client.getBuildReportHtmlContent("proj", buildReports[0].buildId, "custom")
-        ).resolves.toContain(`custom report ${buildReports[0].buildId}`);
+        await expect(client.getBuildReportHtmlContent("proj", buildReports[0].buildId, "custom")).resolves.toContain(
+            `custom report ${buildReports[0].buildId}`
+        );
     });
 
     it("finds the latest stage timeline by stage name", async () => {
@@ -242,13 +208,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("overrides the change id on a stage timeline", async () => {
-        const stage = await client.getBuildStageTimeline(
-            "proj",
-            1,
-            "timeline-deploy",
-            "Deploy",
-            88
-        );
+        const stage = await client.getBuildStageTimeline("proj", 1, "timeline-deploy", "Deploy", 88);
         expect(stage.changeId).toBe(88);
     });
 
@@ -257,9 +217,7 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("returns option definitions without a project", async () => {
-        await expect(client.getBuildOptionDefinitions()).resolves.toHaveLength(
-            optionDefinitions.length
-        );
+        await expect(client.getBuildOptionDefinitions()).resolves.toHaveLength(optionDefinitions.length);
     });
 
     it("returns the seeded general settings", async () => {
@@ -325,20 +283,11 @@ describe("BuildRestClient mock attachments, logs and properties", () => {
     });
 
     it("returns every path item when no path is given", async () => {
-        await expect(client.getPathContents("proj", "TfsGit")).resolves.toEqual(
-            sourceRepositoryItems
-        );
+        await expect(client.getPathContents("proj", "TfsGit")).resolves.toEqual(sourceRepositoryItems);
     });
 
     it("filters path items by the requested prefix", async () => {
-        const items = await client.getPathContents(
-            "proj",
-            "TfsGit",
-            "endpoint-1",
-            "repo-1",
-            "main",
-            "/src"
-        );
+        const items = await client.getPathContents("proj", "TfsGit", "endpoint-1", "repo-1", "main", "/src");
         expect(items.map(item => item.path)).toEqual(["/src", "/src/index.ts"]);
     });
 

@@ -125,11 +125,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve({ ...makeBuildDefinition(), ...definition });
     }
 
-    updateDefinition(
-        definition: BuildDefinition,
-        _project: string,
-        definitionId: number
-    ): Promise<BuildDefinition> {
+    updateDefinition(definition: BuildDefinition, _project: string, definitionId: number): Promise<BuildDefinition> {
         return Promise.resolve({ ...makeBuildDefinition(), ...definition, id: definitionId });
     }
 
@@ -180,11 +176,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeArtifact(artifactName));
     }
 
-    createArtifact(
-        artifact: BuildArtifact,
-        _project: string,
-        _buildId: number
-    ): Promise<BuildArtifact> {
+    createArtifact(artifact: BuildArtifact, _project: string, _buildId: number): Promise<BuildArtifact> {
         return Promise.resolve({ ...makeArtifact(), ...artifact });
     }
 
@@ -192,11 +184,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(new ArrayBuffer(0));
     }
 
-    getBuildTimeline(
-        _project: string,
-        _buildId: number,
-        _timelineId?: string
-    ): Promise<Timeline> {
+    getBuildTimeline(_project: string, _buildId: number, _timelineId?: string): Promise<Timeline> {
         return Promise.resolve(timeline);
     }
 
@@ -228,11 +216,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve([...buildTags]);
     }
 
-    updateBuildTags(
-        updateParameters: UpdateTagParameters,
-        _project: string,
-        _buildId: number
-    ): Promise<string[]> {
+    updateBuildTags(updateParameters: UpdateTagParameters, _project: string, _buildId: number): Promise<string[]> {
         const removed = new Set(updateParameters.tagsToRemove);
         return Promise.resolve(
             [...new Set([...buildTags, ...updateParameters.tagsToAdd])].filter(tag => !removed.has(tag))
@@ -252,9 +236,7 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     getDefinitionTags(_project: string, _definitionId: number, revision?: number): Promise<string[]> {
-        return Promise.resolve(
-            revision === undefined ? [...definitionTags] : definitionTags.slice(0, revision)
-        );
+        return Promise.resolve(revision === undefined ? [...definitionTags] : definitionTags.slice(0, revision));
     }
 
     updateDefinitionTags(
@@ -276,21 +258,11 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve([...projectTags]);
     }
 
-    getBuildBadge(
-        _project: string,
-        _repoType: string,
-        _repoId?: string,
-        _branchName?: string
-    ): Promise<BuildBadge> {
+    getBuildBadge(_project: string, _repoType: string, _repoId?: string, _branchName?: string): Promise<BuildBadge> {
         return Promise.resolve({ ...makeBuildBadge(), buildId: buildList[0].id });
     }
 
-    getBuildBadgeData(
-        _project: string,
-        repoType: string,
-        repoId?: string,
-        branchName?: string
-    ): Promise<string> {
+    getBuildBadgeData(_project: string, repoType: string, repoId?: string, branchName?: string): Promise<string> {
         const scope = [repoType, repoId, branchName].filter(Boolean).join(" ");
         return Promise.resolve(`<svg width="120" height="20"><text x="60" y="14">${scope} succeeded</text></svg>`);
     }
@@ -335,9 +307,7 @@ export class MockBuildRestClient extends RestClientBase {
     getFolders(_project: string, path?: string, queryOrder?: FolderQueryOrder): Promise<Folder[]> {
         const matched = folders.filter(folder => folder.path.startsWith(path ?? "\\"));
         const ascending = [...matched].sort((left, right) => left.path.localeCompare(right.path));
-        return Promise.resolve(
-            queryOrder === FolderQueryOrder.FolderDescending ? ascending.reverse() : ascending
-        );
+        return Promise.resolve(queryOrder === FolderQueryOrder.FolderDescending ? ascending.reverse() : ascending);
     }
 
     updateFolder(folder: Folder, _project: string, path: string): Promise<Folder> {
@@ -369,11 +339,7 @@ export class MockBuildRestClient extends RestClientBase {
         });
     }
 
-    restoreDefinition(
-        _project: string,
-        definitionId: number,
-        deleted: boolean
-    ): Promise<BuildDefinition> {
+    restoreDefinition(_project: string, definitionId: number, deleted: boolean): Promise<BuildDefinition> {
         const found = buildDefinitions.find(definition => definition.id === definitionId);
         const definition = found ?? { ...makeBuildDefinition(), id: definitionId };
         return Promise.resolve({
@@ -382,30 +348,18 @@ export class MockBuildRestClient extends RestClientBase {
         });
     }
 
-    getDefinitionMetrics(
-        _project: string,
-        _definitionId: number,
-        minMetricsTime?: Date
-    ): Promise<BuildMetric[]> {
+    getDefinitionMetrics(_project: string, _definitionId: number, minMetricsTime?: Date): Promise<BuildMetric[]> {
         const since = minMetricsTime ?? new Date(0);
         return Promise.resolve(buildMetrics.filter(metric => metric.date >= since));
     }
 
-    getDefinitionProperties(
-        _project: string,
-        _definitionId: number,
-        filter?: string[]
-    ): Promise<any> {
+    getDefinitionProperties(_project: string, _definitionId: number, filter?: string[]): Promise<any> {
         const properties: Record<string, unknown> = { ...definitionProperties };
         const keys = filter ?? Object.keys(properties);
         return Promise.resolve(Object.fromEntries(keys.map(key => [key, properties[key]])));
     }
 
-    updateDefinitionProperties(
-        document: JsonPatchDocument,
-        _project: string,
-        _definitionId: number
-    ): Promise<any> {
+    updateDefinitionProperties(document: JsonPatchDocument, _project: string, _definitionId: number): Promise<any> {
         const operations = document as unknown as Array<{ path: string; value: unknown }>;
         const properties: Record<string, unknown> = { ...definitionProperties };
         for (const operation of operations) {
@@ -414,10 +368,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(properties);
     }
 
-    getDefinitionRevisions(
-        _project: string,
-        _definitionId: number
-    ): Promise<BuildDefinitionRevision[]> {
+    getDefinitionRevisions(_project: string, _definitionId: number): Promise<BuildDefinitionRevision[]> {
         return Promise.resolve([...definitionRevisions]);
     }
 
@@ -429,13 +380,7 @@ export class MockBuildRestClient extends RestClientBase {
         propertyFilters?: string[],
         includeLatestBuilds?: boolean
     ): Promise<YamlBuild> {
-        const scope = [
-            `definition ${definitionId}`,
-            revision,
-            minMetricsTime,
-            propertyFilters,
-            includeLatestBuilds
-        ]
+        const scope = [`definition ${definitionId}`, revision, minMetricsTime, propertyFilters, includeLatestBuilds]
             .filter(Boolean)
             .join(" ");
         return Promise.resolve({
@@ -452,10 +397,7 @@ export class MockBuildRestClient extends RestClientBase {
         });
     }
 
-    getDefinitionResources(
-        _project: string,
-        _definitionId: number
-    ): Promise<DefinitionResourceReference[]> {
+    getDefinitionResources(_project: string, _definitionId: number): Promise<DefinitionResourceReference[]> {
         return Promise.resolve([...definitionResources]);
     }
 
@@ -484,25 +426,13 @@ export class MockBuildRestClient extends RestClientBase {
         );
     }
 
-    getProjectResources(
-        _project: string,
-        type?: string,
-        id?: string
-    ): Promise<DefinitionResourceReference[]> {
-        const typed = definitionResources.filter(
-            resource => resource.type === (type ?? resource.type)
-        );
+    getProjectResources(_project: string, type?: string, id?: string): Promise<DefinitionResourceReference[]> {
+        const typed = definitionResources.filter(resource => resource.type === (type ?? resource.type));
         return Promise.resolve(typed.filter(resource => resource.id === (id ?? resource.id)));
     }
 
-    getProjectMetrics(
-        _project: string,
-        metricAggregationType?: string,
-        minMetricsTime?: Date
-    ): Promise<BuildMetric[]> {
-        const scoped = buildMetrics.filter(
-            metric => metric.scope === (metricAggregationType ?? metric.scope)
-        );
+    getProjectMetrics(_project: string, metricAggregationType?: string, minMetricsTime?: Date): Promise<BuildMetric[]> {
+        const scoped = buildMetrics.filter(metric => metric.scope === (metricAggregationType ?? metric.scope));
         const since = minMetricsTime ?? new Date(0);
         return Promise.resolve(scoped.filter(metric => metric.date >= since));
     }
@@ -533,9 +463,7 @@ export class MockBuildRestClient extends RestClientBase {
         startLine?: number,
         endLine?: number
     ): Promise<string[]> {
-        return Promise.resolve(
-            buildLogLines.slice(startLine ?? 0, endLine ?? buildLogLines.length)
-        );
+        return Promise.resolve(buildLogLines.slice(startLine ?? 0, endLine ?? buildLogLines.length));
     }
 
     getBuildLogZip(
@@ -559,11 +487,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(Object.fromEntries(keys.map(key => [key, properties[key]])));
     }
 
-    updateBuildProperties(
-        document: JsonPatchDocument,
-        _project: string,
-        _buildId: number
-    ): Promise<any> {
+    updateBuildProperties(document: JsonPatchDocument, _project: string, _buildId: number): Promise<any> {
         const operations = document as unknown as Array<{ path: string; value: unknown }>;
         const properties: Record<string, unknown> = { ...buildProperties };
         for (const operation of operations) {
@@ -572,11 +496,7 @@ export class MockBuildRestClient extends RestClientBase {
         return Promise.resolve(properties);
     }
 
-    getBuildReport(
-        _project: string,
-        buildId: number,
-        type?: string
-    ): Promise<BuildReportMetadata> {
+    getBuildReport(_project: string, buildId: number, type?: string): Promise<BuildReportMetadata> {
         const found = buildReports.find(report => report.buildId === buildId);
         const report = found ?? makeBuildReportMetadata(buildId, "build");
         return Promise.resolve(type === undefined ? report : { ...report, type });
@@ -610,9 +530,7 @@ export class MockBuildRestClient extends RestClientBase {
     ): Promise<Timeline> {
         const found = stageTimelines.find(candidate => candidate.id === timelineId);
         const stage = found ?? makeStageTimeline(timelineId, stageName);
-        return Promise.resolve(
-            changeId === undefined ? { ...stage } : { ...stage, changeId }
-        );
+        return Promise.resolve(changeId === undefined ? { ...stage } : { ...stage, changeId });
     }
 
     updateStage(
@@ -666,9 +584,7 @@ export class MockBuildRestClient extends RestClientBase {
         path?: string
     ): Promise<string> {
         return Promise.resolve(
-            [providerName, serviceEndpointId, repository, commitOrBranch, path]
-                .filter(Boolean)
-                .join("/")
+            [providerName, serviceEndpointId, repository, commitOrBranch, path].filter(Boolean).join("/")
         );
     }
 
@@ -687,10 +603,7 @@ export class MockBuildRestClient extends RestClientBase {
         );
     }
 
-    addRetentionLeases(
-        newLeases: NewRetentionLease[],
-        _project: string
-    ): Promise<RetentionLease[]> {
+    addRetentionLeases(newLeases: NewRetentionLease[], _project: string): Promise<RetentionLease[]> {
         return Promise.resolve(newLeases.map(makeLeaseFromNew));
     }
 
@@ -700,9 +613,7 @@ export class MockBuildRestClient extends RestClientBase {
 
     getRetentionLease(_project: string, leaseId: number): Promise<RetentionLease> {
         const found = retentionLeases.find(lease => lease.leaseId === leaseId);
-        return Promise.resolve(
-            found ?? makeRetentionLease(leaseId, "owner-unknown", 0, 0)
-        );
+        return Promise.resolve(found ?? makeRetentionLease(leaseId, "owner-unknown", 0, 0));
     }
 
     getRetentionLeasesByMinimalRetentionLeases(
@@ -802,11 +713,7 @@ export class MockBuildRestClient extends RestClientBase {
         });
     }
 
-    getBuildWorkItemsRefs(
-        _project: string,
-        _buildId: number,
-        top?: number
-    ): Promise<ResourceRef[]> {
+    getBuildWorkItemsRefs(_project: string, _buildId: number, top?: number): Promise<ResourceRef[]> {
         return Promise.resolve(buildWorkItemRefs.slice(0, top ?? buildWorkItemRefs.length));
     }
 
@@ -887,9 +794,7 @@ export class MockBuildRestClient extends RestClientBase {
         _serviceEndpointId?: string,
         repository?: string
     ): Promise<RepositoryWebhook[]> {
-        return Promise.resolve(
-            repositoryWebhooks.filter(webhook => webhook.name === (repository ?? webhook.name))
-        );
+        return Promise.resolve(repositoryWebhooks.filter(webhook => webhook.name === (repository ?? webhook.name)));
     }
 
     restoreWebhooks(

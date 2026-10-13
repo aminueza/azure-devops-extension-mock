@@ -31,10 +31,7 @@ describe("BuildRestClient mock tags, badges and controllers", () => {
         ["addDefinitionTags", () => client.addDefinitionTags(["hotfix"], "proj", 1)],
         ["deleteDefinitionTag", () => client.deleteDefinitionTag("proj", 1, definitionTags[0])],
         ["getDefinitionTags", () => client.getDefinitionTags("proj", 1)],
-        [
-            "updateDefinitionTags",
-            () => client.updateDefinitionTags({ tagsToAdd: ["x"], tagsToRemove: [] }, "proj", 1)
-        ],
+        ["updateDefinitionTags", () => client.updateDefinitionTags({ tagsToAdd: ["x"], tagsToRemove: [] }, "proj", 1)],
         ["deleteTag", () => client.deleteTag("proj", projectTags[0])],
         ["getTags", () => client.getTags("proj")],
         ["updateBuilds", () => client.updateBuilds([{ id: 5 } as any], "proj")],
@@ -82,28 +79,18 @@ describe("BuildRestClient mock tags, badges and controllers", () => {
     });
 
     it("updates build tags adding and removing", async () => {
-        const tags = await client.updateBuildTags(
-            { tagsToAdd: ["nightly"], tagsToRemove: [buildTags[0]] },
-            "proj",
-            1
-        );
+        const tags = await client.updateBuildTags({ tagsToAdd: ["nightly"], tagsToRemove: [buildTags[0]] }, "proj", 1);
         expect(tags).toContain("nightly");
         expect(tags).not.toContain(buildTags[0]);
         expect(tags).toContain(buildTags[1]);
     });
 
     it("adds a definition tag to the seeded list", async () => {
-        await expect(client.addDefinitionTag("proj", 1, "nightly")).resolves.toEqual([
-            ...definitionTags,
-            "nightly"
-        ]);
+        await expect(client.addDefinitionTag("proj", 1, "nightly")).resolves.toEqual([...definitionTags, "nightly"]);
     });
 
     it("reads the definition tag body from the first argument", async () => {
-        await expect(client.addDefinitionTags(["canary"], "proj", 1)).resolves.toEqual([
-            ...definitionTags,
-            "canary"
-        ]);
+        await expect(client.addDefinitionTags(["canary"], "proj", 1)).resolves.toEqual([...definitionTags, "canary"]);
     });
 
     it("deletes a seeded definition tag", async () => {
@@ -189,9 +176,9 @@ describe("BuildRestClient mock tags, badges and controllers", () => {
 
     it("returns a status word by default and the label when given", async () => {
         await expect(client.getStatusBadge("proj", "my-def")).resolves.toBe("my-def succeeded");
-        await expect(
-            client.getStatusBadge("proj", "my-def", "dev", "stage", "job", "cfg", "custom")
-        ).resolves.toBe("my-def dev stage job cfg custom");
+        await expect(client.getStatusBadge("proj", "my-def", "dev", "stage", "job", "cfg", "custom")).resolves.toBe(
+            "my-def dev stage job cfg custom"
+        );
     });
 
     it("gets a known controller by id", async () => {

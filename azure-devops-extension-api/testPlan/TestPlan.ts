@@ -223,7 +223,11 @@ export class MockTestPlanRestClient extends RestClientBase {
         return Promise.resolve(matched.map(entry => ({ ...entry, suiteId })));
     }
 
-    reorderSuiteEntries(suiteEntries: SuiteEntryUpdateParams[], _project: string, suiteId: number): Promise<SuiteEntry[]> {
+    reorderSuiteEntries(
+        suiteEntries: SuiteEntryUpdateParams[],
+        _project: string,
+        suiteId: number
+    ): Promise<SuiteEntry[]> {
         return Promise.resolve(suiteEntries.map(entry => ({ ...entry, suiteId })));
     }
 
@@ -240,7 +244,11 @@ export class MockTestPlanRestClient extends RestClientBase {
         );
     }
 
-    createTestSuite(testSuiteCreateParams: TestSuiteCreateParams, _project: string, planId: number): Promise<TestSuite> {
+    createTestSuite(
+        testSuiteCreateParams: TestSuiteCreateParams,
+        _project: string,
+        planId: number
+    ): Promise<TestSuite> {
         return Promise.resolve({ ...makeTestSuite(planReference(planId)), ...testSuiteCreateParams });
     }
 
@@ -351,7 +359,10 @@ export class MockTestPlanRestClient extends RestClientBase {
         });
     }
 
-    getTestCaseCloneInformation(_project: string, cloneOperationId: number): Promise<CloneTestCaseOperationInformation> {
+    getTestCaseCloneInformation(
+        _project: string,
+        cloneOperationId: number
+    ): Promise<CloneTestCaseOperationInformation> {
         return Promise.resolve(
             testCaseCloneOperations.find(o => o.cloneOperationResponse.opId === cloneOperationId) ??
                 makeCloneTestCaseOperation(cloneOperationId)
@@ -374,7 +385,11 @@ export class MockTestPlanRestClient extends RestClientBase {
         return Promise.resolve(makePage(deletedPlans));
     }
 
-    restoreDeletedTestPlan(_restoreModel: TestPlanAndSuiteRestoreModel, _project: string, _planId: number): Promise<void> {
+    restoreDeletedTestPlan(
+        _restoreModel: TestPlanAndSuiteRestoreModel,
+        _project: string,
+        _planId: number
+    ): Promise<void> {
         return Promise.resolve();
     }
 
@@ -408,7 +423,10 @@ export class MockTestPlanRestClient extends RestClientBase {
         );
     }
 
-    createTestPlanWithTestCases(_creationParams: TestPlanWithTestCasesCreateParams, _project: string): Promise<boolean> {
+    createTestPlanWithTestCases(
+        _creationParams: TestPlanWithTestCasesCreateParams,
+        _project: string
+    ): Promise<boolean> {
         return Promise.resolve(true);
     }
 

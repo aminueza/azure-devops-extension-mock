@@ -76,9 +76,7 @@ export const makeReleaseShallowReference = (id: number): ReleaseShallowReference
     url: fake.internet.url()
 });
 
-export const makeReleaseDefinitionShallowReference = (
-    id: number
-): ReleaseDefinitionShallowReference => ({
+export const makeReleaseDefinitionShallowReference = (id: number): ReleaseDefinitionShallowReference => ({
     _links: {},
     id,
     name: fake.lorem.slug(),
@@ -87,9 +85,7 @@ export const makeReleaseDefinitionShallowReference = (
     url: fake.internet.url()
 });
 
-export const makeReleaseEnvironmentShallowReference = (
-    name = "Production"
-): ReleaseEnvironmentShallowReference => ({
+export const makeReleaseEnvironmentShallowReference = (name = "Production"): ReleaseEnvironmentShallowReference => ({
     _links: {},
     id: fake.number.id(),
     name,
@@ -204,10 +200,7 @@ export const makeProcessParameters = (): ReleaseEnvironment["processParameters"]
     sourceDefinitions: []
 });
 
-export const makeDefinitionEnvironment = (
-    name = "Production",
-    rank = 1
-): ReleaseDefinitionEnvironment => ({
+export const makeDefinitionEnvironment = (name = "Production", rank = 1): ReleaseDefinitionEnvironment => ({
     badgeUrl: fake.internet.url(),
     conditions: [
         {
@@ -435,11 +428,7 @@ export const releaseTags = ["candidate", "hotfix", "verified"];
 export const definitionTags = ["nightly", "production"];
 export const tags = [...new Set([...releaseTags, ...definitionTags])];
 
-export const folders = [
-    makeFolder("\\shared\\infra"),
-    makeFolder("\\shared\\apps"),
-    makeFolder("\\archive")
-];
+export const folders = [makeFolder("\\shared\\infra"), makeFolder("\\shared\\apps"), makeFolder("\\archive")];
 
 export const favorites = [
     makeFavoriteItem("ReleaseDefinition"),
@@ -668,10 +657,7 @@ export const makeDefinitionEnvironmentReference = (
     releaseDefinitionName: fake.lorem.slug()
 });
 
-export const makeReleaseDefinitionRevision = (
-    definitionId: number,
-    revision: number
-): ReleaseDefinitionRevision => ({
+export const makeReleaseDefinitionRevision = (definitionId: number, revision: number): ReleaseDefinitionRevision => ({
     apiVersion: "7.1",
     changedBy: makeIdentityRef(),
     changedDate: fake.date.recent(),
@@ -682,9 +668,7 @@ export const makeReleaseDefinitionRevision = (
     revision
 });
 
-export const makeReleaseDefinitionEnvironmentSummary = (
-    id: number
-): ReleaseDefinitionEnvironmentSummary => ({
+export const makeReleaseDefinitionEnvironmentSummary = (id: number): ReleaseDefinitionEnvironmentSummary => ({
     id,
     lastReleases: [makeReleaseShallowReference(id * 10), makeReleaseShallowReference(id * 10 + 1)],
     name: fake.lorem.slug(2)
@@ -708,10 +692,7 @@ export const releaseDefinitionEnvironmentSummaries = [
     makeReleaseDefinitionEnvironmentSummary(103)
 ];
 
-export const makeReleaseRevision = (
-    releaseId: number,
-    definitionSnapshotRevision: number
-): ReleaseRevision => ({
+export const makeReleaseRevision = (releaseId: number, definitionSnapshotRevision: number): ReleaseRevision => ({
     changedBy: makeIdentityRef(),
     changedDate: fake.date.recent(),
     changeDetails: fake.lorem.sentence(),
@@ -749,11 +730,7 @@ export const releaseRevisions = [
     makeReleaseRevision(2002, 1)
 ];
 
-export const releaseChanges = [
-    makeChange("change-1"),
-    makeChange("change-2"),
-    makeChange("change-3")
-];
+export const releaseChanges = [makeChange("change-1"), makeChange("change-2"), makeChange("change-3")];
 
 export const releaseWorkItemRefs = [
     makeReleaseWorkItemRef("501"),

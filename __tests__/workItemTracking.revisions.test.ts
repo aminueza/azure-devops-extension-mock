@@ -14,8 +14,12 @@ import {
 } from "../azure-devops-extension-api/workItemTracking/Data";
 
 describe("WorkItemTrackingRestClient attachments, history, deletions and templates", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(WorkItemTrackingRestClient);
     const workItemId = workItems[0].id;
@@ -40,7 +44,10 @@ describe("WorkItemTrackingRestClient attachments, history, deletions and templat
         ["getTemplate", () => client.getTemplate("proj", "team", seededTemplate.id)],
         ["getTemplates", () => client.getTemplates("proj", "team", "Bug")],
         ["replaceTemplate", () => client.replaceTemplate(seededTemplate, "proj", "team", seededTemplate.id)],
-        ["getWorkItemTemplate", () => client.getWorkItemTemplate("proj", "Bug", "System.Title", new Date(), WorkItemExpand.None)]
+        [
+            "getWorkItemTemplate",
+            () => client.getWorkItemTemplate("proj", "Bug", "System.Title", new Date(), WorkItemExpand.None)
+        ]
     ];
 
     const voidCases: Array<[string, () => Promise<void>]> = [

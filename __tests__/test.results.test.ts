@@ -3,8 +3,12 @@ import { getClient } from "../azure-devops-extension-api";
 import { testSettingsList } from "../azure-devops-extension-api/test/Data";
 
 describe("TestRestClient mock results, iterations, attachments, sessions and settings", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestRestClient);
 
@@ -24,9 +28,15 @@ describe("TestRestClient mock results, iterations, attachments, sessions and set
         ["getTestResultDetailsForRelease", () => client.getTestResultDetailsForRelease("proj", 5, 6)],
         ["getTestIteration", () => client.getTestIteration("proj", 1, 2, 3, true)],
         ["getTestIterations", () => client.getTestIterations("proj", 1, 2)],
-        ["createTestIterationResultAttachment", () => client.createTestIterationResultAttachment(attachmentRequest, "proj", 1, 2, 3, "00000002")],
+        [
+            "createTestIterationResultAttachment",
+            () => client.createTestIterationResultAttachment(attachmentRequest, "proj", 1, 2, 3, "00000002")
+        ],
         ["createTestResultAttachment", () => client.createTestResultAttachment(attachmentRequest, "proj", 1, 2)],
-        ["createTestSubResultAttachment", () => client.createTestSubResultAttachment(attachmentRequest, "proj", 1, 2, 3)],
+        [
+            "createTestSubResultAttachment",
+            () => client.createTestSubResultAttachment(attachmentRequest, "proj", 1, 2, 3)
+        ],
         ["getTestResultAttachmentContent", () => client.getTestResultAttachmentContent("proj", 1, 2, 3)],
         ["getTestResultAttachmentZip", () => client.getTestResultAttachmentZip("proj", 1, 2, 3)],
         ["getTestResultAttachments", () => client.getTestResultAttachments("proj", 1, 2)],
@@ -82,7 +92,17 @@ describe("TestRestClient mock results, iterations, attachments, sessions and set
 
     it("groups build and release result details by outcome", async () => {
         const build = await client.getTestResultDetailsForBuild("proj", 7, "CI", "TestRun", "f", "o", true, false);
-        const release = await client.getTestResultDetailsForRelease("proj", 5, 6, "CI", "TestRun", "f", "o", true, false);
+        const release = await client.getTestResultDetailsForRelease(
+            "proj",
+            5,
+            6,
+            "CI",
+            "TestRun",
+            "f",
+            "o",
+            true,
+            false
+        );
         expect(build.groupByField).toBe("TestRun");
         expect(build.resultsForGroup[0].resultsCountByOutcome).toHaveProperty("2");
         expect(release.resultsForGroup[0].results).toHaveLength(1);

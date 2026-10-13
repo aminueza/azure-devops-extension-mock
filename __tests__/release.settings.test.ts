@@ -38,38 +38,20 @@ describe("ReleaseRestClient history, summaries and settings", () => {
 
     const cases: Array<[string, () => Promise<unknown>]> = [
         ["getApprovalHistory", () => client.getApprovalHistory("proj", approvals[0].id)],
-        [
-            "updateReleaseApprovals",
-            () => client.updateReleaseApprovals([makeApproval()], "proj")
-        ],
+        ["updateReleaseApprovals", () => client.updateReleaseApprovals([makeApproval()], "proj")],
         ["getDefinitionEnvironments", () => client.getDefinitionEnvironments("proj")],
-        [
-            "getDefinitionEnvironmentsFiltered",
-            () => client.getDefinitionEnvironments("proj", "group-1", ["prop"])
-        ],
+        ["getDefinitionEnvironmentsFiltered", () => client.getDefinitionEnvironments("proj", "group-1", ["prop"])],
         ["getDefinitionRevision", () => client.getDefinitionRevision("proj", 11, 2)],
         ["getReleaseDefinitionHistory", () => client.getReleaseDefinitionHistory("proj", 11)],
-        [
-            "getReleaseDefinitionRevision",
-            () => client.getReleaseDefinitionRevision("proj", 11, 2)
-        ],
-        [
-            "getReleaseDefinitionSummary",
-            () => client.getReleaseDefinitionSummary("proj", 11, 2)
-        ],
+        ["getReleaseDefinitionRevision", () => client.getReleaseDefinitionRevision("proj", 11, 2)],
+        ["getReleaseDefinitionSummary", () => client.getReleaseDefinitionSummary("proj", 11, 2)],
         ["getReleaseHistory", () => client.getReleaseHistory("proj", 2001)],
         ["getReleaseRevision", () => client.getReleaseRevision("proj", 2001, 2)],
         ["getReleaseChanges", () => client.getReleaseChanges("proj", 2001)],
-        [
-            "getReleaseChangesWithTop",
-            () => client.getReleaseChanges("proj", 2001, 2000, 2, "primary")
-        ],
+        ["getReleaseChangesWithTop", () => client.getReleaseChanges("proj", 2001, 2000, 2, "primary")],
         ["getReleaseProjects", () => client.getReleaseProjects("Build", "source-1")],
         ["getReleaseWorkItemsRefs", () => client.getReleaseWorkItemsRefs("proj", 2001)],
-        [
-            "getReleaseWorkItemsRefsWithTop",
-            () => client.getReleaseWorkItemsRefs("proj", 2001, 2000, 1, "primary")
-        ],
+        ["getReleaseWorkItemsRefsWithTop", () => client.getReleaseWorkItemsRefs("proj", 2001, 2000, 1, "primary")],
         [
             "getDeploymentsForMultipleEnvironments",
             () =>
@@ -79,17 +61,11 @@ describe("ReleaseRestClient history, summaries and settings", () => {
                 )
         ],
         ["getDeploymentBadge", () => client.getDeploymentBadge("proj", 11, 101)],
-        [
-            "getDeploymentBadgeWithBranch",
-            () => client.getDeploymentBadge("proj", 11, 101, "refs/heads/main")
-        ],
+        ["getDeploymentBadgeWithBranch", () => client.getDeploymentBadge("proj", 11, 101, "refs/heads/main")],
         ["getMetrics", () => client.getMetrics("proj")],
         ["getMetricsSince", () => client.getMetrics("proj", new Date("2024-01-01"))],
         ["getReleaseSettings", () => client.getReleaseSettings("proj")],
-        [
-            "updateReleaseSettings",
-            () => client.updateReleaseSettings(makeReleaseSettings(), "proj")
-        ],
+        ["updateReleaseSettings", () => client.updateReleaseSettings(makeReleaseSettings(), "proj")],
         ["getPipelineReleaseSettings", () => client.getPipelineReleaseSettings("proj")],
         [
             "updatePipelineReleaseSettings",
@@ -100,10 +76,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
             "updateOrgPipelineReleaseSettings",
             () => client.updateOrgPipelineReleaseSettings({ orgEnforceJobAuthScope: false })
         ],
-        [
-            "undeleteReleaseDefinition",
-            () => client.undeleteReleaseDefinition({ comment: "restore" }, "proj", 11)
-        ],
+        ["undeleteReleaseDefinition", () => client.undeleteReleaseDefinition({ comment: "restore" }, "proj", 11)],
         [
             "updateReleaseResource",
             () =>
@@ -166,15 +139,11 @@ describe("ReleaseRestClient history, summaries and settings", () => {
     it("lists every seeded definition environment reference", async () => {
         const result = await client.getDefinitionEnvironments("proj");
         expect(result).toHaveLength(definitionEnvironmentReferences.length);
-        expect(result.map(reference => reference.definitionEnvironmentId)).toEqual([
-            101, 102, 103
-        ]);
+        expect(result.map(reference => reference.definitionEnvironmentId)).toEqual([101, 102, 103]);
     });
 
     it("builds a definition revision string from its arguments", async () => {
-        await expect(client.getDefinitionRevision("proj", 11, 7)).resolves.toBe(
-            "definition 11 revision 7"
-        );
+        await expect(client.getDefinitionRevision("proj", 11, 7)).resolves.toBe("definition 11 revision 7");
     });
 
     it("builds a release definition revision string from its arguments", async () => {
@@ -206,9 +175,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
         const result = await client.getReleaseDefinitionSummary("proj", 11, 1, true, [102]);
         expect(result.environments).toHaveLength(1);
         expect(result.environments[0].id).toBe(102);
-        expect(result.environments[0].lastReleases.map(release => release.id)).toEqual([
-            1020, 1021
-        ]);
+        expect(result.environments[0].lastReleases.map(release => release.id)).toEqual([1020, 1021]);
     });
 
     it("returns only the revisions of a known release", async () => {
@@ -223,18 +190,12 @@ describe("ReleaseRestClient history, summaries and settings", () => {
     });
 
     it("builds a release revision string from its arguments", async () => {
-        await expect(client.getReleaseRevision("proj", 2001, 5)).resolves.toBe(
-            "release 2001 revision 5"
-        );
+        await expect(client.getReleaseRevision("proj", 2001, 5)).resolves.toBe("release 2001 revision 5");
     });
 
     it("returns every change when top is omitted", async () => {
         const result = await client.getReleaseChanges("proj", 2001);
-        expect(result.map(change => change.id)).toEqual([
-            "change-1",
-            "change-2",
-            "change-3"
-        ]);
+        expect(result.map(change => change.id)).toEqual(["change-1", "change-2", "change-3"]);
     });
 
     it("caps the changes at top", async () => {
@@ -254,9 +215,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
 
     it("lists the seeded release projects", async () => {
         const result = await client.getReleaseProjects("Build", "source-1");
-        expect(result.map(project => project.id)).toEqual(
-            releaseProjects.map(project => project.id)
-        );
+        expect(result.map(project => project.id)).toEqual(releaseProjects.map(project => project.id));
     });
 
     it("matches deployments on the queried status", async () => {
@@ -276,25 +235,19 @@ describe("ReleaseRestClient history, summaries and settings", () => {
     });
 
     it("builds a deployment badge without a branch", async () => {
-        await expect(client.getDeploymentBadge("proj", 11, 101)).resolves.toBe(
-            "proj/11/101 succeeded"
-        );
+        await expect(client.getDeploymentBadge("proj", 11, 101)).resolves.toBe("proj/11/101 succeeded");
     });
 
     it("builds a deployment badge scoped to a branch", async () => {
-        await expect(
-            client.getDeploymentBadge("proj", 11, 101, "refs/heads/main")
-        ).resolves.toBe("proj/11/101/refs/heads/main succeeded");
+        await expect(client.getDeploymentBadge("proj", 11, 101, "refs/heads/main")).resolves.toBe(
+            "proj/11/101/refs/heads/main succeeded"
+        );
     });
 
     it("lists the seeded metrics", async () => {
         const result = await client.getMetrics("proj");
         expect(result).toHaveLength(metrics.length);
-        expect(result.map(metric => metric.name)).toEqual([
-            "TotalReleases",
-            "ActiveReleases",
-            "FailedDeployments"
-        ]);
+        expect(result.map(metric => metric.name)).toEqual(["TotalReleases", "ActiveReleases", "FailedDeployments"]);
         expect(result[0].value).toBe(42);
     });
 
@@ -302,9 +255,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
         const result = await client.getReleaseSettings("proj");
         expect(result.complianceSettings.checkForCredentialsAndOtherSecrets).toBe(true);
         expect(result.retentionSettings.daysToKeepDeletedReleases).toBe(30);
-        expect(result.retentionSettings.maximumEnvironmentRetentionPolicy.releasesToKeep).toBe(
-            100
-        );
+        expect(result.retentionSettings.maximumEnvironmentRetentionPolicy.releasesToKeep).toBe(100);
     });
 
     it("echoes the release settings sent for update", async () => {
@@ -338,10 +289,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
     });
 
     it("maps the project pipeline update parameter onto the settings", async () => {
-        const result = await client.updatePipelineReleaseSettings(
-            { enforceJobAuthScope: false },
-            "proj"
-        );
+        const result = await client.updatePipelineReleaseSettings({ enforceJobAuthScope: false }, "proj");
         expect(result.enforceJobAuthScope).toBe(false);
         expect(result.hasManageSettingsPermission).toBe(true);
     });
@@ -362,11 +310,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
 
     it("undeletes a seeded release definition", async () => {
         const seeded = releaseDefinitions[0];
-        const result = await client.undeleteReleaseDefinition(
-            { comment: "brought back" },
-            "proj",
-            seeded.id
-        );
+        const result = await client.undeleteReleaseDefinition({ comment: "brought back" }, "proj", seeded.id);
         expect(result.id).toBe(seeded.id);
         expect(result.name).toBe(seeded.name);
         expect(result.comment).toBe("brought back");
@@ -374,11 +318,7 @@ describe("ReleaseRestClient history, summaries and settings", () => {
     });
 
     it("undeletes an unknown release definition", async () => {
-        const result = await client.undeleteReleaseDefinition(
-            { comment: "fabricated" },
-            "proj",
-            UNMATCHED_ID
-        );
+        const result = await client.undeleteReleaseDefinition({ comment: "fabricated" }, "proj", UNMATCHED_ID);
         expect(result.id).toBe(UNMATCHED_ID);
         expect(result.comment).toBe("fabricated");
     });

@@ -150,7 +150,12 @@ describe("ReleaseRestClient mock", () => {
     });
 
     it("updates an environment echoing the id", async () => {
-        const env = await client.updateReleaseEnvironment({ status: EnvironmentStatus.InProgress } as any, "proj", 1, 44);
+        const env = await client.updateReleaseEnvironment(
+            { status: EnvironmentStatus.InProgress } as any,
+            "proj",
+            1,
+            44
+        );
         expect(env.id).toBe(44);
         expect(env).toHaveProperty("owner");
     });
@@ -321,9 +326,7 @@ describe("release Data factories", () => {
         expect(phase.workflowTasks).toHaveLength(1);
 
         const definitionApprovals = makeReleaseDefinitionApprovals();
-        expect(definitionApprovals.approvalOptions.executionOrder).toBe(
-            ApprovalExecutionOrder.BeforeGates
-        );
+        expect(definitionApprovals.approvalOptions.executionOrder).toBe(ApprovalExecutionOrder.BeforeGates);
         expect(definitionApprovals.approvalOptions.requiredApproverCount).toBe(1);
         expect(definitionApprovals.approvals[0]).toMatchObject({
             isAutomated: false,
@@ -459,9 +462,7 @@ describe("release Data factories", () => {
         expect(template.environment.name).toBe("Production");
         expect(template.environment.rank).toBe(1);
         expect(template.environment.deployPhases[0].workflowTasks).toHaveLength(1);
-        environmentTemplates.forEach(seeded =>
-            expect(seeded.environment.retentionPolicy.daysToKeep).toBe(30)
-        );
+        environmentTemplates.forEach(seeded => expect(seeded.environment.retentionPolicy.daysToKeep).toBe(30));
     });
 
     it("fills every manual intervention field without a cast", () => {

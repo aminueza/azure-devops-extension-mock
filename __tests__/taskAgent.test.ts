@@ -1,8 +1,4 @@
-import {
-    TaskAgentPoolType,
-    TaskAgentRestClient,
-    TaskAgentStatus
-} from "azure-devops-extension-api/TaskAgent";
+import { TaskAgentPoolType, TaskAgentRestClient, TaskAgentStatus } from "azure-devops-extension-api/TaskAgent";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -18,7 +14,7 @@ import {
     makeTaskGroup,
     makeVariableGroup,
     taskGroups,
-    variableGroups,
+    variableGroups
 } from "../azure-devops-extension-api/taskAgent/Data";
 
 describe("TaskAgentRestClient mock", () => {
@@ -129,7 +125,6 @@ describe("TaskAgentRestClient mock", () => {
         expect(list.map(g => g.name)).toEqual(["Common", "Production"]);
         expect(list[0].variables["MyVariable"].value).toBe("myValue");
     });
-
 
     it("returns a known variable group", async () => {
         const group = await client.getVariableGroup("proj", variableGroups[1].id);

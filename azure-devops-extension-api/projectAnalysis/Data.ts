@@ -72,7 +72,10 @@ export const makeRepositoryLanguageAnalytics = (
 export const makeProjectLanguageAnalytics = (projectId: string = fake.string.uuid()): ProjectLanguageAnalytics => ({
     id: projectId,
     languageBreakdown: makeLanguageBreakdown(projectId),
-    repositoryLanguageAnalytics: [makeRepositoryLanguageAnalytics(projectId), makeRepositoryLanguageAnalytics(projectId)],
+    repositoryLanguageAnalytics: [
+        makeRepositoryLanguageAnalytics(projectId),
+        makeRepositoryLanguageAnalytics(projectId)
+    ],
     resultPhase: ResultPhase.Full,
     url: fake.internet.url(),
     namespaceId: NAMESPACE_ID,
@@ -93,9 +96,7 @@ export const makeProjectActivityMetrics = (projectId: string = fake.string.uuid(
     };
 };
 
-export const makeRepositoryActivityMetrics = (
-    repositoryId: string = fake.string.uuid()
-): RepositoryActivityMetrics => {
+export const makeRepositoryActivityMetrics = (repositoryId: string = fake.string.uuid()): RepositoryActivityMetrics => {
     const codeChangesTrend = makeCodeChangeTrend();
     return {
         repositoryId,

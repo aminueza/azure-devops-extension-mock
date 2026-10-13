@@ -85,27 +85,38 @@ const BASE_METHODS = new Set(Object.getOwnPropertyNames(RestClientBase.prototype
 
 const ownMethods = (cls: { prototype: Record<string, unknown> }): string[] =>
     Object.getOwnPropertyNames(cls.prototype).filter(
-        (name) => name !== "constructor" && !BASE_METHODS.has(name) && typeof cls.prototype[name] === "function"
+        name => name !== "constructor" && !BASE_METHODS.has(name) && typeof cls.prototype[name] === "function"
     );
 
 describe("mock surface against the real REST clients", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
-
-    const rows = surface.report() as Array<{ area: string; real: string; implemented: string[]; phantom: string[]; missing: string[]; total: number }>;
-
-    it("checks every registered client", () => {
-        expect(rows.map((row) => row.real).sort()).toEqual(Object.keys(REAL_CLASSES).sort());
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
     });
 
-    describe.each(rows)("$real", (row) => {
+    const rows = surface.report() as Array<{
+        area: string;
+        real: string;
+        implemented: string[];
+        phantom: string[];
+        missing: string[];
+        total: number;
+    }>;
+
+    it("checks every registered client", () => {
+        expect(rows.map(row => row.real).sort()).toEqual(Object.keys(REAL_CLASSES).sort());
+    });
+
+    describe.each(rows)("$real", row => {
         const realClass = REAL_CLASSES[row.real];
         const realMethods = surface.realMethods(row.area) as Set<string>;
 
         it("declares no method that the real client lacks", () => {
             expect(row.phantom).toEqual([]);
             const mockClass = getRegisteredMockClient(realClass)!;
-            expect(ownMethods(mockClass).filter((name) => !realMethods.has(name))).toEqual([]);
+            expect(ownMethods(mockClass).filter(name => !realMethods.has(name))).toEqual([]);
         });
 
         it("exposes every real method through getClient", () => {
@@ -129,14 +140,16 @@ describe("mock surface against the real SDK", () => {
         require("path").join(__dirname, "..", "node_modules", "azure-devops-extension-sdk", "SDK.d.ts"),
         "utf8"
     ) as string;
-    const exported = [...declarations.matchAll(/^export declare (?:function|const|enum) ([A-Za-z]+)/gm)].map((match) => match[1]);
+    const exported = [...declarations.matchAll(/^export declare (?:function|const|enum) ([A-Za-z]+)/gm)].map(
+        match => match[1]
+    );
 
     it("finds the real SDK declarations", () => {
         expect(exported.length).toBeGreaterThan(15);
     });
 
     it("mocks every function, constant and enum the real SDK exports", () => {
-        const missing = exported.filter((name) => !(name in sdkMock));
+        const missing = exported.filter(name => !(name in sdkMock));
         expect(missing).toEqual([]);
     });
 });
@@ -147,6 +160,21 @@ describe("surface script", () => {
         expect(table).toContain("| Client | Hand-written | Stubbed | Total |");
         expect(table).toContain("| **All** |");
         expect(table).toContain("`GitRestClient`");
+    });
+
+    it("reads methods from the class body only", () => {
+        const source = [
+            "const pick = (id: string): string =>",
+            "    lookup(id);",
+            "",
+            "export class MockThingRestClient extends RestClientBase {",
+            "    getThing2(id: string): Promise<string> {",
+            "        return Promise.resolve(pick(id));",
+            "    }",
+            "}"
+        ].join("\n");
+        expect([...surface.methodNames(surface.classBody(source))]).toEqual(["getThing2"]);
+        expect([...surface.methodNames(source)]).toEqual(["lookup", "getThing2"]);
     });
 
     it("matches the table published in the readme", () => {

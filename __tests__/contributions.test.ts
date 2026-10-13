@@ -60,7 +60,10 @@ describe("ContributionsRestClient mock", () => {
     });
 
     it("resolves the queried data providers", async () => {
-        const query = { context: { properties: {} }, contributionIds: ["pub.ext.provider-one", "pub.ext.provider-two"] };
+        const query = {
+            context: { properties: {} },
+            contributionIds: ["pub.ext.provider-one", "pub.ext.provider-two"]
+        };
         const result = await client.queryDataProviders(query);
         expect(Object.keys(result.data)).toEqual(query.contributionIds);
         expect(result.resolvedProviders.map(p => p.id)).toEqual(query.contributionIds);

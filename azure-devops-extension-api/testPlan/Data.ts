@@ -338,7 +338,11 @@ const rootSuite: TestSuite = {
 export const suites: TestSuite[] = [
     rootSuite,
     makeTestSuite(seededPlan, plans[0].rootSuite),
-    { ...makeTestSuite(seededPlan, plans[0].rootSuite), suiteType: TestSuiteType.RequirementTestSuite, requirementId: fake.number.id() },
+    {
+        ...makeTestSuite(seededPlan, plans[0].rootSuite),
+        suiteType: TestSuiteType.RequirementTestSuite,
+        requirementId: fake.number.id()
+    },
     {
         ...makeTestSuite(seededPlan, plans[0].rootSuite),
         suiteType: TestSuiteType.DynamicTestSuite,
@@ -346,7 +350,9 @@ export const suites: TestSuite[] = [
     }
 ];
 
-export const deletedSuites: TestSuite[] = Array.from({ length: 2 }, () => makeTestSuite(seededPlan, plans[0].rootSuite));
+export const deletedSuites: TestSuite[] = Array.from({ length: 2 }, () =>
+    makeTestSuite(seededPlan, plans[0].rootSuite)
+);
 
 export const configurations: TestConfiguration[] = [
     { ...makeTestConfiguration(), isDefault: true },

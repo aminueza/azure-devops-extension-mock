@@ -61,33 +61,21 @@ describe("GitRestClient mock cherry pick, revert, attachments and likes", () => 
         ["getCherryPickRelationships", () => client.getCherryPickRelationships("repo-id", commits[0].commitId)],
         ["getCherryPickConflict", () => client.getCherryPickConflict("repo-id", knownCherryPickId, 6201)],
         ["getCherryPickConflicts", () => client.getCherryPickConflicts("repo-id", knownCherryPickId)],
-        ["updateCherryPickConflict", () => client.updateCherryPickConflict(
-            cherryPickConflicts[0],
-            "repo-id",
-            knownCherryPickId,
-            6201
-        )],
-        ["updateCherryPickConflicts", () => client.updateCherryPickConflicts(
-            [cherryPickConflicts[0]],
-            "repo-id",
-            knownCherryPickId
-        )],
+        [
+            "updateCherryPickConflict",
+            () => client.updateCherryPickConflict(cherryPickConflicts[0], "repo-id", knownCherryPickId, 6201)
+        ],
+        [
+            "updateCherryPickConflicts",
+            () => client.updateCherryPickConflicts([cherryPickConflicts[0]], "repo-id", knownCherryPickId)
+        ],
         ["createRevert", () => client.createRevert(revertParameters, "proj", "repo-id")],
         ["getRevert", () => client.getRevert("proj", knownRevertId, "repo-id")],
         ["getRevertForRefName", () => client.getRevertForRefName("proj", "repo-id", knownRevertRefName)],
         ["getRevertConflict", () => client.getRevertConflict("repo-id", knownRevertId, 6301)],
         ["getRevertConflicts", () => client.getRevertConflicts("repo-id", knownRevertId)],
-        ["updateRevertConflict", () => client.updateRevertConflict(
-            revertConflicts[0],
-            "repo-id",
-            knownRevertId,
-            6301
-        )],
-        ["updateRevertConflicts", () => client.updateRevertConflicts(
-            [revertConflicts[0]],
-            "repo-id",
-            knownRevertId
-        )],
+        ["updateRevertConflict", () => client.updateRevertConflict(revertConflicts[0], "repo-id", knownRevertId, 6301)],
+        ["updateRevertConflicts", () => client.updateRevertConflicts([revertConflicts[0]], "repo-id", knownRevertId)],
         ["createAttachment", () => client.createAttachment("payload", "design.png", "repo-id", 42)],
         ["getAttachmentContent", () => client.getAttachmentContent("design.png", "repo-id", 42)],
         ["getAttachmentZip", () => client.getAttachmentZip("design.png", "repo-id", 42)],
@@ -175,12 +163,29 @@ describe("GitRestClient mock cherry pick, revert, attachments and likes", () => 
     });
 
     it("keeps only resolved cherry pick conflicts", async () => {
-        const page = await client.getCherryPickConflicts("repo-id", knownCherryPickId, "proj", undefined, undefined, false, true);
+        const page = await client.getCherryPickConflicts(
+            "repo-id",
+            knownCherryPickId,
+            "proj",
+            undefined,
+            undefined,
+            false,
+            true
+        );
         expect(page.map(c => c.conflictId)).toEqual([6202, 6204]);
     });
 
     it("drops resolved cherry pick conflicts", async () => {
-        const page = await client.getCherryPickConflicts("repo-id", knownCherryPickId, "proj", undefined, undefined, true, false, true);
+        const page = await client.getCherryPickConflicts(
+            "repo-id",
+            knownCherryPickId,
+            "proj",
+            undefined,
+            undefined,
+            true,
+            false,
+            true
+        );
         expect(page.map(c => c.conflictId)).toEqual([6201, 6203]);
     });
 

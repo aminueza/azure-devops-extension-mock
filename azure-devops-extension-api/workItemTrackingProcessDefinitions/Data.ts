@@ -265,7 +265,12 @@ export const behaviors: BehaviorModel[] = [
     { ...makeBehavior("Microsoft.VSTS.Agile.EpicBacklogBehavior"), name: "Epics" }
 ];
 
-export const lists: PickListModel[] = fake.helpers.distinct(3, makePickList, list => list.id, list => list.name);
+export const lists: PickListModel[] = fake.helpers.distinct(
+    3,
+    makePickList,
+    list => list.id,
+    list => list.name
+);
 
 export const fields: FieldModel[] = [
     { ...makeField("System.Title"), name: "Title" },

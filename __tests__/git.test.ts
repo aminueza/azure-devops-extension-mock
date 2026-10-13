@@ -243,11 +243,7 @@ describe("GitRestClient mock", () => {
     });
 
     it("updates a pull request forcing the requested id", async () => {
-        const pr = await client.updatePullRequest(
-            { title: "Updated", pullRequestId: 1 } as any,
-            "repo-id",
-            55
-        );
+        const pr = await client.updatePullRequest({ title: "Updated", pullRequestId: 1 } as any, "repo-id", 55);
         expect(pr.pullRequestId).toBe(55);
         expect(pr.title).toBe("Updated");
     });

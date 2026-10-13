@@ -1,4 +1,22 @@
-import { ExtensionDataCollection, IDialogOptions, IDocumentOptions, IExtensionDataManager, IExtensionDataService, IGlobalDialog, IGlobalMessageBanner, IGlobalMessagesService, IHostNavigationService, IHostPageLayoutService, ILocationService, IMessageDialogOptions, IPanelOptions, IProjectInfo, IProjectPageService, IToast, TeamFoundationHostType } from "azure-devops-extension-api/Common";
+import {
+    ExtensionDataCollection,
+    IDialogOptions,
+    IDocumentOptions,
+    IExtensionDataManager,
+    IExtensionDataService,
+    IGlobalDialog,
+    IGlobalMessageBanner,
+    IGlobalMessagesService,
+    IHostNavigationService,
+    IHostPageLayoutService,
+    ILocationService,
+    IMessageDialogOptions,
+    IPanelOptions,
+    IProjectInfo,
+    IProjectPageService,
+    IToast,
+    TeamFoundationHostType
+} from "azure-devops-extension-api/Common";
 import { fake } from "./fixtures";
 
 /**
@@ -9,10 +27,10 @@ export const MockProjectPageService: IProjectPageService = {
     getProject: async (): Promise<IProjectInfo> => {
         return {
             id: fake.string.uuid(),
-            name: fake.lorem.slug(),
+            name: fake.lorem.slug()
         };
     }
-}
+};
 
 /**
  * Mocking ILocationService to return
@@ -24,13 +42,17 @@ export const MockLocationService: ILocationService = {
     },
 
     getServiceLocation: async (serviceInstanceType?: string, hostType?: TeamFoundationHostType) => {
-        return `https://${fake.internet.domainName()}/service/${serviceInstanceType || 'defaultService'}/${hostType || 'defaultHost'}`;
+        return `https://${fake.internet.domainName()}/service/${serviceInstanceType || "defaultService"}/${hostType || "defaultHost"}`;
     },
 
     routeUrl: async (routeId: string, routeValues?: { [key: string]: string }, hostPath?: string) => {
         const baseHost = hostPath || `https://${fake.internet.domainName()}`;
-        const routeValueString = routeValues ? Object.entries(routeValues).map(([key, value]) => `${key}=${value}`).join('&') : '';
-        return `${baseHost}/route/${routeId}${routeValueString ? '?' + routeValueString : ''}`;
+        const routeValueString = routeValues
+            ? Object.entries(routeValues)
+                  .map(([key, value]) => `${key}=${value}`)
+                  .join("&")
+            : "";
+        return `${baseHost}/route/${routeId}${routeValueString ? "?" + routeValueString : ""}`;
     }
 };
 
@@ -72,23 +94,25 @@ export const MockHostPageLayoutService: IHostPageLayoutService = {
 export const MockHostNavigationService: IHostNavigationService = {
     getHash: async () => `#${fake.lorem.word()}`,
 
-    getPageNavigationElements: async () => [{
-        id: fake.string.uuid(),
-        name: fake.commerce.productName(),
-        type: fake.helpers.arrayElement(['link', 'button']),
-    }],
+    getPageNavigationElements: async () => [
+        {
+            id: fake.string.uuid(),
+            name: fake.commerce.productName(),
+            type: fake.helpers.arrayElement(["link", "button"])
+        }
+    ],
 
     getPageRoute: async () => ({
         id: fake.string.uuid(),
         routeValues: {
             key1: fake.lorem.word(),
-            key2: fake.commerce.productName(),
+            key2: fake.commerce.productName()
         }
     }),
 
     getQueryParams: async () => ({
         param1: fake.lorem.word(),
-        param2: fake.lorem.word(),
+        param2: fake.lorem.word()
     }),
 
     navigate: (url: string) => {
@@ -119,10 +143,10 @@ export const MockHostNavigationService: IHostNavigationService = {
         console.log(`Setting hash to: ${hash}`);
     },
 
-    setQueryParams: (parameters: { [key: string]: string; }) => {
+    setQueryParams: (parameters: { [key: string]: string }) => {
         console.log(`Setting query parameters to: ${JSON.stringify(parameters)}`);
     }
-}
+};
 
 /**
  * Mocking IGlobalMessagesService to log
@@ -156,15 +180,21 @@ export const MockExtensionDataManager: IExtensionDataManager = {
         return fake.lorem.word() as unknown as T;
     },
     setValue: async <T>(key: string, value: T, documentOptions?: IDocumentOptions): Promise<T> => {
-        console.log(`Setting value for key: ${key} to: ${value} with document options: ${JSON.stringify(documentOptions)}`);
+        console.log(
+            `Setting value for key: ${key} to: ${value} with document options: ${JSON.stringify(documentOptions)}`
+        );
         return value;
     },
     getDocument: async (collectionName: string, id: string, documentOptions?: IDocumentOptions) => {
-        console.log(`Getting document with ID: ${id} from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`);
+        console.log(
+            `Getting document with ID: ${id} from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`
+        );
         return Promise.resolve(fake.lorem.paragraph());
     },
     getDocuments: async (collectionName: string, documentOptions?: IDocumentOptions) => {
-        console.log(`Getting documents from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`);
+        console.log(
+            `Getting documents from collection: ${collectionName} with document options: ${JSON.stringify(documentOptions)}`
+        );
         return Promise.resolve([fake.lorem.paragraph()]);
     },
     setDocument: async (content: string) => {
@@ -192,7 +222,7 @@ export const MockExtensionDataManager: IExtensionDataManager = {
     },
     updateDocument: async (documentId: string, content: string) => {
         console.log(`Updating document with ID: ${documentId} to: ${content}`);
-    },
+    }
 };
 
 export const MockExtensionDataService: IExtensionDataService = {

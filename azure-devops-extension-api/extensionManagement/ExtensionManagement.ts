@@ -214,7 +214,11 @@ export class MockExtensionManagementRestClient extends RestClientBase {
         return Promise.resolve(findInstalled(publisherName, extensionName));
     }
 
-    installExtensionByName(publisherName: string, extensionName: string, version?: string): Promise<InstalledExtension> {
+    installExtensionByName(
+        publisherName: string,
+        extensionName: string,
+        version?: string
+    ): Promise<InstalledExtension> {
         const extension = findInstalled(publisherName, extensionName);
         return Promise.resolve({ ...extension, version: version ?? extension.version });
     }
@@ -259,7 +263,11 @@ export class MockExtensionManagementRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    requestExtension(publisherName: string, extensionName: string, requestMessage: string): Promise<RequestedExtension> {
+    requestExtension(
+        publisherName: string,
+        extensionName: string,
+        requestMessage: string
+    ): Promise<RequestedExtension> {
         const requested = findRequested(publisherName, extensionName);
         return Promise.resolve({
             ...requested,

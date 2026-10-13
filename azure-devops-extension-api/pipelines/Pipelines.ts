@@ -11,16 +11,7 @@ import {
     CreatePipelineParameters,
     RunPipelineParameters
 } from "azure-devops-extension-api/Pipelines";
-import {
-    makeArtifact,
-    makeLog,
-    makePipeline,
-    makePreviewRun,
-    makeRun,
-    pipelines,
-    runs,
-    logCollection
-} from "./Data";
+import { makeArtifact, makeLog, makePipeline, makePreviewRun, makeRun, pipelines, runs, logCollection } from "./Data";
 
 /**
  * Mocked PipelinesRestClient — YAML pipelines, runs, artifacts, logs.
@@ -40,10 +31,7 @@ export class MockPipelinesRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makePipeline(), id: pipelineId });
     }
 
-    createPipeline(
-        inputParameters: CreatePipelineParameters,
-        _project: string
-    ): Promise<Pipeline> {
+    createPipeline(inputParameters: CreatePipelineParameters, _project: string): Promise<Pipeline> {
         const next = makePipeline();
         return Promise.resolve({
             ...next,
@@ -62,48 +50,26 @@ export class MockPipelinesRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeRun(pipelineId), id: runId });
     }
 
-    runPipeline(
-        runParameters: RunPipelineParameters,
-        _project: string,
-        pipelineId: number
-    ): Promise<Run> {
+    runPipeline(runParameters: RunPipelineParameters, _project: string, pipelineId: number): Promise<Run> {
         return Promise.resolve({
             ...makeRun(pipelineId),
             variables: runParameters.variables ?? {}
         });
     }
 
-    preview(
-        _runParameters: RunPipelineParameters,
-        _project: string,
-        _pipelineId: number
-    ): Promise<PreviewRun> {
+    preview(_runParameters: RunPipelineParameters, _project: string, _pipelineId: number): Promise<PreviewRun> {
         return Promise.resolve(makePreviewRun());
     }
 
-    getArtifact(
-        _project: string,
-        _pipelineId: number,
-        _runId: number,
-        artifactName: string
-    ): Promise<Artifact> {
+    getArtifact(_project: string, _pipelineId: number, _runId: number, artifactName: string): Promise<Artifact> {
         return Promise.resolve(makeArtifact(artifactName));
     }
 
-    getLog(
-        _project: string,
-        _pipelineId: number,
-        _runId: number,
-        logId: number
-    ): Promise<Log> {
+    getLog(_project: string, _pipelineId: number, _runId: number, logId: number): Promise<Log> {
         return Promise.resolve(makeLog(logId));
     }
 
-    listLogs(
-        _project: string,
-        _pipelineId: number,
-        _runId: number
-    ): Promise<LogCollection> {
+    listLogs(_project: string, _pipelineId: number, _runId: number): Promise<LogCollection> {
         return Promise.resolve(logCollection);
     }
 }

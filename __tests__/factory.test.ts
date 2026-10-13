@@ -5,14 +5,7 @@ import * as api from "../azure-devops-extension-api";
 import { RestClientBase } from "../azure-devops-extension-api/common/RestClientBase";
 import { RestClientBase as RealRestClientBase } from "../node_modules/azure-devops-extension-api/Common/RestClientBase";
 
-const {
-    getClient,
-    getService,
-    mockClient,
-    registerMockClient,
-    getRegisteredMockClient,
-    registerMockService
-} = api;
+const { getClient, getService, mockClient, registerMockClient, getRegisteredMockClient, registerMockService } = api;
 
 class UnregisteredRestClient extends RealRestClientBase {
     getRecord(recordId: string): Promise<{ id: string }> {
@@ -38,8 +31,12 @@ class CustomMockClient extends RestClientBase {
 }
 
 describe("getClient", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("returns a fresh registered instance per call", () => {
         const a = getClient(TestRestClient);
@@ -72,8 +69,12 @@ describe("getClient", () => {
 });
 
 describe("mockClient", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("resolves unknown methods to undefined on an unregistered class", async () => {
         expect(getRegisteredMockClient(UnregisteredRestClient)).toBeUndefined();
@@ -118,8 +119,12 @@ describe("mockClient", () => {
 });
 
 describe("registry", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("registers and resolves a custom mock class", async () => {
         expect(getRegisteredMockClient(CustomRealClient)).toBeUndefined();
@@ -138,7 +143,9 @@ describe("registry", () => {
     });
 
     it("throws for an unknown service id", () => {
-        expect(() => getService("nobody.registered.this")).toThrow(/Unknown service id for mock: nobody\.registered\.this/);
+        expect(() => getService("nobody.registered.this")).toThrow(
+            /Unknown service id for mock: nobody\.registered\.this/
+        );
     });
 
     it("still resolves the built-in services", () => {
@@ -148,8 +155,12 @@ describe("registry", () => {
 });
 
 describe("index re-exports", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     it("exposes every mock client class", () => {
         const classes = [

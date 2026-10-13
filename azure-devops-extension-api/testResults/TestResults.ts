@@ -181,7 +181,9 @@ const queryBlobAttachments = (
 };
 
 const groupsForFields = (fields?: string[]): PagedList<FieldDetailsForTestResults> => {
-    const groups = fields ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName })) : resultGroups;
+    const groups = fields
+        ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName }))
+        : resultGroups;
     return page(groups);
 };
 
@@ -282,11 +284,7 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(makeBuffer(`result-attachment-${attachmentId}`));
     }
 
-    getTestResultAttachments(
-        _project: string,
-        _runId: number,
-        _testCaseResultId: number
-    ): Promise<TestAttachment[]> {
+    getTestResultAttachments(_project: string, _runId: number, _testCaseResultId: number): Promise<TestAttachment[]> {
         return Promise.resolve(attachments);
     }
 
@@ -464,9 +462,10 @@ export class MockTestResultsRestClient extends RestClientBase {
         const summary = found ?? makeCodeCoverageSummary(String(buildId));
         return Promise.resolve({
             ...summary,
-            deltaBuild: deltaBuildId === undefined
-                ? summary.deltaBuild
-                : { ...makeShallowReference(), id: String(deltaBuildId) }
+            deltaBuild:
+                deltaBuildId === undefined
+                    ? summary.deltaBuild
+                    : { ...makeShallowReference(), id: String(deltaBuildId) }
         });
     }
 
@@ -514,7 +513,11 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(`file-coverage-${fileCoverageRequest.filePath}`);
     }
 
-    deleteFlakyTestCaseRefIdsByBranch(_project: string, _repositoryId: string, _branchInfo: BranchInfo): Promise<number> {
+    deleteFlakyTestCaseRefIdsByBranch(
+        _project: string,
+        _repositoryId: string,
+        _branchInfo: BranchInfo
+    ): Promise<number> {
         return Promise.resolve(flakyBranchInfos.length);
     }
 
@@ -538,7 +541,10 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(testResults);
     }
 
-    getBranchesByFlakyTestCaseRefId(_project: string, testCaseReferenceId: number): Promise<TestCaseFlakinessBranchInfo> {
+    getBranchesByFlakyTestCaseRefId(
+        _project: string,
+        testCaseReferenceId: number
+    ): Promise<TestCaseFlakinessBranchInfo> {
         const found = flakyBranchInfos.find(info => info.testCaseReferenceId === testCaseReferenceId);
         return Promise.resolve(found ?? { ...makeTestCaseFlakinessBranchInfo(), testCaseReferenceId });
     }
@@ -821,10 +827,7 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(summaries);
     }
 
-    queryResultTrendForBuild(
-        filter: TestResultTrendFilter,
-        _project: string
-    ): Promise<AggregatedDataForResultTrend[]> {
+    queryResultTrendForBuild(filter: TestResultTrendFilter, _project: string): Promise<AggregatedDataForResultTrend[]> {
         return Promise.resolve(resultTrendData.slice(0, filter.buildCount));
     }
 
@@ -893,8 +896,7 @@ export class MockTestResultsRestClient extends RestClientBase {
     ): Promise<PagedList<TestRun>> {
         const matched = queryableTestRuns.filter(run => {
             const updated = run.lastUpdatedDate.getTime();
-            const inRange =
-                updated >= minLastUpdatedDate.getTime() && updated <= maxLastUpdatedDate.getTime();
+            const inRange = updated >= minLastUpdatedDate.getTime() && updated <= maxLastUpdatedDate.getTime();
             return inRange && (state === undefined || run.state === TestRunState[state]);
         });
         return Promise.resolve(page(paginate(matched, 0, top)));
@@ -940,12 +942,7 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(findRunStatistic(runId));
     }
 
-    getCoverageStatusBadge(
-        _project: string,
-        definition: string,
-        branchName?: string,
-        label?: string
-    ): Promise<string> {
+    getCoverageStatusBadge(_project: string, definition: string, branchName?: string, label?: string): Promise<string> {
         const title = `${label ?? "coverage"}: ${definition}@${branchName ?? "main"}`;
         return Promise.resolve(`<svg xmlns="http://www.w3.org/2000/svg"><title>${title}</title></svg>`);
     }
@@ -1202,10 +1199,12 @@ export class MockTestResultsRestClient extends RestClientBase {
         _project: string,
         _sessionId: number
     ): Promise<AnalysisFailureGroupReturn[]> {
-        const groups = analysis.flatMap(entry => entry.analysisFailureGroups).map(group => ({
-            analysisFailureGroupId: group.failureGroupId,
-            failureGroupUid: group.uid
-        }));
+        const groups = analysis
+            .flatMap(entry => entry.analysisFailureGroups)
+            .map(group => ({
+                analysisFailureGroupId: group.failureGroupId,
+                failureGroupUid: group.uid
+            }));
         return Promise.resolve(groups);
     }
 
@@ -1261,7 +1260,11 @@ export class MockTestResultsRestClient extends RestClientBase {
         return Promise.resolve(results.map(result => result.id));
     }
 
-    createTestResultMachines(_testResultMachines: TestResultMachine[], _project: string, _runId: number): Promise<void> {
+    createTestResultMachines(
+        _testResultMachines: TestResultMachine[],
+        _project: string,
+        _runId: number
+    ): Promise<void> {
         return Promise.resolve();
     }
 

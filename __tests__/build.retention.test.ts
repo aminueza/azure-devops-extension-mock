@@ -1,8 +1,4 @@
-import {
-    BuildRestClient,
-    DefinitionTriggerType,
-    ResultSet
-} from "azure-devops-extension-api/Build";
+import { BuildRestClient, DefinitionTriggerType, ResultSet } from "azure-devops-extension-api/Build";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -58,26 +54,15 @@ describe("BuildRestClient mock retention leases", () => {
                 ])
         ],
         ["getRetentionLeasesByOwnerId", () => client.getRetentionLeasesByOwnerId("proj")],
-        [
-            "getRetentionLeasesByUserId",
-            () => client.getRetentionLeasesByUserId("proj", "owner-alpha")
-        ],
+        ["getRetentionLeasesByUserId", () => client.getRetentionLeasesByUserId("proj", "owner-alpha")],
         ["getRetentionLeasesForBuild", () => client.getRetentionLeasesForBuild("proj", 9_200_001)],
         [
             "updateRetentionLease",
-            () =>
-                client.updateRetentionLease(
-                    { daysValid: 30, protectPipeline: false },
-                    "proj",
-                    9_000_001
-                )
+            () => client.updateRetentionLease({ daysValid: 30, protectPipeline: false }, "proj", 9_000_001)
         ],
         ["getRetentionHistory", () => client.getRetentionHistory()],
         ["getRetentionSettings", () => client.getRetentionSettings("proj")],
-        [
-            "updateRetentionSettings",
-            () => client.updateRetentionSettings(updateModel, "proj")
-        ],
+        ["updateRetentionSettings", () => client.updateRetentionSettings(updateModel, "proj")],
         ["getBuildWorkItemsRefs", () => client.getBuildWorkItemsRefs("proj", 1)],
         [
             "getBuildWorkItemsRefsFromCommits",
@@ -97,18 +82,10 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     const voidCases: Array<[string, () => Promise<unknown>]> = [
-        [
-            "deleteRetentionLeasesById",
-            () => client.deleteRetentionLeasesById("proj", [9_000_001, 9_000_002])
-        ],
+        ["deleteRetentionLeasesById", () => client.deleteRetentionLeasesById("proj", [9_000_001, 9_000_002])],
         [
             "restoreWebhooks",
-            () =>
-                client.restoreWebhooks(
-                    [DefinitionTriggerType.ContinuousIntegration],
-                    "proj",
-                    "TfsGit"
-                )
+            () => client.restoreWebhooks([DefinitionTriggerType.ContinuousIntegration], "proj", "TfsGit")
         ]
     ];
 
@@ -174,19 +151,12 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("filters leases by owner, definition and run", async () => {
-        const leases = await client.getRetentionLeasesByOwnerId(
-            "proj",
-            "owner-alpha",
-            9_100_002,
-            9_200_002
-        );
+        const leases = await client.getRetentionLeasesByOwnerId("proj", "owner-alpha", 9_100_002, 9_200_002);
         expect(leases.map(lease => lease.leaseId)).toEqual([9_000_002]);
     });
 
     it("returns nothing for an absent owner id", async () => {
-        await expect(client.getRetentionLeasesByOwnerId("proj", "absent-owner")).resolves.toEqual(
-            []
-        );
+        await expect(client.getRetentionLeasesByOwnerId("proj", "absent-owner")).resolves.toEqual([]);
     });
 
     it("returns every lease of a user when no extra filter is given", async () => {
@@ -195,12 +165,7 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("filters user leases by definition and run", async () => {
-        const leases = await client.getRetentionLeasesByUserId(
-            "proj",
-            "owner-alpha",
-            9_100_001,
-            9_200_001
-        );
+        const leases = await client.getRetentionLeasesByUserId("proj", "owner-alpha", 9_100_001, 9_200_001);
         expect(leases.map(lease => lease.leaseId)).toEqual([9_000_001]);
     });
 
@@ -214,17 +179,11 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("returns nothing for a build with no lease", async () => {
-        await expect(
-            client.getRetentionLeasesForBuild("proj", Number.MAX_SAFE_INTEGER)
-        ).resolves.toEqual([]);
+        await expect(client.getRetentionLeasesForBuild("proj", Number.MAX_SAFE_INTEGER)).resolves.toEqual([]);
     });
 
     it("applies the update to the lease it echoes back", async () => {
-        const updated = await client.updateRetentionLease(
-            { daysValid: 30, protectPipeline: false },
-            "proj",
-            9_000_002
-        );
+        const updated = await client.updateRetentionLease({ daysValid: 30, protectPipeline: false }, "proj", 9_000_002);
         expect(updated.leaseId).toBe(9_000_002);
         expect(updated.protectPipeline).toBe(false);
         expect(updated.validUntil.getTime() - updated.createdOn.getTime()).toBe(30 * DAY_MS);
@@ -237,15 +196,11 @@ describe("BuildRestClient mock retention leases", () => {
 
     it("drops retention samples older than the lookback window", async () => {
         const history = await client.getRetentionHistory(30);
-        expect(history.buildRetentionSamples).toEqual(
-            retentionHistory.buildRetentionSamples.slice(0, 2)
-        );
+        expect(history.buildRetentionSamples).toEqual(retentionHistory.buildRetentionSamples.slice(0, 2));
     });
 
     it("returns the seeded project retention settings", async () => {
-        await expect(client.getRetentionSettings("proj")).resolves.toEqual(
-            projectRetentionSetting
-        );
+        await expect(client.getRetentionSettings("proj")).resolves.toEqual(projectRetentionSetting);
     });
 
     it("maps each update model field onto its retention setting", async () => {
@@ -273,28 +228,17 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("returns one work item ref per commit", async () => {
-        const refs = await client.getBuildWorkItemsRefsFromCommits(
-            ["sha-1", "sha-2", "sha-3"],
-            "proj",
-            1
-        );
+        const refs = await client.getBuildWorkItemsRefsFromCommits(["sha-1", "sha-2", "sha-3"], "proj", 1);
         expect(refs).toHaveLength(3);
     });
 
     it("caps work item refs from commits at top", async () => {
-        const refs = await client.getBuildWorkItemsRefsFromCommits(
-            ["sha-1", "sha-2", "sha-3"],
-            "proj",
-            1,
-            1
-        );
+        const refs = await client.getBuildWorkItemsRefsFromCommits(["sha-1", "sha-2", "sha-3"], "proj", 1, 1);
         expect(refs.map(ref => ref.id)).toEqual(["9300001"]);
     });
 
     it("returns every work item ref between two builds", async () => {
-        await expect(client.getWorkItemsBetweenBuilds("proj", 1, 2)).resolves.toEqual(
-            buildWorkItemRefs
-        );
+        await expect(client.getWorkItemsBetweenBuilds("proj", 1, 2)).resolves.toEqual(buildWorkItemRefs);
     });
 
     it("caps work item refs between builds at top", async () => {
@@ -318,13 +262,7 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("fabricates a pull request for an unknown id", async () => {
-        const request = await client.getPullRequest(
-            "proj",
-            "Bitbucket",
-            "absent-pr",
-            "repo-9501",
-            "endpoint-1"
-        );
+        const request = await client.getPullRequest("proj", "Bitbucket", "absent-pr", "repo-9501", "endpoint-1");
         expect(request.id).toBe("absent-pr");
         expect(request.providerName).toBe("Bitbucket");
     });
@@ -367,24 +305,12 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("returns only the top repository for the top result set", async () => {
-        const result = await client.listRepositories(
-            "proj",
-            "TfsGit",
-            undefined,
-            undefined,
-            ResultSet.Top
-        );
+        const result = await client.listRepositories("proj", "TfsGit", undefined, undefined, ResultSet.Top);
         expect(result.repositories.map(repo => repo.id)).toEqual(["repo-9501"]);
     });
 
     it("returns every repository for the all result set", async () => {
-        const result = await client.listRepositories(
-            "proj",
-            "TfsGit",
-            undefined,
-            undefined,
-            ResultSet.All
-        );
+        const result = await client.listRepositories("proj", "TfsGit", undefined, undefined, ResultSet.All);
         expect(result.repositories).toHaveLength(sourceRepositories.length);
     });
 
@@ -416,9 +342,7 @@ describe("BuildRestClient mock retention leases", () => {
     });
 
     it("returns nothing for an absent webhook repository", async () => {
-        await expect(
-            client.listWebhooks("proj", "TfsGit", undefined, "absent-repo")
-        ).resolves.toEqual([]);
+        await expect(client.listWebhooks("proj", "TfsGit", undefined, "absent-repo")).resolves.toEqual([]);
     });
 
     it("builds source provider attributes for any provider name", () => {

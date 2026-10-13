@@ -37,10 +37,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
         ["createFolder", () => client.createFolder(makeFolder("\\new"), "proj")],
         ["getFolders", () => client.getFolders("proj")],
         ["updateFolder", () => client.updateFolder(makeFolder("\\x"), "proj", folders[0].path)],
-        [
-            "createFavorites",
-            () => client.createFavorites([makeFavoriteItem()], "proj", "ReleaseDefinition")
-        ],
+        ["createFavorites", () => client.createFavorites([makeFavoriteItem()], "proj", "ReleaseDefinition")],
         ["getFavorites", () => client.getFavorites("proj", "Folder")],
         [
             "createDefinitionEnvironmentTemplate",
@@ -50,17 +47,10 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
             "getDefinitionEnvironmentTemplate",
             () => client.getDefinitionEnvironmentTemplate("proj", environmentTemplates[0].id)
         ],
-        [
-            "listDefinitionEnvironmentTemplates",
-            () => client.listDefinitionEnvironmentTemplates("proj")
-        ],
+        ["listDefinitionEnvironmentTemplates", () => client.listDefinitionEnvironmentTemplates("proj")],
         [
             "undeleteReleaseDefinitionEnvironmentTemplate",
-            () =>
-                client.undeleteReleaseDefinitionEnvironmentTemplate(
-                    "proj",
-                    environmentTemplates[2].id
-                )
+            () => client.undeleteReleaseDefinitionEnvironmentTemplate("proj", environmentTemplates[2].id)
         ]
     ];
 
@@ -71,10 +61,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     const voidCases: Array<[string, () => Promise<void>]> = [
         ["deleteFolder", () => client.deleteFolder("proj", folders[0].path)],
         ["deleteFavorites", () => client.deleteFavorites("proj", "ReleaseDefinition")],
-        [
-            "deleteFavoritesWithIdentity",
-            () => client.deleteFavorites("proj", "ReleaseDefinition", "id-1", "fav-1")
-        ],
+        ["deleteFavoritesWithIdentity", () => client.deleteFavorites("proj", "ReleaseDefinition", "id-1", "fav-1")],
         [
             "deleteDefinitionEnvironmentTemplate",
             () => client.deleteDefinitionEnvironmentTemplate("proj", environmentTemplates[0].id)
@@ -86,13 +73,8 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("adds a definition tag only when it is new", async () => {
-        await expect(client.addDefinitionTag("proj", 1, "canary")).resolves.toEqual([
-            ...definitionTags,
-            "canary"
-        ]);
-        await expect(client.addDefinitionTag("proj", 1, definitionTags[0])).resolves.toEqual(
-            definitionTags
-        );
+        await expect(client.addDefinitionTag("proj", 1, "canary")).resolves.toEqual([...definitionTags, "canary"]);
+        await expect(client.addDefinitionTag("proj", 1, definitionTags[0])).resolves.toEqual(definitionTags);
     });
 
     it("merges posted definition tags without duplicates", async () => {
@@ -113,10 +95,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("adds a release tag only when it is new", async () => {
-        await expect(client.addReleaseTag("proj", 1, "canary")).resolves.toEqual([
-            ...releaseTags,
-            "canary"
-        ]);
+        await expect(client.addReleaseTag("proj", 1, "canary")).resolves.toEqual([...releaseTags, "canary"]);
         await expect(client.addReleaseTag("proj", 1, releaseTags[0])).resolves.toEqual(releaseTags);
     });
 
@@ -162,16 +141,12 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
 
     it("orders folders ascending", async () => {
         const ordered = await client.getFolders("proj", undefined, FolderPathQueryOrder.Ascending);
-        expect(ordered.map(f => f.path)).toEqual(
-            folders.map(f => f.path).sort((a, b) => a.localeCompare(b))
-        );
+        expect(ordered.map(f => f.path)).toEqual(folders.map(f => f.path).sort((a, b) => a.localeCompare(b)));
     });
 
     it("orders folders descending", async () => {
         const ordered = await client.getFolders("proj", undefined, FolderPathQueryOrder.Descending);
-        expect(ordered.map(f => f.path)).toEqual(
-            folders.map(f => f.path).sort((a, b) => b.localeCompare(a))
-        );
+        expect(ordered.map(f => f.path)).toEqual(folders.map(f => f.path).sort((a, b) => b.localeCompare(a)));
     });
 
     it("leaves folders unordered for the none query order", async () => {
@@ -180,11 +155,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("updates a known folder", async () => {
-        const updated = await client.updateFolder(
-            { description: "changed" } as any,
-            "proj",
-            folders[2].path
-        );
+        const updated = await client.updateFolder({ description: "changed" } as any, "proj", folders[2].path);
         expect(updated.description).toBe("changed");
         expect(updated.createdOn).toBe(folders[2].createdOn);
         expect(updated.path).toBe(folders[2].path);
@@ -197,11 +168,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("creates favorites keeping the posted type", async () => {
-        const created = await client.createFavorites(
-            [makeFavoriteItem("Folder")],
-            "proj",
-            "ReleaseDefinition"
-        );
+        const created = await client.createFavorites([makeFavoriteItem("Folder")], "proj", "ReleaseDefinition");
         expect(created[0].type).toBe("Folder");
     });
 
@@ -227,20 +194,14 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("creates an environment template merging the posted fields", async () => {
-        const created = await client.createDefinitionEnvironmentTemplate(
-            { id: "tpl-1", name: "mine" } as any,
-            "proj"
-        );
+        const created = await client.createDefinitionEnvironmentTemplate({ id: "tpl-1", name: "mine" } as any, "proj");
         expect(created.id).toBe("tpl-1");
         expect(created.name).toBe("mine");
         expect(created.canDelete).toBe(true);
     });
 
     it("returns a known environment template", async () => {
-        const template = await client.getDefinitionEnvironmentTemplate(
-            "proj",
-            environmentTemplates[1].id
-        );
+        const template = await client.getDefinitionEnvironmentTemplate("proj", environmentTemplates[1].id);
         expect(template).toBe(environmentTemplates[1]);
     });
 
@@ -261,10 +222,7 @@ describe("ReleaseRestClient tags, folders, favorites and templates", () => {
     });
 
     it("undeletes a known environment template", async () => {
-        const restored = await client.undeleteReleaseDefinitionEnvironmentTemplate(
-            "proj",
-            environmentTemplates[2].id
-        );
+        const restored = await client.undeleteReleaseDefinitionEnvironmentTemplate("proj", environmentTemplates[2].id);
         expect(restored.id).toBe(environmentTemplates[2].id);
         expect(restored.isDeleted).toBe(false);
         expect(restored.name).toBe(environmentTemplates[2].name);

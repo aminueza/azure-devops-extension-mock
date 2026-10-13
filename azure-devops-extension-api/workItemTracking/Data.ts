@@ -147,9 +147,7 @@ export const makeQueryClause = (
 export const makeQuery = (id = fake.string.uuid()): QueryHierarchyItem => ({
     id,
     children: [],
-    clauses: makeQueryClause("System.TeamProject", "@project", [
-        makeQueryClause("System.State", "Active")
-    ]),
+    clauses: makeQueryClause("System.TeamProject", "@project", [makeQueryClause("System.State", "Active")]),
     columns: [makeFieldReference("System.Id"), makeFieldReference("System.Title")],
     createdBy: makeIdentityReference(),
     createdDate: fake.date.past(),
@@ -357,9 +355,7 @@ export const makeProjectWorkItemStateColors = (projectName: string): ProjectWork
     }))
 });
 
-export const makeWorkItemTypeFieldWithReferences = (
-    referenceName: string
-): WorkItemTypeFieldWithReferences => ({
+export const makeWorkItemTypeFieldWithReferences = (referenceName: string): WorkItemTypeFieldWithReferences => ({
     allowedValues: [...states],
     alwaysRequired: false,
     defaultValue: states[0],
@@ -370,10 +366,7 @@ export const makeWorkItemTypeFieldWithReferences = (
     url: fake.internet.url()
 });
 
-export const makeWorkItemTypeTemplate = (
-    type: string,
-    exportGlobalLists: boolean
-): WorkItemTypeTemplate => ({
+export const makeWorkItemTypeTemplate = (type: string, exportGlobalLists: boolean): WorkItemTypeTemplate => ({
     template: `<WITD type="${type}" globalLists="${exportGlobalLists}" />`
 });
 
@@ -388,10 +381,7 @@ export const makeIconSvg = (icon: string, color: string): string =>
 export const makeIconXaml = (icon: string, color: string): string =>
     `<Canvas Tag="${icon}"><Path Fill="${color}" Data="M0,0 L16,16 Z" /></Canvas>`;
 
-export const makeWorkItemNextState = (
-    id: number,
-    action: string
-): WorkItemNextStateOnTransition => ({
+export const makeWorkItemNextState = (id: number, action: string): WorkItemNextStateOnTransition => ({
     errorCode: "",
     id,
     message: `Next state on ${action}`,
@@ -412,11 +402,7 @@ export const makeWorkItemRelation = (rel: string): WorkItemRelation => ({
     url: fake.internet.url()
 });
 
-export const makeWorkArtifactLink = (
-    linkType: string,
-    artifactType: string,
-    toolType: string
-): WorkArtifactLink => ({
+export const makeWorkArtifactLink = (linkType: string, artifactType: string, toolType: string): WorkArtifactLink => ({
     artifactType,
     linkType,
     toolType
@@ -514,24 +500,17 @@ export const rootNodes: WorkItemClassificationNode[] = [
         ]
     }
 ];
-export const classificationNodes: WorkItemClassificationNode[] = rootNodes.flatMap(
-    node => [node, ...node.children]
-);
-export const comments: WorkItemComment[] = Array.from(
-    { length: 5 },
-    (_value, index) => makeWorkItemComment(index + 1)
-);
+export const classificationNodes: WorkItemClassificationNode[] = rootNodes.flatMap(node => [node, ...node.children]);
+export const comments: WorkItemComment[] = Array.from({ length: 5 }, (_value, index) => makeWorkItemComment(index + 1));
 export const revisions: WorkItem[] = Array.from({ length: 5 }, (_value, index) => ({
     ...makeWorkItem(workItems[0].id),
     rev: index + 1
 }));
-export const updates: WorkItemUpdate[] = Array.from(
-    { length: 4 },
-    (_value, index) => makeWorkItemUpdate(index + 1, workItems[0].id)
+export const updates: WorkItemUpdate[] = Array.from({ length: 4 }, (_value, index) =>
+    makeWorkItemUpdate(index + 1, workItems[0].id)
 );
-export const deletedWorkItems: WorkItemDelete[] = Array.from(
-    { length: 3 },
-    (_value, index) => makeWorkItemDelete(20_001 + index)
+export const deletedWorkItems: WorkItemDelete[] = Array.from({ length: 3 }, (_value, index) =>
+    makeWorkItemDelete(20_001 + index)
 );
 export const templates: WorkItemTemplate[] = [
     { ...makeWorkItemTemplate(fake.string.uuid()), workItemTypeName: "Bug" },
@@ -553,8 +532,8 @@ export const relationTypes: WorkItemRelationType[] = [
     "System.LinkTypes.Duplicate-Forward",
     "ArtifactLink"
 ].map(makeWorkItemRelationType);
-export const workItemRelations: WorkItemRelation[] = relationTypes.map(
-    type => makeWorkItemRelation(type.referenceName)
+export const workItemRelations: WorkItemRelation[] = relationTypes.map(type =>
+    makeWorkItemRelation(type.referenceName)
 );
 export const workArtifactLinkTypes: WorkArtifactLink[] = [
     makeWorkArtifactLink("Branch", "Branch", "Git"),

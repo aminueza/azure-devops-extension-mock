@@ -9,23 +9,22 @@ const LOCAL_BINDINGS = {
     module: "module"
 };
 
-const toModuleId = (dependency) => {
+const toModuleId = dependency => {
     if (!dependency.startsWith(".") || dependency.endsWith(".js")) {
         return dependency;
     }
     return `${dependency}.js`;
 };
 
-const toExpression = (dependency) =>
-    LOCAL_BINDINGS[dependency] ?? `require(${JSON.stringify(toModuleId(dependency))})`;
+const toExpression = dependency => LOCAL_BINDINGS[dependency] ?? `require(${JSON.stringify(toModuleId(dependency))})`;
 
-const readDependencies = (source) => {
+const readDependencies = source => {
     const match = DEFINE_PATTERN.exec(source);
     if (!match) {
         return undefined;
     }
     const dependencies = JSON.parse(match[1]);
-    if (!dependencies.every((dependency) => typeof dependency === "string")) {
+    if (!dependencies.every(dependency => typeof dependency === "string")) {
         throw new Error("amd-transformer: define() dependencies must be string literals");
     }
     return dependencies;

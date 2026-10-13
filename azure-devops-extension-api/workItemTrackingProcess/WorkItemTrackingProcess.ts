@@ -125,7 +125,8 @@ const findSystemControl = (controlId: string): Control =>
 
 const findList = (listId: string): PickList => lists.find(l => l.id === listId) ?? { ...makePickList(), id: listId };
 
-const findRule = (ruleId: string): ProcessRule => rules.find(r => r.id === ruleId) ?? { ...makeProcessRule(), id: ruleId };
+const findRule = (ruleId: string): ProcessRule =>
+    rules.find(r => r.id === ruleId) ?? { ...makeProcessRule(), id: ruleId };
 
 const findState = (stateId: string): WorkItemStateResultModel =>
     states.find(s => s.id === stateId) ?? { ...makeWorkItemStateResultModel(), id: stateId };
@@ -175,7 +176,12 @@ export class MockWorkItemTrackingProcessRestClient extends RestClientBase {
         });
     }
 
-    createControlInGroup(control: Control, _processId: string, _witRefName: string, _groupId: string): Promise<Control> {
+    createControlInGroup(
+        control: Control,
+        _processId: string,
+        _witRefName: string,
+        _groupId: string
+    ): Promise<Control> {
         return Promise.resolve({ ...makeControl(), ...control });
     }
 

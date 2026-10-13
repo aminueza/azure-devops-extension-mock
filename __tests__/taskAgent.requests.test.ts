@@ -34,36 +34,15 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
     const resolving: Array<[string, () => Promise<unknown>]> = [
         ["replaceAgent", () => client.replaceAgent(makeAgent(), 1, 5)],
         ["updateAgentUpdateState", () => client.updateAgentUpdateState(1, agents[0].id, "Ready")],
-        [
-            "updateAgentUserCapabilities",
-            () => client.updateAgentUserCapabilities({ tier: "gold" }, 1, agents[0].id)
-        ],
+        ["updateAgentUserCapabilities", () => client.updateAgentUserCapabilities({ tier: "gold" }, 1, agents[0].id)],
         ["getAgentRequest", () => client.getAgentRequest(1, seeded.requestId, true)],
         ["getAgentRequests", () => client.getAgentRequests(1, 2, "token")],
-        [
-            "getAgentRequestsForAgent",
-            () => client.getAgentRequestsForAgent(1, seeded.reservedAgent.id, 1)
-        ],
-        [
-            "getAgentRequestsForAgents",
-            () => client.getAgentRequestsForAgents(1, [seeded.reservedAgent.id], 1)
-        ],
-        [
-            "getAgentRequestsForPlan",
-            () => client.getAgentRequestsForPlan(1, seeded.planId, seeded.jobId)
-        ],
-        [
-            "getAgentRequestsForQueue",
-            () => client.getAgentRequestsForQueue("proj", seeded.queueId, 5, "token")
-        ],
-        [
-            "queueAgentRequest",
-            () => client.queueAgentRequest(makeAgentJobRequest(), "proj", 12)
-        ],
-        [
-            "queueAgentRequestByPool",
-            () => client.queueAgentRequestByPool(makeAgentJobRequest(), 12)
-        ],
+        ["getAgentRequestsForAgent", () => client.getAgentRequestsForAgent(1, seeded.reservedAgent.id, 1)],
+        ["getAgentRequestsForAgents", () => client.getAgentRequestsForAgents(1, [seeded.reservedAgent.id], 1)],
+        ["getAgentRequestsForPlan", () => client.getAgentRequestsForPlan(1, seeded.planId, seeded.jobId)],
+        ["getAgentRequestsForQueue", () => client.getAgentRequestsForQueue("proj", seeded.queueId, 5, "token")],
+        ["queueAgentRequest", () => client.queueAgentRequest(makeAgentJobRequest(), "proj", 12)],
+        ["queueAgentRequestByPool", () => client.queueAgentRequestByPool(makeAgentJobRequest(), 12)],
         [
             "updateAgentRequest",
             () =>
@@ -98,10 +77,7 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
     const voiding: Array<[string, () => Promise<void>]> = [
         ["refreshAgent", () => client.refreshAgent(1, 5)],
         ["refreshAgents", () => client.refreshAgents(1)],
-        [
-            "deleteAgentRequest",
-            () => client.deleteAgentRequest(1, 7, "lock", TaskResult.Succeeded, true)
-        ],
+        ["deleteAgentRequest", () => client.deleteAgentRequest(1, 7, "lock", TaskResult.Succeeded, true)],
         ["deleteAgentSession", () => client.deleteAgentSession(1, "session")],
         ["deleteMessage", () => client.deleteMessage(1, 3, "session")],
         ["sendMessage", () => client.sendMessage(makeAgentMessage(), 1, 7)],
@@ -139,9 +115,7 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
     });
 
     it("caps requests for an agent at the completed count", async () => {
-        await expect(
-            client.getAgentRequestsForAgent(3, seeded.reservedAgent.id, 0)
-        ).resolves.toEqual([]);
+        await expect(client.getAgentRequestsForAgent(3, seeded.reservedAgent.id, 0)).resolves.toEqual([]);
     });
 
     it("filters requests by a list of agents", async () => {
@@ -162,9 +136,7 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
         expect(byPlan[0].poolId).toBe(6);
         const byJob = await client.getAgentRequestsForPlan(6, seeded.planId, seeded.jobId);
         expect(byJob).toHaveLength(1);
-        await expect(
-            client.getAgentRequestsForPlan(6, seeded.planId, "job-none")
-        ).resolves.toEqual([]);
+        await expect(client.getAgentRequestsForPlan(6, seeded.planId, "job-none")).resolves.toEqual([]);
     });
 
     it("pages requests for a queue and echoes the project scope", async () => {
@@ -247,9 +219,7 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
     });
 
     it("returns a seeded message by last message id", async () => {
-        await expect(client.getMessage(1, "session", messages[1].messageId)).resolves.toBe(
-            messages[1]
-        );
+        await expect(client.getMessage(1, "session", messages[1].messageId)).resolves.toBe(messages[1]);
     });
 
     it("fabricates a message for an unknown last message id", async () => {
@@ -259,9 +229,9 @@ describe("TaskAgentRestClient requests, sessions and messages", () => {
     });
 
     it("builds an aad oauth request url from the tenant and redirect", async () => {
-        await expect(
-            client.createAadOAuthRequest("tenant-1", "app.example.test/cb")
-        ).resolves.toBe("app.example.test/cb?tenantId=tenant-1");
+        await expect(client.createAadOAuthRequest("tenant-1", "app.example.test/cb")).resolves.toBe(
+            "app.example.test/cb?tenantId=tenant-1"
+        );
     });
 
     it("returns the seeded aad tenant id", async () => {

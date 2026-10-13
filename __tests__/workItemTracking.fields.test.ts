@@ -20,8 +20,12 @@ import {
 } from "../azure-devops-extension-api/workItemTracking/Data";
 
 describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(WorkItemTrackingRestClient);
     const postedField = makeWorkItemField("Custom.Points", FieldType.Double);
@@ -38,11 +42,29 @@ describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
         ["getField", () => client.getField("System.Title", "proj")],
         ["getFields", () => client.getFields("proj", GetFieldsExpand.None)],
         ["updateField", () => client.updateField({ isDeleted: false }, "System.Title", "proj")],
-        ["createOrUpdateClassificationNode", () => client.createOrUpdateClassificationNode(postedNode, "proj", TreeStructureGroup.Areas, "Payments")],
-        ["getClassificationNode", () => client.getClassificationNode("proj", TreeStructureGroup.Areas, rootNodes[0].path, 2)],
-        ["getClassificationNodes", () => client.getClassificationNodes("proj", [classificationNodes[0].id], 1, ClassificationNodesErrorPolicy.Omit)],
+        [
+            "createOrUpdateClassificationNode",
+            () => client.createOrUpdateClassificationNode(postedNode, "proj", TreeStructureGroup.Areas, "Payments")
+        ],
+        [
+            "getClassificationNode",
+            () => client.getClassificationNode("proj", TreeStructureGroup.Areas, rootNodes[0].path, 2)
+        ],
+        [
+            "getClassificationNodes",
+            () =>
+                client.getClassificationNodes(
+                    "proj",
+                    [classificationNodes[0].id],
+                    1,
+                    ClassificationNodesErrorPolicy.Omit
+                )
+        ],
         ["getRootNodes", () => client.getRootNodes("proj", 2)],
-        ["updateClassificationNode", () => client.updateClassificationNode(postedNode, "proj", TreeStructureGroup.Iterations, "Payments")],
+        [
+            "updateClassificationNode",
+            () => client.updateClassificationNode(postedNode, "proj", TreeStructureGroup.Iterations, "Payments")
+        ],
         ["createQuery", () => client.createQuery(postedQuery, "proj", "Shared Queries", false)],
         ["getQueriesBatch", () => client.getQueriesBatch(batchRequest, "proj")],
         ["getQueryResultCount", () => client.getQueryResultCount(queries[0].id, "proj", "team", true, 3)],
@@ -52,7 +74,10 @@ describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
 
     const voidCases: Array<[string, () => Promise<void>]> = [
         ["deleteField", () => client.deleteField("Custom.Retired", "proj")],
-        ["deleteClassificationNode", () => client.deleteClassificationNode("proj", TreeStructureGroup.Areas, "Payments", 1)],
+        [
+            "deleteClassificationNode",
+            () => client.deleteClassificationNode("proj", TreeStructureGroup.Areas, "Payments", 1)
+        ],
         ["deleteQuery", () => client.deleteQuery("proj", queries[0].id)]
     ];
 
@@ -65,9 +90,7 @@ describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
     });
 
     it("echoes the posted field over a fixture", async () => {
-        const created = await client.createField(
-            { ...postedField, name: "Story Points", description: "estimate" }
-        );
+        const created = await client.createField({ ...postedField, name: "Story Points", description: "estimate" });
         expect(created.name).toBe("Story Points");
         expect(created.description).toBe("estimate");
         expect(created.type).toBe(FieldType.Double);
@@ -109,7 +132,11 @@ describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
         const area = await client.createOrUpdateClassificationNode(postedNode, "proj", TreeStructureGroup.Areas);
         expect(area.structureType).toBe(TreeNodeStructureType.Area);
         expect(area.name).toBe("Payments");
-        const iteration = await client.createOrUpdateClassificationNode(postedNode, "proj", TreeStructureGroup.Iterations);
+        const iteration = await client.createOrUpdateClassificationNode(
+            postedNode,
+            "proj",
+            TreeStructureGroup.Iterations
+        );
         expect(iteration.structureType).toBe(TreeNodeStructureType.Iteration);
     });
 
@@ -154,10 +181,7 @@ describe("WorkItemTrackingRestClient fields, nodes and queries", () => {
     });
 
     it("resolves known and unknown ids in a query batch", async () => {
-        const result = await client.getQueriesBatch(
-            { ...batchRequest, ids: [queries[1].id, "missing-id"] },
-            "proj"
-        );
+        const result = await client.getQueriesBatch({ ...batchRequest, ids: [queries[1].id, "missing-id"] }, "proj");
         expect(result[0]).toBe(queries[1]);
         expect(result[1].id).toBe("missing-id");
     });

@@ -10,7 +10,14 @@ import {
     ProfileRestClient
 } from "azure-devops-extension-api/Profile";
 import { VssJsonCollectionWrapperV } from "azure-devops-extension-api/WebApi";
-import { makeAttributeDescriptor, makeAvatar, makeProfile, makeProfileAttribute, profileAttributes, profiles } from "./Data";
+import {
+    makeAttributeDescriptor,
+    makeAvatar,
+    makeProfile,
+    makeProfileAttribute,
+    profileAttributes,
+    profiles
+} from "./Data";
 
 const AVATAR_SIZES: { [name: string]: AvatarSize } = {
     small: AvatarSize.Small,

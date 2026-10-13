@@ -110,17 +110,11 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeReleaseDefinition(), id: definitionId });
     }
 
-    createReleaseDefinition(
-        releaseDefinition: ReleaseDefinition,
-        _project: string
-    ): Promise<ReleaseDefinition> {
+    createReleaseDefinition(releaseDefinition: ReleaseDefinition, _project: string): Promise<ReleaseDefinition> {
         return Promise.resolve({ ...makeReleaseDefinition(), ...releaseDefinition });
     }
 
-    updateReleaseDefinition(
-        releaseDefinition: ReleaseDefinition,
-        _project: string
-    ): Promise<ReleaseDefinition> {
+    updateReleaseDefinition(releaseDefinition: ReleaseDefinition, _project: string): Promise<ReleaseDefinition> {
         return Promise.resolve({ ...makeReleaseDefinition(), ...releaseDefinition });
     }
 
@@ -153,11 +147,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve({ ...makeRelease(), ...release, id: releaseId });
     }
 
-    getReleaseEnvironment(
-        _project: string,
-        _releaseId: number,
-        environmentId: number
-    ): Promise<ReleaseEnvironment> {
+    getReleaseEnvironment(_project: string, _releaseId: number, environmentId: number): Promise<ReleaseEnvironment> {
         return Promise.resolve({ ...makeEnvironment(), id: environmentId });
     }
 
@@ -183,33 +173,19 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeApproval(), id: approvalId });
     }
 
-    updateReleaseApproval(
-        approval: ReleaseApproval,
-        _project: string,
-        approvalId: number
-    ): Promise<ReleaseApproval> {
+    updateReleaseApproval(approval: ReleaseApproval, _project: string, approvalId: number): Promise<ReleaseApproval> {
         return Promise.resolve({ ...makeApproval(), ...approval, id: approvalId });
     }
 
     addDefinitionTag(_project: string, _releaseDefinitionId: number, tag: string): Promise<string[]> {
-        return Promise.resolve(
-            definitionTags.includes(tag) ? [...definitionTags] : [...definitionTags, tag]
-        );
+        return Promise.resolve(definitionTags.includes(tag) ? [...definitionTags] : [...definitionTags, tag]);
     }
 
-    addDefinitionTags(
-        tags: string[],
-        _project: string,
-        _releaseDefinitionId: number
-    ): Promise<string[]> {
+    addDefinitionTags(tags: string[], _project: string, _releaseDefinitionId: number): Promise<string[]> {
         return Promise.resolve([...new Set([...definitionTags, ...tags])]);
     }
 
-    deleteDefinitionTag(
-        _project: string,
-        _releaseDefinitionId: number,
-        tag: string
-    ): Promise<string[]> {
+    deleteDefinitionTag(_project: string, _releaseDefinitionId: number, tag: string): Promise<string[]> {
         return Promise.resolve(definitionTags.filter(existing => existing !== tag));
     }
 
@@ -245,11 +221,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getFolders(
-        _project: string,
-        path?: string,
-        queryOrder?: FolderPathQueryOrder
-    ): Promise<Folder[]> {
+    getFolders(_project: string, path?: string, queryOrder?: FolderPathQueryOrder): Promise<Folder[]> {
         const matched = path ? folders.filter(folder => folder.path.startsWith(path)) : [...folders];
         if (queryOrder === FolderPathQueryOrder.Ascending) {
             return Promise.resolve([...matched].sort((a, b) => a.path.localeCompare(b.path)));
@@ -276,12 +248,7 @@ export class MockReleaseRestClient extends RestClientBase {
         );
     }
 
-    deleteFavorites(
-        _project: string,
-        _scope: string,
-        _identityId?: string,
-        _favoriteItemIds?: string
-    ): Promise<void> {
+    deleteFavorites(_project: string, _scope: string, _identityId?: string, _favoriteItemIds?: string): Promise<void> {
         return Promise.resolve();
     }
 
@@ -313,9 +280,7 @@ export class MockReleaseRestClient extends RestClientBase {
         _project: string,
         isDeleted?: boolean
     ): Promise<ReleaseDefinitionEnvironmentTemplate[]> {
-        return Promise.resolve(
-            environmentTemplates.filter(template => template.isDeleted === (isDeleted ?? false))
-        );
+        return Promise.resolve(environmentTemplates.filter(template => template.isDeleted === (isDeleted ?? false)));
     }
 
     undeleteReleaseDefinitionEnvironmentTemplate(
@@ -330,10 +295,7 @@ export class MockReleaseRestClient extends RestClientBase {
         });
     }
 
-    getAgentArtifactDefinitions(
-        _project: string,
-        _releaseId: number
-    ): Promise<AgentArtifactDefinition[]> {
+    getAgentArtifactDefinitions(_project: string, _releaseId: number): Promise<AgentArtifactDefinition[]> {
         return Promise.resolve([...agentArtifactDefinitions]);
     }
 
@@ -341,17 +303,11 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve([...artifactTypeDefinitions]);
     }
 
-    getArtifactVersions(
-        _project: string,
-        _releaseDefinitionId: number
-    ): Promise<ArtifactVersionQueryResult> {
+    getArtifactVersions(_project: string, _releaseDefinitionId: number): Promise<ArtifactVersionQueryResult> {
         return Promise.resolve({ artifactVersions: [...artifactVersions] });
     }
 
-    getArtifactVersionsForSources(
-        artifacts: Artifact[],
-        _project: string
-    ): Promise<ArtifactVersionQueryResult> {
+    getArtifactVersionsForSources(artifacts: Artifact[], _project: string): Promise<ArtifactVersionQueryResult> {
         return Promise.resolve({
             artifactVersions: artifacts.map(artifact => makeArtifactVersion(artifact.alias))
         });
@@ -382,9 +338,7 @@ export class MockReleaseRestClient extends RestClientBase {
         gateId: number,
         taskId: number
     ): Promise<string> {
-        return Promise.resolve(
-            `release ${releaseId} env ${environmentId} gate ${gateId} task ${taskId} log`
-        );
+        return Promise.resolve(`release ${releaseId} env ${environmentId} gate ${gateId} task ${taskId} log`);
     }
 
     getTaskLog(
@@ -523,11 +477,7 @@ export class MockReleaseRestClient extends RestClientBase {
         });
     }
 
-    updateGates(
-        gateUpdateMetadata: GateUpdateMetadata,
-        _project: string,
-        gateStepId: number
-    ): Promise<ReleaseGates> {
+    updateGates(gateUpdateMetadata: GateUpdateMetadata, _project: string, gateStepId: number): Promise<ReleaseGates> {
         return Promise.resolve({
             ...makeReleaseGates(gateStepId),
             ignoredGates: gateUpdateMetadata.gatesToIgnore.map(name => ({
@@ -537,11 +487,7 @@ export class MockReleaseRestClient extends RestClientBase {
         });
     }
 
-    getIssues(
-        _project: string,
-        _buildId: number,
-        _sourceId?: string
-    ): Promise<AutoTriggerIssue[]> {
+    getIssues(_project: string, _buildId: number, _sourceId?: string): Promise<AutoTriggerIssue[]> {
         return Promise.resolve([...autoTriggerIssues]);
     }
 
@@ -563,10 +509,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeApproval(), id: approvalStepId });
     }
 
-    updateReleaseApprovals(
-        approvals: ReleaseApproval[],
-        _project: string
-    ): Promise<ReleaseApproval[]> {
+    updateReleaseApprovals(approvals: ReleaseApproval[], _project: string): Promise<ReleaseApproval[]> {
         return Promise.resolve(approvals.map(approval => ({ ...makeApproval(), ...approval })));
     }
 
@@ -578,29 +521,16 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve([...definitionEnvironmentReferences]);
     }
 
-    getDefinitionRevision(
-        _project: string,
-        definitionId: number,
-        revision: number
-    ): Promise<string> {
+    getDefinitionRevision(_project: string, definitionId: number, revision: number): Promise<string> {
         return Promise.resolve(`definition ${definitionId} revision ${revision}`);
     }
 
-    getReleaseDefinitionHistory(
-        _project: string,
-        definitionId: number
-    ): Promise<ReleaseDefinitionRevision[]> {
-        const matched = releaseDefinitionRevisions.filter(
-            revision => revision.definitionId === definitionId
-        );
+    getReleaseDefinitionHistory(_project: string, definitionId: number): Promise<ReleaseDefinitionRevision[]> {
+        const matched = releaseDefinitionRevisions.filter(revision => revision.definitionId === definitionId);
         return Promise.resolve(matched.length > 0 ? matched : [...releaseDefinitionRevisions]);
     }
 
-    getReleaseDefinitionRevision(
-        _project: string,
-        definitionId: number,
-        revision: number
-    ): Promise<string> {
+    getReleaseDefinitionRevision(_project: string, definitionId: number, revision: number): Promise<string> {
         return Promise.resolve(`release definition ${definitionId} revision ${revision}`);
     }
 
@@ -628,11 +558,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(matched.length > 0 ? matched : [...releaseRevisions]);
     }
 
-    getReleaseRevision(
-        _project: string,
-        releaseId: number,
-        definitionSnapshotRevision: number
-    ): Promise<string> {
+    getReleaseRevision(_project: string, releaseId: number, definitionSnapshotRevision: number): Promise<string> {
         return Promise.resolve(`release ${releaseId} revision ${definitionSnapshotRevision}`);
     }
 
@@ -646,10 +572,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(top ? releaseChanges.slice(0, top) : [...releaseChanges]);
     }
 
-    getReleaseProjects(
-        _artifactType: string,
-        _artifactSourceId: string
-    ): Promise<ProjectReference[]> {
+    getReleaseProjects(_artifactType: string, _artifactSourceId: string): Promise<ProjectReference[]> {
         return Promise.resolve([...releaseProjects]);
     }
 
@@ -668,9 +591,7 @@ export class MockReleaseRestClient extends RestClientBase {
         _project: string
     ): Promise<Deployment[]> {
         return Promise.resolve(
-            deployments.filter(
-                deployment => deployment.deploymentStatus === queryParameters.deploymentStatus
-            )
+            deployments.filter(deployment => deployment.deploymentStatus === queryParameters.deploymentStatus)
         );
     }
 
@@ -694,10 +615,7 @@ export class MockReleaseRestClient extends RestClientBase {
         return Promise.resolve(makeReleaseSettings());
     }
 
-    updateReleaseSettings(
-        releaseSettings: ReleaseSettings,
-        _project: string
-    ): Promise<ReleaseSettings> {
+    updateReleaseSettings(releaseSettings: ReleaseSettings, _project: string): Promise<ReleaseSettings> {
         return Promise.resolve({ ...makeReleaseSettings(), ...releaseSettings });
     }
 
@@ -766,19 +684,11 @@ export class MockReleaseRestClient extends RestClientBase {
         });
     }
 
-    getSummaryMailSections(
-        _project: string,
-        _releaseId: number
-    ): Promise<SummaryMailSection[]> {
+    getSummaryMailSections(_project: string, _releaseId: number): Promise<SummaryMailSection[]> {
         return Promise.resolve([...summaryMailSections]);
     }
 
-    sendSummaryMail(
-        _mailMessage: MailMessage,
-        _project: string,
-        _releaseId: number
-    ): Promise<void> {
+    sendSummaryMail(_mailMessage: MailMessage, _project: string, _releaseId: number): Promise<void> {
         return Promise.resolve();
     }
 }
-
