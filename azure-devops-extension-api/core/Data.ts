@@ -177,12 +177,16 @@ export const makeProxy = (): Proxy => ({
     url: fake.internet.url()
 });
 
-export const projects: TeamProject[] = Array.from({ length: 5 }, makeProject);
-export const teams: WebApiTeam[] = Array.from({ length: 3 }, makeTeam);
+export const projects: TeamProject[] = fake.helpers.distinct(5, makeProject, p => p.name);
+export const teams: WebApiTeam[] = fake.helpers.distinct(3, makeTeam, t => t.name);
 export const readableTeams: WebApiTeam[] = Array.from({ length: 2 }, makeTeam);
 export const processes: Process[] = Array.from({ length: 4 }, makeProcess);
 export const teamMembers: TeamMember[] = Array.from({ length: 5 }, makeTeamMember);
-export const projectCollections: TeamProjectCollection[] = Array.from({ length: 2 }, makeProjectCollection);
+export const projectCollections: TeamProjectCollection[] = fake.helpers.distinct(
+    2,
+    makeProjectCollection,
+    c => c.name
+);
 export const identityMru: IdentityRef[] = Array.from({ length: 3 }, makeIdentityRef);
 export const connectedServices: WebApiConnectedService[] = Array.from({ length: 4 }, makeConnectedService);
 export const projectHistory: ProjectInfo[] = Array.from({ length: 5 }, (_, index) => ({

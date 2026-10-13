@@ -74,6 +74,25 @@ const id = (): number => (lastId += 1);
 
 const arrayElement = <T>(values: readonly T[]): T => values[int({ min: 0, max: values.length - 1 })];
 
+const DISTINCT_ATTEMPTS = 1_000;
+
+const distinct = <T>(length: number, make: () => T, ...keys: Array<(item: T) => string>): T[] => {
+    const seen = keys.map(() => new Set<string>());
+    const items: T[] = [];
+    for (let attempt = 0; items.length < length; attempt += 1) {
+        if (attempt === DISTINCT_ATTEMPTS) {
+            throw new Error(`Could not make ${length} distinct items in ${DISTINCT_ATTEMPTS} attempts`);
+        }
+        const item = make();
+        const values = keys.map(key => key(item));
+        if (values.every((value, index) => !seen[index].has(value))) {
+            values.forEach((value, index) => seen[index].add(value));
+            items.push(item);
+        }
+    }
+    return items;
+};
+
 const chars = (alphabet: string, length: number): string =>
     Array.from({ length }, () => alphabet[int({ min: 0, max: alphabet.length - 1 })]).join("");
 
@@ -124,7 +143,7 @@ export const fake = {
     commerce: { productName: (): string => `${arrayElement(ADJECTIVES)} ${arrayElement(MATERIALS)} ${arrayElement(PRODUCTS)}` },
     date: { recent, past, future },
     datatype: { boolean: (): boolean => random() < 0.5 },
-    helpers: { arrayElement },
+    helpers: { arrayElement, distinct },
     git: {
         commitSha: (): string => chars(HEX, 40),
         commitMessage: (): string => `${arrayElement(VERBS)} ${arrayElement(NOUNS)}`,

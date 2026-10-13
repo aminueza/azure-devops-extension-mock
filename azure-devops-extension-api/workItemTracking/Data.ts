@@ -425,7 +425,12 @@ export const makeRevisionsBatch = (
 
 export const workItems: WorkItem[] = Array.from({ length: 10 }, () => makeWorkItem());
 export const workItemTypes: WorkItemType[] = types.map(makeWorkItemType);
-export const queries: QueryHierarchyItem[] = Array.from({ length: 3 }, () => makeQuery());
+export const queries: QueryHierarchyItem[] = fake.helpers.distinct(
+    3,
+    () => makeQuery(),
+    q => q.path,
+    q => q.name
+);
 export const fields: WorkItemField[] = [
     makeWorkItemField("System.Id", FieldType.Integer),
     makeWorkItemField("System.Title", FieldType.String),

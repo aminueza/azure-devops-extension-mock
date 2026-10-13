@@ -169,6 +169,29 @@ describe("fixtures helpers", () => {
         repeat(50, () => fake.helpers.arrayElement(values)).forEach(value => expect(values).toContain(value));
         expect(fake.helpers.arrayElement([7])).toBe(7);
     });
+
+    it("redraws until every key of every item is distinct", () => {
+        const draws = ["a1", "a2", "b1", "b2", "c2", "c3"];
+        const items = fake.helpers.distinct(
+            3,
+            () => draws.shift() as string,
+            value => value[0],
+            value => value[1]
+        );
+        expect(items).toEqual(["a1", "b2", "c3"]);
+        expect(draws).toEqual([]);
+    });
+
+    it("returns the drawn items unchanged when no key is given", () => {
+        expect(fake.helpers.distinct(2, () => "same")).toEqual(["same", "same"]);
+        expect(fake.helpers.distinct(0, () => "unused", value => value)).toEqual([]);
+    });
+
+    it("gives up when the maker cannot produce enough distinct items", () => {
+        expect(() => fake.helpers.distinct(2, () => "same", value => value)).toThrow(
+            "Could not make 2 distinct items in 1000 attempts"
+        );
+    });
 });
 
 describe("fixtures git, system, image and color", () => {

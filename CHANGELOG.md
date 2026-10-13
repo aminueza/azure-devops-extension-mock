@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The seeded projects, teams, project collections and work item queries no longer repeat a name, and queries no longer repeat a path. Two entries could draw the same value, so a lookup by name, such as `CoreRestClient.getProject(name)`, returned the wrong entry in about 6% of runs for projects.
 - The SDK mock's declarations import their types from `azure-devops-extension-sdk` instead of `azure-devops-extension-sdk/SDK`. The SDK does not export that subpath, so the old import failed to resolve under `bundler` and `node16` module resolution.
 
 ## [1.1.0] - 2026-10-01
