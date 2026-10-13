@@ -2,6 +2,7 @@ import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 import { RestClientBase } from "../common/RestClientBase";
 import { patchOperations } from "../common/jsonPatch";
 import { fake } from "../common/fixtures";
+import { forget, remember, stateful } from "../common/state";
 import { makeIdentityRef } from "../core/Data";
 import {
     WorkItemTrackingRestClient,
@@ -112,6 +113,11 @@ import {
     workItemTypes
 } from "./Data";
 
+const readWorkItem = (id: number): WorkItem => {
+    const found = stateful.isEnabled() ? workItems.find(w => w.id === id) : undefined;
+    return found ?? makeWorkItem(id);
+};
+
 export class MockWorkItemTrackingRestClient extends RestClientBase {
     public TYPE = WorkItemTrackingRestClient;
     constructor(options: IVssRestClientOptions) {
@@ -119,7 +125,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     getWorkItems(ids: number[], _project?: string, _fields?: string[]): Promise<WorkItem[]> {
-        return Promise.resolve(ids.map(id => makeWorkItem(id)));
+        return Promise.resolve(ids.map(readWorkItem));
     }
 
     getWorkItem(id: number): Promise<WorkItem> {
@@ -135,7 +141,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;
             }
         }
-        return Promise.resolve({ ...wi, fields: workItemFields });
+        return Promise.resolve(remember(workItems, { ...wi, fields: workItemFields }, w => w.id === wi.id));
     }
 
     updateWorkItem(document: unknown, id: number, _project?: string): Promise<WorkItem> {
@@ -150,12 +156,14 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;
             }
         }
-        return Promise.resolve({ ...existing, fields: workItemFields, rev: (existing.rev ?? 0) + 1 });
+        return Promise.resolve(
+            remember(workItems, { ...existing, fields: workItemFields, rev: (existing.rev ?? 0) + 1 }, w => w.id === id)
+        );
     }
 
     deleteWorkItem(id: number, project?: string): Promise<WorkItemDelete> {
         const resource = workItems.find(w => w.id === id) ?? makeWorkItem(id);
-        return Promise.resolve({
+        const deleted: WorkItemDelete = {
             id,
             code: 200,
             deletedBy: makeIdentityRef().displayName,
@@ -166,7 +174,9 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
             type: String(resource.fields["System.WorkItemType"]),
             url: resource.url,
             resource
-        });
+        };
+        forget(workItems, w => w.id === id);
+        return Promise.resolve(remember(deletedWorkItems, deleted, d => d.id === id));
     }
 
     getWorkItemTypes(_project: string): Promise<WorkItemType[]> {
@@ -201,10 +211,12 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
 
     createField(workItemField: WorkItemField, _project?: string): Promise<WorkItemField> {
         const base = makeWorkItemField(workItemField.referenceName, workItemField.type);
-        return Promise.resolve({ ...base, ...workItemField });
+        const created = { ...base, ...workItemField };
+        return Promise.resolve(remember(fields, created, f => f.referenceName === created.referenceName));
     }
 
-    deleteField(_fieldNameOrRefName: string, _project?: string): Promise<void> {
+    deleteField(fieldNameOrRefName: string, _project?: string): Promise<void> {
+        forget(fields, f => f.referenceName === fieldNameOrRefName || f.name === fieldNameOrRefName);
         return Promise.resolve();
     }
 
@@ -221,10 +233,9 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     updateField(payload: UpdateWorkItemField, fieldNameOrRefName: string, project?: string): Promise<WorkItemField> {
-        return this.getField(fieldNameOrRefName, project).then(field => ({
-            ...field,
-            isDeleted: payload.isDeleted
-        }));
+        return this.getField(fieldNameOrRefName, project).then(field =>
+            remember(fields, { ...field, isDeleted: payload.isDeleted }, f => f.referenceName === field.referenceName)
+        );
     }
 
     createOrUpdateClassificationNode(
@@ -236,15 +247,28 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         const structureType =
             structureGroup === TreeStructureGroup.Areas ? TreeNodeStructureType.Area : TreeNodeStructureType.Iteration;
         const base = makeClassificationNode(postedNode.name, structureType);
-        return Promise.resolve({ ...base, ...postedNode, structureType });
+        const node = { ...base, ...postedNode, structureType };
+        return Promise.resolve(
+            remember(
+                classificationNodes,
+                node,
+                existing => existing.structureType === structureType && existing.path === node.path
+            )
+        );
     }
 
     deleteClassificationNode(
         _project: string,
-        _structureGroup: TreeStructureGroup,
-        _path?: string,
+        structureGroup: TreeStructureGroup,
+        path?: string,
         _reclassifyId?: number
     ): Promise<void> {
+        const structureType =
+            structureGroup === TreeStructureGroup.Areas ? TreeNodeStructureType.Area : TreeNodeStructureType.Iteration;
+        forget(
+            classificationNodes,
+            node => node.structureType === structureType && (node.path === path || node.name === path)
+        );
         return Promise.resolve();
     }
 
@@ -297,14 +321,16 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         query: string,
         _validateWiqlOnly?: boolean
     ): Promise<QueryHierarchyItem> {
-        return Promise.resolve({
+        const created = {
             ...makeQuery(),
             ...postedQuery,
             path: `${query}/${postedQuery.name}`
-        });
+        };
+        return Promise.resolve(remember(queries, created, q => q.id === created.id || q.path === created.path));
     }
 
-    deleteQuery(_project: string, _query: string): Promise<void> {
+    deleteQuery(_project: string, query: string): Promise<void> {
+        forget(queries, q => q.id === query || q.path === query || q.name === query);
         return Promise.resolve();
     }
 
@@ -351,7 +377,8 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         _undeleteDescendants?: boolean
     ): Promise<QueryHierarchyItem> {
         const found = queries.find(q => q.id === query || q.path === query || q.name === query);
-        return Promise.resolve({ ...(found ?? makeQuery(query)), ...queryUpdate });
+        const updated = { ...(found ?? makeQuery(query)), ...queryUpdate };
+        return Promise.resolve(remember(queries, updated, q => q === found));
     }
 
     createAttachment(
@@ -441,25 +468,35 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         );
     }
 
-    destroyWorkItem(_id: number, _project?: string): Promise<void> {
+    destroyWorkItem(id: number, _project?: string): Promise<void> {
+        forget(deletedWorkItems, d => d.id === id);
         return Promise.resolve();
     }
 
     restoreWorkItem(payload: WorkItemDeleteUpdate, id: number, project?: string): Promise<WorkItemDelete> {
-        return this.getDeletedWorkItem(id, project).then(deleted => ({
-            ...deleted,
-            resource: {
-                ...deleted.resource,
-                fields: { ...deleted.resource.fields, "System.IsDeleted": payload.isDeleted }
+        return this.getDeletedWorkItem(id, project).then(deleted => {
+            const restored = {
+                ...deleted,
+                resource: {
+                    ...deleted.resource,
+                    fields: { ...deleted.resource.fields, "System.IsDeleted": payload.isDeleted }
+                }
+            };
+            if (!payload.isDeleted) {
+                forget(deletedWorkItems, d => d.id === id);
+                remember(workItems, restored.resource, w => w.id === id);
             }
-        }));
+            return restored;
+        });
     }
 
     createTemplate(template: WorkItemTemplate, _project: string, _team: string): Promise<WorkItemTemplate> {
-        return Promise.resolve({ ...makeWorkItemTemplate(template.id), ...template });
+        const created = { ...makeWorkItemTemplate(template.id), ...template };
+        return Promise.resolve(remember(templates, created, t => t.id === created.id));
     }
 
-    deleteTemplate(_project: string, _team: string, _templateId: string): Promise<void> {
+    deleteTemplate(_project: string, _team: string, templateId: string): Promise<void> {
+        forget(templates, t => t.id === templateId);
         return Promise.resolve();
     }
 
@@ -481,11 +518,9 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         team: string,
         templateId: string
     ): Promise<WorkItemTemplate> {
-        return this.getTemplate(project, team, templateId).then(existing => ({
-            ...existing,
-            ...templateContent,
-            id: templateId
-        }));
+        return this.getTemplate(project, team, templateId).then(existing =>
+            remember(templates, { ...existing, ...templateContent, id: templateId }, t => t.id === templateId)
+        );
     }
 
     getWorkItemTemplate(
@@ -612,7 +647,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     getWorkItemsBatch(workItemGetRequest: WorkItemBatchGetRequest, _project?: string): Promise<WorkItem[]> {
-        return Promise.resolve(workItemGetRequest.ids.map(id => makeWorkItem(id)));
+        return Promise.resolve(workItemGetRequest.ids.map(readWorkItem));
     }
 
     getRelationType(relation: string): Promise<WorkItemRelationType> {
