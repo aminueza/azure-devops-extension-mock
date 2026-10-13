@@ -7,7 +7,15 @@ import {
     ShallowTestCaseResult,
     TestAttachmentReference,
     TestAttachment,
+    AttachmentType,
     ShallowReference,
+    BuildReference,
+    ReleaseReference,
+    PipelineReference,
+    CustomTestField,
+    TestSubResult,
+    TestRunSubstate,
+    ResultGroupType,
     WorkItemReference,
     LastResultDetails,
     TestPoint,
@@ -76,36 +84,179 @@ const outcomeValues = [
     TestOutcome.Blocked
 ];
 
+const makeOutcomeName = (): string => TestOutcome[fake.helpers.arrayElement(outcomeValues)];
+
+export const makeShallowReference = (): ShallowReference => ({
+    id: String(fake.number.int({ min: 1, max: 100_000 })),
+    name: fake.lorem.slug(),
+    url: fake.internet.url()
+});
+
+export const makeBuildReference = (): BuildReference => ({
+    branchName: `refs/heads/${fake.git.branch()}`,
+    buildSystem: "Azure Pipelines",
+    definitionId: fake.number.int({ min: 1, max: 1_000 }),
+    id: fake.number.id(),
+    number: fake.system.semver(),
+    repositoryId: fake.string.uuid(),
+    uri: `vstfs:///Build/Build/${fake.number.int({ min: 1, max: 100_000 })}`
+});
+
+export const makeReleaseReference = (): ReleaseReference => ({
+    attempt: 1,
+    creationDate: fake.date.recent(),
+    definitionId: fake.number.int({ min: 1, max: 1_000 }),
+    environmentCreationDate: fake.date.recent(),
+    environmentDefinitionId: fake.number.int({ min: 1, max: 1_000 }),
+    environmentDefinitionName: fake.helpers.arrayElement(["Dev", "Staging", "Production"]),
+    environmentId: fake.number.int({ min: 1, max: 100_000 }),
+    environmentName: fake.helpers.arrayElement(["Dev", "Staging", "Production"]),
+    id: fake.number.id(),
+    name: `Release-${fake.number.int({ min: 1, max: 999 })}`
+});
+
+export const makePipelineReference = (): PipelineReference => ({
+    jobReference: { attempt: 1, jobName: fake.lorem.slug() },
+    phaseReference: { attempt: 1, phaseName: fake.lorem.slug() },
+    pipelineDefinitionId: fake.number.int({ min: 1, max: 1_000 }),
+    pipelineId: fake.number.int({ min: 1, max: 100_000 }),
+    stageReference: { attempt: 1, stageName: fake.lorem.slug() }
+});
+
+export const makeTestResultsContext = (
+    contextType: TestResultsContextType = TestResultsContextType.Build
+): TestResultsContext => ({
+    build: makeBuildReference(),
+    contextType,
+    pipelineReference: makePipelineReference(),
+    release: makeReleaseReference()
+});
+
+export const makeCustomTestField = (): CustomTestField => ({
+    fieldName: fake.lorem.word(),
+    value: fake.lorem.slug()
+});
+
+export const makeBuildConfiguration = (): BuildConfiguration => ({
+    branchName: fake.git.branch(),
+    buildDefinitionId: fake.number.int({ min: 1, max: 1_000 }),
+    buildSystem: "Azure Pipelines",
+    creationDate: fake.date.recent(),
+    flavor: fake.helpers.arrayElement(["Debug", "Release"]),
+    id: fake.number.id(),
+    number: fake.system.semver(),
+    platform: fake.helpers.arrayElement(["x64", "x86", "ARM64"]),
+    project: makeShallowReference(),
+    repositoryGuid: fake.string.uuid(),
+    repositoryId: fake.number.int({ min: 1, max: 1_000 }),
+    repositoryType: "TfsGit",
+    sourceVersion: fake.git.commitSha(),
+    targetBranchName: fake.git.branch(),
+    uri: fake.internet.url()
+});
+
+export const makeRunStatistic = (): RunStatistic => ({
+    count: fake.number.int({ min: 1, max: 500 }),
+    outcome: "Passed",
+    resolutionState: {
+        id: fake.number.id(),
+        name: fake.lorem.word(),
+        project: makeShallowReference()
+    },
+    resultMetadata: ResultMetadata.Flaky,
+    state: "Completed"
+});
+
 export const makeTestRun = (id?: number): TestRun => ({
     id: id ?? fake.number.int({ min: 1, max: 100_000 }),
     name: `Test Run ${fake.lorem.slug()}`,
     url: fake.internet.url(),
     isAutomated: true,
-    state: TestRunState.Completed as unknown as string,
+    state: TestRunState[TestRunState.Completed],
     startedDate: fake.date.recent(),
     completedDate: fake.date.recent(),
-    owner: makeIdentityRef() as any,
-    build: { id: String(fake.number.int()), name: fake.lorem.slug() } as any,
-    project: { id: fake.string.uuid(), name: fake.company.name() } as any,
+    owner: makeIdentityRef(),
+    build: makeShallowReference(),
+    project: { id: fake.string.uuid(), name: fake.company.name(), url: fake.internet.url() },
     totalTests: 100,
     passedTests: 95,
     incompleteTests: 0,
     unanalyzedTests: 0,
     notApplicableTests: 0,
     iteration: `Sprint ${fake.number.int({ min: 1, max: 30 })}`,
-    webAccessUrl: fake.internet.url()
-} as unknown as TestRun);
+    webAccessUrl: fake.internet.url(),
+    buildConfiguration: makeBuildConfiguration(),
+    comment: fake.lorem.sentence(),
+    controller: fake.internet.domainName(),
+    createdDate: fake.date.recent(),
+    customFields: [makeCustomTestField()],
+    dropLocation: `\\\\drops\\${fake.lorem.slug()}`,
+    dtlAutEnvironment: makeShallowReference(),
+    dtlEnvironment: makeShallowReference(),
+    dtlEnvironmentCreationDetails: {
+        csmContent: "{}",
+        csmParameters: "{}",
+        subscriptionName: fake.company.name()
+    },
+    dueDate: fake.date.future(),
+    errorMessage: "",
+    filter: { sourceFilter: "*.dll", testCaseFilter: "" },
+    lastUpdatedBy: makeIdentityRef(),
+    lastUpdatedDate: fake.date.recent(),
+    phase: "Test",
+    pipelineReference: makePipelineReference(),
+    plan: makeShallowReference(),
+    postProcessState: "Complete",
+    release: makeReleaseReference(),
+    releaseEnvironmentUri: `vstfs:///ReleaseManagement/Environment/${fake.number.int({ min: 1, max: 100_000 })}`,
+    releaseUri: `vstfs:///ReleaseManagement/Release/${fake.number.int({ min: 1, max: 100_000 })}`,
+    revision: 1,
+    runStatistics: [makeRunStatistic()],
+    substate: TestRunSubstate.None,
+    tags: [{ name: fake.lorem.word() }],
+    testEnvironment: {
+        environmentId: fake.string.uuid(),
+        environmentName: fake.lorem.slug()
+    },
+    testMessageLogId: fake.number.int({ min: 1, max: 100_000 }),
+    testSettings: makeShallowReference()
+});
+
+export const makeTestSubResult = (): TestSubResult => ({
+    comment: fake.lorem.sentence(),
+    completedDate: fake.date.recent(),
+    computerName: fake.internet.domainName(),
+    configuration: makeShallowReference(),
+    customFields: [makeCustomTestField()],
+    displayName: fake.lorem.slug(),
+    durationInMs: fake.number.int({ min: 1, max: 10_000 }),
+    errorMessage: "",
+    id: fake.number.id(),
+    lastUpdatedDate: fake.date.recent(),
+    outcome: makeOutcomeName(),
+    parentId: 0,
+    resultGroupType: ResultGroupType.None,
+    sequenceId: 1,
+    stackTrace: "",
+    startedDate: fake.date.recent(),
+    subResults: [],
+    testResult: {
+        testResultId: fake.number.int({ min: 1, max: 100_000 }),
+        testRunId: fake.number.int({ min: 1, max: 100_000 })
+    },
+    url: fake.internet.url()
+});
 
 export const makeTestCaseResult = (id?: number): TestCaseResult => ({
     id: id ?? fake.number.int(),
-    testRun: { id: String(fake.number.int()) } as any,
+    testRun: makeShallowReference(),
     testCase: {
         id: String(fake.number.int()),
         name: fake.lorem.sentence(),
         url: fake.internet.url()
-    } as any,
+    },
     testCaseTitle: fake.lorem.sentence(),
-    outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
+    outcome: makeOutcomeName(),
     state: "Completed",
     automatedTestName: fake.lorem.slug(),
     automatedTestStorage: fake.system.fileName(),
@@ -114,11 +265,78 @@ export const makeTestCaseResult = (id?: number): TestCaseResult => ({
     durationInMs: fake.number.int({ min: 1, max: 10_000 }),
     startedDate: fake.date.recent(),
     completedDate: fake.date.recent(),
-    runBy: makeIdentityRef() as any,
-    owner: makeIdentityRef() as any,
-    build: { id: String(fake.number.int()), name: fake.lorem.slug() } as any,
-    project: { id: fake.string.uuid(), name: fake.company.name() } as any
-} as unknown as TestCaseResult);
+    runBy: makeIdentityRef(),
+    owner: makeIdentityRef(),
+    build: makeShallowReference(),
+    project: { id: fake.string.uuid(), name: fake.company.name(), url: fake.internet.url() },
+    afnStripId: 0,
+    analysisFailureGroups: [
+        {
+            classificationCategory: "Product",
+            dimensions: { branch: fake.git.branch() },
+            displayReason: fake.lorem.sentence(),
+            displayTitle: fake.lorem.words(3),
+            failureGroupId: fake.number.int({ min: 1, max: 10_000 }),
+            uid: fake.string.uuid()
+        }
+    ],
+    area: makeShallowReference(),
+    associatedBugs: [makeShallowReference()],
+    attempt: 1,
+    automatedTestId: fake.string.uuid(),
+    automatedTestType: "UnitTest",
+    automatedTestTypeId: fake.string.uuid(),
+    bucketingSystem: "",
+    bucketUid: fake.string.uuid(),
+    buildReference: makeBuildReference(),
+    buildType: "Build",
+    comment: fake.lorem.sentence(),
+    computerName: fake.internet.domainName(),
+    configuration: makeShallowReference(),
+    createdDate: fake.date.recent(),
+    customFields: [makeCustomTestField()],
+    dimensions: [{ name: "os", value: fake.helpers.arrayElement(["linux", "windows", "macos"]) }],
+    errorMessage: "",
+    exceptionType: "",
+    executionNumber: 1,
+    failingSince: {
+        build: makeBuildReference(),
+        date: fake.date.recent(),
+        release: makeReleaseReference()
+    },
+    failureType: "None",
+    isSystemIssue: false,
+    iterationDetails: [],
+    lastUpdatedBy: makeIdentityRef(),
+    lastUpdatedDate: fake.date.recent(),
+    layoutUid: fake.string.uuid(),
+    links: [
+        {
+            displayName: fake.lorem.words(2),
+            operationType: "add",
+            type: "MoreInfo",
+            url: fake.internet.url()
+        }
+    ],
+    locale: "en-US",
+    release: makeShallowReference(),
+    releaseReference: makeReleaseReference(),
+    resetCount: 0,
+    resolutionState: "",
+    resolutionStateId: 0,
+    resultGroupType: ResultGroupType.None,
+    sourceSystemTestCaseId: String(fake.number.int({ min: 1, max: 100_000 })),
+    stackTrace: "",
+    subResults: [makeTestSubResult()],
+    testCaseReferenceId: fake.number.int({ min: 1, max: 100_000 }),
+    testCaseRevision: 1,
+    testPhase: "Test",
+    testPlan: makeShallowReference(),
+    testPoint: makeShallowReference(),
+    testSuite: makeShallowReference(),
+    topologyId: 0,
+    url: fake.internet.url()
+});
 
 export const makeShallowResult = (): ShallowTestCaseResult => ({
     id: fake.number.id(),
@@ -130,35 +348,31 @@ export const makeShallowResult = (): ShallowTestCaseResult => ({
     outcome: fake.helpers.arrayElement(["Passed", "Failed", "NotExecuted"]),
     priority: fake.number.int({ min: 1, max: 4 }),
     isReRun: false,
-    owner: fake.person.fullName()
-} as unknown as ShallowTestCaseResult);
+    owner: fake.person.fullName(),
+    durationInMs: fake.number.int({ min: 1, max: 10_000 }),
+    tags: [fake.lorem.word()]
+});
 
 export const makeAttachment = (): TestAttachment => ({
     id: fake.number.id(),
     fileName: fake.system.fileName(),
     comment: fake.lorem.sentence(),
-    attachmentType: "GeneralAttachment" as any,
+    attachmentType: AttachmentType.GeneralAttachment,
     size: fake.number.int({ min: 1, max: 10_000_000 }),
     createdDate: fake.date.recent(),
     url: fake.internet.url()
-} as unknown as TestAttachment);
+});
 
 export const makeAttachmentRef = (): TestAttachmentReference => ({
     id: fake.number.id(),
     url: fake.internet.url()
-} as unknown as TestAttachmentReference);
+});
 
 export const testRuns: TestRun[] = Array.from({ length: 5 }, () => makeTestRun());
 export const testResults: TestCaseResult[] = Array.from({ length: 10 }, () => makeTestCaseResult());
 export const shallowResults: PagedList<ShallowTestCaseResult> =
-    Object.assign(Array.from({ length: 10 }, makeShallowResult), { continuationToken: "" }) as PagedList<ShallowTestCaseResult>;
+    Object.assign(Array.from({ length: 10 }, makeShallowResult), { continuationToken: "" });
 export const attachments: TestAttachment[] = Array.from({ length: 2 }, makeAttachment);
-
-export const makeShallowReference = (): ShallowReference => ({
-    id: String(fake.number.int({ min: 1, max: 100_000 })),
-    name: fake.lorem.slug(),
-    url: fake.internet.url()
-});
 
 export const makeWorkItemReference = (): WorkItemReference => ({
     id: String(fake.number.int({ min: 1, max: 100_000 })),
@@ -190,7 +404,7 @@ export const makeTestPoint = (): TestPoint => ({
     lastTestRun: makeShallowReference(),
     lastUpdatedBy: makeIdentityRef(),
     lastUpdatedDate: fake.date.recent(),
-    outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
+    outcome: makeOutcomeName(),
     revision: 1,
     state: "Ready",
     suite: makeShallowReference(),
@@ -277,7 +491,7 @@ export const makeTestActionResult = (): TestActionResultModel => ({
     durationInMs: fake.number.int({ min: 1, max: 10_000 }),
     errorMessage: fake.lorem.sentence(),
     iterationId: fake.number.int({ min: 1, max: 20 }),
-    outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
+    outcome: makeOutcomeName(),
     sharedStepModel: {
         id: fake.number.id(),
         revision: fake.number.int({ min: 1, max: 10 })
@@ -313,7 +527,7 @@ export const makeTestIterationDetails = (): TestIterationDetailsModel => ({
     durationInMs: fake.number.int({ min: 1, max: 10_000 }),
     errorMessage: fake.lorem.sentence(),
     id: fake.number.id(),
-    outcome: fake.helpers.arrayElement(outcomeValues) as unknown as string,
+    outcome: makeOutcomeName(),
     parameters: [makeTestResultParameter()],
     startedDate: fake.date.recent(),
     url: fake.internet.url()
@@ -351,9 +565,7 @@ export const makeResultsFilter = (): ResultsFilter => ({
     testCaseReferenceIds: [fake.number.int({ min: 1, max: 100_000 })],
     testPlanId: fake.number.int({ min: 1, max: 1_000 }),
     testPointIds: [fake.number.int({ min: 1, max: 100_000 })],
-    testResultsContext: {
-        contextType: TestResultsContextType.Build
-    } as unknown as TestResultsContext,
+    testResultsContext: makeTestResultsContext(),
     trendDays: fake.number.int({ min: 1, max: 30 })
 });
 
@@ -424,24 +636,6 @@ export const makeModuleCoverage = (): ModuleCoverage => ({
     statistics: makeCoverageStatistics()
 });
 
-export const makeBuildConfiguration = (): BuildConfiguration => ({
-    branchName: fake.git.branch(),
-    buildDefinitionId: fake.number.int({ min: 1, max: 1_000 }),
-    buildSystem: "Azure Pipelines",
-    creationDate: fake.date.recent(),
-    flavor: fake.helpers.arrayElement(["Debug", "Release"]),
-    id: fake.number.id(),
-    number: fake.system.semver(),
-    platform: fake.helpers.arrayElement(["x64", "x86", "ARM64"]),
-    project: makeShallowReference(),
-    repositoryGuid: fake.string.uuid(),
-    repositoryId: fake.number.int({ min: 1, max: 1_000 }),
-    repositoryType: "TfsGit",
-    sourceVersion: fake.git.commitSha(),
-    targetBranchName: fake.git.branch(),
-    uri: fake.internet.url()
-});
-
 export const makeBuildCoverage = (): BuildCoverage => ({
     codeCoverageFileUrl: fake.internet.url(),
     configuration: makeBuildConfiguration(),
@@ -484,18 +678,6 @@ export const makeTestMessageLogDetails = (): TestMessageLogDetails => ({
     dateCreated: fake.date.recent(),
     entryId: fake.number.int({ min: 1, max: 10_000 }),
     message: fake.lorem.sentence()
-});
-
-export const makeRunStatistic = (): RunStatistic => ({
-    count: fake.number.int({ min: 1, max: 500 }),
-    outcome: "Passed",
-    resolutionState: {
-        id: fake.number.id(),
-        name: fake.lorem.word(),
-        project: makeShallowReference()
-    },
-    resultMetadata: ResultMetadata.Flaky,
-    state: "Completed"
 });
 
 export const makeTestRunStatistic = (runId: string): TestRunStatistic => ({
@@ -584,7 +766,7 @@ export const makeAggregatedDataForResultTrend = (): AggregatedDataForResultTrend
     duration: `PT${fake.number.int({ min: 1, max: 600 })}S`,
     resultsByOutcome: { [TestOutcome.Passed]: makeAggregatedResultsByOutcome() },
     runSummaryByState: { [TestRunState.Completed]: makeAggregatedRunsByState() },
-    testResultsContext: { contextType: TestResultsContextType.Build } as unknown as TestResultsContext,
+    testResultsContext: makeTestResultsContext(),
     totalTests: fake.number.int({ min: 1, max: 500 })
 });
 
@@ -597,7 +779,7 @@ export const makeTestResultSummary = (): TestResultSummary => ({
     aggregatedResultsAnalysis: {
         duration: `PT${fake.number.int({ min: 1, max: 600 })}S`,
         notReportedResultsByOutcome: { [TestOutcome.NotExecuted]: makeAggregatedResultsByOutcome() },
-        previousContext: { contextType: TestResultsContextType.Build } as unknown as TestResultsContext,
+        previousContext: makeTestResultsContext(),
         resultsByOutcome: { [TestOutcome.Passed]: makeAggregatedResultsByOutcome() },
         resultsDifference: {
             increaseInDuration: `PT${fake.number.int({ min: 1, max: 60 })}S`,
@@ -622,9 +804,9 @@ export const makeTestResultSummary = (): TestResultSummary => ({
         existingFailures: { count: fake.number.int({ min: 0, max: 5 }), testResults: [] },
         fixedTests: { count: fake.number.int({ min: 0, max: 5 }), testResults: [] },
         newFailures: { count: fake.number.int({ min: 0, max: 5 }), testResults: [] },
-        previousContext: { contextType: TestResultsContextType.Build } as unknown as TestResultsContext
+        previousContext: makeTestResultsContext()
     },
-    testResultsContext: { contextType: TestResultsContextType.Build } as unknown as TestResultsContext,
+    testResultsContext: makeTestResultsContext(),
     totalRunsCount: fake.number.int({ min: 1, max: 20 })
 });
 

@@ -65,6 +65,9 @@ import {
     linkedBugs,
     makeAggregatedDataForResultTrend,
     makeAttachmentRef,
+    makeBuildReference,
+    makeReleaseReference,
+    makeTestResultsContext,
     makeBuffer,
     makeCodeCoverageSummary,
     makeCustomTestFieldDefinition,
@@ -685,7 +688,7 @@ export class MockTestRestClient extends RestClientBase {
             ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName }))
             : resultGroups;
         return Promise.resolve(
-            Object.assign([...groups], { continuationToken: null }) as PagedList<FieldDetailsForTestResults>
+            Object.assign([...groups], { continuationToken: null })
         );
     }
 
@@ -701,7 +704,7 @@ export class MockTestRestClient extends RestClientBase {
             ? fields.map(fieldName => ({ ...makeFieldDetailsForTestResults(), fieldName }))
             : resultGroups;
         return Promise.resolve(
-            Object.assign([...groups], { continuationToken: null }) as PagedList<FieldDetailsForTestResults>
+            Object.assign([...groups], { continuationToken: null })
         );
     }
 
@@ -737,9 +740,9 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve({
             ...makeTestResultSummary(),
             testResultsContext: {
-                contextType: TestResultsContextType.Build,
-                build: { id: buildId }
-            } as unknown as TestResultsContext
+                ...makeTestResultsContext(TestResultsContextType.Build),
+                build: { ...makeBuildReference(), id: buildId }
+            }
         });
     }
 
@@ -754,9 +757,9 @@ export class MockTestRestClient extends RestClientBase {
         return Promise.resolve({
             ...makeTestResultSummary(),
             testResultsContext: {
-                contextType: TestResultsContextType.Release,
-                release: { id: releaseId, environmentId: releaseEnvId }
-            } as unknown as TestResultsContext
+                ...makeTestResultsContext(TestResultsContextType.Release),
+                release: { ...makeReleaseReference(), id: releaseId, environmentId: releaseEnvId }
+            }
         });
     }
 
@@ -767,9 +770,9 @@ export class MockTestRestClient extends RestClientBase {
         const summaries = releases.map(release => ({
             ...makeTestResultSummary(),
             testResultsContext: {
-                contextType: TestResultsContextType.Release,
+                ...makeTestResultsContext(TestResultsContextType.Release),
                 release
-            } as unknown as TestResultsContext
+            }
         }));
         return Promise.resolve(summaries);
     }
@@ -833,7 +836,7 @@ export class MockTestRestClient extends RestClientBase {
             return inRange && (state === undefined || run.state === TestRunState[state]);
         });
         return Promise.resolve(
-            Object.assign([...matched], { continuationToken: null }) as PagedList<TestRun>
+            Object.assign([...matched], { continuationToken: null })
         );
     }
 
