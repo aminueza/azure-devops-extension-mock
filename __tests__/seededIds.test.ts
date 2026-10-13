@@ -13,6 +13,7 @@ import * as gallery from "../azure-devops-extension-api/gallery/Data";
 import * as git from "../azure-devops-extension-api/git/Data";
 import * as graph from "../azure-devops-extension-api/graph/Data";
 import * as operations from "../azure-devops-extension-api/operations/Data";
+import * as notification from "../azure-devops-extension-api/notification/Data";
 import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
 import * as policy from "../azure-devops-extension-api/policy/Data";
 import * as projectAnalysis from "../azure-devops-extension-api/projectAnalysis/Data";
@@ -27,6 +28,7 @@ import * as profile from "../azure-devops-extension-api/profile/Data";
 import * as release from "../azure-devops-extension-api/release/Data";
 import * as resourceUsage from "../azure-devops-extension-api/resourceUsage/Data";
 import * as serviceEndpoint from "../azure-devops-extension-api/serviceEndpoint/Data";
+import * as serviceHooks from "../azure-devops-extension-api/serviceHooks/Data";
 import * as taskAgent from "../azure-devops-extension-api/taskAgent/Data";
 import * as test from "../azure-devops-extension-api/test/Data";
 import * as testPlan from "../azure-devops-extension-api/testPlan/Data";
@@ -54,6 +56,7 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["git", git],
     ["graph", graph],
     ["operations", operations],
+    ["notification", notification],
     ["pipelines", pipelines],
     ["policy", policy],
     ["projectAnalysis", projectAnalysis],
@@ -68,6 +71,7 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["release", release],
     ["resourceUsage", resourceUsage],
     ["serviceEndpoint", serviceEndpoint],
+    ["serviceHooks", serviceHooks],
     ["taskAgent", taskAgent],
     ["test", test],
     ["testPlan", testPlan],

@@ -14,6 +14,7 @@ import { GalleryRestClient } from "azure-devops-extension-api/Gallery";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
+import { NotificationRestClient } from "azure-devops-extension-api/Notification";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
@@ -28,6 +29,7 @@ import { ProfileRestClient } from "azure-devops-extension-api/Profile";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
+import { ServiceHooksRestClient } from "azure-devops-extension-api/ServiceHooks";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
@@ -60,6 +62,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     GitRestClient,
     GraphRestClient,
     OperationsRestClient,
+    NotificationRestClient,
     PipelinesRestClient,
     PolicyRestClient,
     ProjectAnalysisRestClient,
@@ -74,6 +77,7 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     ReleaseRestClient,
     ResourceUsageRestClient,
     ServiceEndpointRestClient,
+    ServiceHooksRestClient,
     TaskAgentRestClient,
     TestRestClient,
     TestPlanRestClient,

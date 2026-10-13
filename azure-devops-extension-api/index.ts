@@ -15,6 +15,7 @@ import { GalleryRestClient } from "azure-devops-extension-api/Gallery";
 import { GitRestClient } from "azure-devops-extension-api/Git";
 import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { OperationsRestClient } from "azure-devops-extension-api/Operations";
+import { NotificationRestClient } from "azure-devops-extension-api/Notification";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
@@ -29,6 +30,7 @@ import { ProfileRestClient } from "azure-devops-extension-api/Profile";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
+import { ServiceHooksRestClient } from "azure-devops-extension-api/ServiceHooks";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
@@ -63,6 +65,7 @@ import { MockGalleryRestClient } from "./gallery/Gallery";
 import { MockGitRestClient } from "./git/Git";
 import { MockGraphRestClient } from "./graph/Graph";
 import { MockOperationsRestClient } from "./operations/Operations";
+import { MockNotificationRestClient } from "./notification/Notification";
 import { MockPipelinesRestClient } from "./pipelines/Pipelines";
 import { MockPolicyRestClient } from "./policy/Policy";
 import { MockProjectAnalysisRestClient } from "./projectAnalysis/ProjectAnalysis";
@@ -77,6 +80,7 @@ import { MockProfileRestClient } from "./profile/Profile";
 import { MockReleaseRestClient } from "./release/Release";
 import { MockResourceUsageRestClient } from "./resourceUsage/ResourceUsage";
 import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint";
+import { MockServiceHooksRestClient } from "./serviceHooks/ServiceHooks";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
 import { MockTestPlanRestClient } from "./testPlan/TestPlan";
@@ -111,6 +115,7 @@ registerMockClient(GalleryRestClient, MockGalleryRestClient);
 registerMockClient(GitRestClient, MockGitRestClient);
 registerMockClient(GraphRestClient, MockGraphRestClient);
 registerMockClient(OperationsRestClient, MockOperationsRestClient);
+registerMockClient(NotificationRestClient, MockNotificationRestClient);
 registerMockClient(PipelinesRestClient, MockPipelinesRestClient);
 registerMockClient(PolicyRestClient, MockPolicyRestClient);
 registerMockClient(ProjectAnalysisRestClient, MockProjectAnalysisRestClient);
@@ -125,6 +130,7 @@ registerMockClient(ProfileRestClient, MockProfileRestClient);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient);
 registerMockClient(ResourceUsageRestClient, MockResourceUsageRestClient);
 registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient);
+registerMockClient(ServiceHooksRestClient, MockServiceHooksRestClient);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient);
 registerMockClient(TestRestClient, MockTestRestClient);
 registerMockClient(TestPlanRestClient, MockTestPlanRestClient);
@@ -194,6 +200,7 @@ export {
     MockGitRestClient,
     MockGraphRestClient,
     MockOperationsRestClient,
+    MockNotificationRestClient,
     MockPipelinesRestClient,
     MockPolicyRestClient,
     MockProjectAnalysisRestClient,
@@ -209,6 +216,7 @@ export {
     MockResourceUsageRestClient,
     MockReportingRestClient,
     MockServiceEndpointRestClient,
+    MockServiceHooksRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
     MockTestPlanRestClient,
