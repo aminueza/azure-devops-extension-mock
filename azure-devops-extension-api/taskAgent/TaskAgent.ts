@@ -40,7 +40,32 @@ import {
     TaskAgentJobResultFilter,
     TaskAgentStatus,
     TaskAgentStatusFilter,
-    TaskResult
+    TaskResult,
+    AzureManagementGroupQueryResult,
+    AzureSubscriptionQueryResult,
+    EnvironmentCreateParameter,
+    EnvironmentDeploymentExecutionRecord,
+    EnvironmentExpands,
+    EnvironmentInstance,
+    EnvironmentUpdateParameter,
+    InputValidationRequest,
+    KubernetesResource,
+    KubernetesResourceCreateParameters,
+    PackageMetadata,
+    PublishTaskGroupMetadata,
+    SecureFile,
+    SecureFileActionFilter,
+    TaskDefinition,
+    TaskDefinitionEndpoint,
+    TaskGroupCreateParameter,
+    TaskGroupExpands,
+    TaskGroupRevision,
+    TaskGroupUpdateParameter,
+    TaskGroupUpdatePropertiesBase,
+    VariableGroupProjectReference,
+    VirtualMachine,
+    VirtualMachineGroup,
+    VirtualMachineGroupCreateParameters
 } from "azure-devops-extension-api/TaskAgent";
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import {
@@ -80,6 +105,28 @@ import {
     taskGroups,
     variableGroups,
     vstsAadTenantId,
+    azureManagementGroups,
+    azureSubscriptions,
+    endpointQueryResults,
+    environmentDeploymentRecords,
+    environments,
+    kubernetesResources,
+    makeEnvironment,
+    makeKubernetesResource,
+    makePackageMetadata,
+    makeSecureFile,
+    makeTaskDefinition,
+    makeTaskGroup,
+    makeVirtualMachine,
+    makeVirtualMachineGroup,
+    packages,
+    parsePackageVersion,
+    secureFiles,
+    taskDefinitions,
+    taskGroupRevisions,
+    virtualMachineGroups,
+    virtualMachines,
+    yamlSchema
 } from "./Data";
 
 const page = <T>(items: T[], continuationToken: string | null): PagedList<T> =>
@@ -106,7 +153,7 @@ const machineById = (machineId: number): DeploymentMachine => {
     return found ?? { ...makeDeploymentMachine(), id: machineId };
 };
 
-const byTags = (machines: DeploymentMachine[], tags?: string[]): DeploymentMachine[] => {
+const byTags = <T extends { tags: string[] }>(machines: T[], tags?: string[]): T[] => {
     return tags === undefined
         ? machines
         : machines.filter(m => tags.every(tag => m.tags.includes(tag)));
@@ -120,11 +167,11 @@ const stampGroupMachine = (
     return { ...machine, properties: { ...machine.properties, project, machineGroupId } };
 };
 
-const byMachineName = (
-    machines: DeploymentMachine[],
+const byMachineName = <T extends { agent: { name: string } }>(
+    machines: T[],
     name?: string,
     partialNameMatch?: boolean
-): DeploymentMachine[] => {
+): T[] => {
     return name === undefined
         ? machines
         : machines.filter(m =>
@@ -172,6 +219,47 @@ const statusMatches = (
         return machine.agent.status === TaskAgentStatus.Offline;
     }
     return true;
+};
+
+const environmentById = (environmentId: number): EnvironmentInstance => {
+    const found = environments.find(e => e.id === environmentId);
+    return found ?? { ...makeEnvironment(), id: environmentId };
+};
+
+const inProject = (environment: EnvironmentInstance, project: string): EnvironmentInstance => {
+    return { ...environment, project: { ...environment.project, name: project } };
+};
+
+const inEnvironment = <T extends { environmentReference: { id: number; name: string } }>(
+    resource: T,
+    environmentId: number
+): T => {
+    return {
+        ...resource,
+        environmentReference: { ...resource.environmentReference, id: environmentId }
+    };
+};
+
+const withTicket = (file: SecureFile, includeDownloadTicket?: boolean): SecureFile => {
+    return includeDownloadTicket === true ? file : { ...file, ticket: "" };
+};
+
+const byNamePattern = (files: SecureFile[], namePattern?: string): SecureFile[] => {
+    return namePattern === undefined ? files : files.filter(f => f.name.includes(namePattern));
+};
+
+const taskGroupById = (taskGroupId: string): TaskGroup => {
+    const found = taskGroups.find(g => g.id === taskGroupId);
+    return found ?? { ...makeTaskGroup(), id: taskGroupId };
+};
+
+const samePackageVersion = (item: PackageMetadata, version: string): boolean => {
+    const wanted = parsePackageVersion(version);
+    return (
+        item.version.major === wanted.major &&
+        item.version.minor === wanted.minor &&
+        item.version.patch === wanted.patch
+    );
 };
 
 export class MockTaskAgentRestClient extends RestClientBase {
@@ -1052,8 +1140,421 @@ export class MockTaskAgentRestClient extends RestClientBase {
             requestsForMachines(deploymentGroupId, targetIds, completedRequestCount)
         );
     }
+
+    getAzureManagementGroups(): Promise<AzureManagementGroupQueryResult> {
+        return Promise.resolve({ errorMessage: "", value: azureManagementGroups });
+    }
+
+    getAzureSubscriptions(): Promise<AzureSubscriptionQueryResult> {
+        return Promise.resolve({ errorMessage: "", value: azureSubscriptions });
+    }
+
+    queryEndpoint(_endpoint: TaskDefinitionEndpoint): Promise<string[]> {
+        return Promise.resolve(endpointQueryResults);
+    }
+
+    getEnvironmentDeploymentExecutionRecords(
+        project: string,
+        environmentId: number,
+        continuationToken?: string,
+        top?: number
+    ): Promise<PagedList<EnvironmentDeploymentExecutionRecord>> {
+        const items = take(environmentDeploymentRecords, top).map(r => ({
+            ...r,
+            environmentId,
+            scopeId: project
+        }));
+        return Promise.resolve(page(items, continuationToken ?? null));
+    }
+
+    addEnvironment(
+        environmentCreateParameter: EnvironmentCreateParameter,
+        project: string
+    ): Promise<EnvironmentInstance> {
+        const created = {
+            ...makeEnvironment(),
+            name: environmentCreateParameter.name,
+            description: environmentCreateParameter.description,
+            resources: []
+        };
+        return Promise.resolve(inProject(created, project));
+    }
+
+    deleteEnvironment(_project: string, _environmentId: number): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getEnvironmentById(
+        project: string,
+        environmentId: number,
+        _expands?: EnvironmentExpands
+    ): Promise<EnvironmentInstance> {
+        return Promise.resolve(inProject(environmentById(environmentId), project));
+    }
+
+    getEnvironments(
+        project: string,
+        name?: string,
+        continuationToken?: string,
+        top?: number
+    ): Promise<PagedList<EnvironmentInstance>> {
+        const matched =
+            name === undefined ? environments : environments.filter(e => e.name === name);
+        const items = take(matched, top).map(e => inProject(e, project));
+        return Promise.resolve(page(items, continuationToken ?? null));
+    }
+
+    updateEnvironment(
+        environmentUpdateParameter: EnvironmentUpdateParameter,
+        project: string,
+        environmentId: number
+    ): Promise<EnvironmentInstance> {
+        const updated = {
+            ...environmentById(environmentId),
+            name: environmentUpdateParameter.name,
+            description: environmentUpdateParameter.description
+        };
+        return Promise.resolve(inProject(updated, project));
+    }
+
+    validateInputs(
+        inputValidationRequest: InputValidationRequest
+    ): Promise<InputValidationRequest> {
+        const inputs = Object.fromEntries(
+            Object.entries(inputValidationRequest.inputs).map(([key, item]) => [
+                key,
+                { ...item, isValid: true, reason: "" }
+            ])
+        );
+        return Promise.resolve({ inputs });
+    }
+
+    addKubernetesResource(
+        createParameters: KubernetesResourceCreateParameters,
+        _project: string,
+        environmentId: number
+    ): Promise<KubernetesResource> {
+        const created = {
+            ...makeKubernetesResource(),
+            name: createParameters.name,
+            clusterName: createParameters.clusterName,
+            namespace: createParameters.namespace,
+            tags: createParameters.tags
+        };
+        return Promise.resolve(inEnvironment(created, environmentId));
+    }
+
+    deleteKubernetesResource(
+        _project: string,
+        _environmentId: number,
+        _resourceId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getKubernetesResource(
+        _project: string,
+        environmentId: number,
+        resourceId: number
+    ): Promise<KubernetesResource> {
+        const found = kubernetesResources.find(r => r.id === resourceId);
+        const base = found ?? { ...makeKubernetesResource(), id: resourceId };
+        return Promise.resolve(inEnvironment(base, environmentId));
+    }
+
+    getPackage(packageType: string, platform: string, version: string): Promise<PackageMetadata> {
+        const found = packages.find(
+            p => p.type === packageType && p.platform === platform && samePackageVersion(p, version)
+        );
+        return Promise.resolve(found ?? makePackageMetadata(packageType, platform, version));
+    }
+
+    getPackages(packageType: string, platform?: string, top?: number): Promise<PackageMetadata[]> {
+        const matched = packages.filter(
+            p => p.type === packageType && (platform === undefined || p.platform === platform)
+        );
+        return Promise.resolve(take(matched, top));
+    }
+
+    getTaskGroupHistory(_project: string, taskGroupId: string): Promise<TaskGroupRevision[]> {
+        return Promise.resolve(taskGroupRevisions.map(r => ({ ...r, taskGroupId })));
+    }
+
+    deleteSecureFile(_project: string, _secureFileId: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    downloadSecureFile(
+        project: string,
+        secureFileId: string,
+        ticket: string,
+        _download?: boolean
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`${project}-secure-file-${secureFileId}-${ticket}`));
+    }
+
+    getSecureFile(
+        _project: string,
+        secureFileId: string,
+        includeDownloadTicket?: boolean,
+        _actionFilter?: SecureFileActionFilter
+    ): Promise<SecureFile> {
+        const found = secureFiles.find(f => f.id === secureFileId);
+        const file = found ?? { ...makeSecureFile(), id: secureFileId };
+        return Promise.resolve(withTicket(file, includeDownloadTicket));
+    }
+
+    getSecureFiles(
+        _project: string,
+        namePattern?: string,
+        includeDownloadTickets?: boolean,
+        _actionFilter?: SecureFileActionFilter
+    ): Promise<SecureFile[]> {
+        const matched = byNamePattern(secureFiles, namePattern);
+        return Promise.resolve(matched.map(f => withTicket(f, includeDownloadTickets)));
+    }
+
+    getSecureFilesByIds(
+        _project: string,
+        secureFileIds: string[],
+        includeDownloadTickets?: boolean,
+        _actionFilter?: SecureFileActionFilter
+    ): Promise<SecureFile[]> {
+        const matched = secureFiles.filter(f => secureFileIds.includes(f.id));
+        return Promise.resolve(matched.map(f => withTicket(f, includeDownloadTickets)));
+    }
+
+    getSecureFilesByNames(
+        _project: string,
+        secureFileNames: string[],
+        includeDownloadTickets?: boolean,
+        _actionFilter?: SecureFileActionFilter
+    ): Promise<SecureFile[]> {
+        const matched = secureFiles.filter(f => secureFileNames.includes(f.name));
+        return Promise.resolve(matched.map(f => withTicket(f, includeDownloadTickets)));
+    }
+
+    querySecureFilesByProperties(
+        _condition: string,
+        _project: string,
+        namePattern?: string
+    ): Promise<SecureFile[]> {
+        const matched = byNamePattern(secureFiles, namePattern);
+        return Promise.resolve(matched.map(f => withTicket(f)));
+    }
+
+    updateSecureFile(
+        secureFile: SecureFile,
+        _project: string,
+        secureFileId: string
+    ): Promise<SecureFile> {
+        return Promise.resolve({ ...makeSecureFile(), ...secureFile, id: secureFileId });
+    }
+
+    updateSecureFiles(secureFiles: SecureFile[], _project: string): Promise<SecureFile[]> {
+        return Promise.resolve(secureFiles.map(f => ({ ...makeSecureFile(), ...f })));
+    }
+
+    uploadSecureFile(
+        _content: any,
+        _project: string,
+        name: string,
+        _authorizePipelines?: boolean
+    ): Promise<SecureFile> {
+        return Promise.resolve(withTicket(makeSecureFile(name)));
+    }
+
+    addTaskGroup(taskGroup: TaskGroupCreateParameter, _project: string): Promise<TaskGroup> {
+        return Promise.resolve({ ...makeTaskGroup(), ...taskGroup });
+    }
+
+    deleteTaskGroup(_project: string, _taskGroupId: string, _comment?: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getTaskGroup(
+        _project: string,
+        taskGroupId: string,
+        _versionSpec: string,
+        _expand?: TaskGroupExpands
+    ): Promise<TaskGroup> {
+        return Promise.resolve(taskGroupById(taskGroupId));
+    }
+
+    getTaskGroupRevision(
+        _project: string,
+        taskGroupId: string,
+        revision: number
+    ): Promise<string> {
+        return Promise.resolve(JSON.stringify({ ...taskGroupById(taskGroupId), revision }));
+    }
+
+    publishTaskGroup(
+        taskGroupMetadata: PublishTaskGroupMetadata,
+        _project: string,
+        parentTaskGroupId: string
+    ): Promise<TaskGroup[]> {
+        return Promise.resolve([
+            {
+                ...taskGroupById(taskGroupMetadata.taskGroupId),
+                comment: taskGroupMetadata.comment,
+                parentDefinitionId: parentTaskGroupId,
+                preview: taskGroupMetadata.preview,
+                revision: taskGroupMetadata.taskGroupRevision
+            }
+        ]);
+    }
+
+    undeleteTaskGroup(taskGroup: TaskGroup, _project: string): Promise<TaskGroup[]> {
+        return Promise.resolve([{ ...makeTaskGroup(), ...taskGroup, deleted: false }]);
+    }
+
+    updateTaskGroup(
+        taskGroup: TaskGroupUpdateParameter,
+        _project: string,
+        taskGroupId?: string
+    ): Promise<TaskGroup> {
+        return Promise.resolve({
+            ...makeTaskGroup(),
+            ...taskGroup,
+            id: taskGroupId ?? taskGroup.id
+        });
+    }
+
+    updateTaskGroupProperties(
+        taskGroupUpdateProperties: TaskGroupUpdatePropertiesBase,
+        _project: string,
+        taskGroupId: string,
+        _disablePriorVersions?: boolean
+    ): Promise<TaskGroup[]> {
+        return Promise.resolve([
+            { ...taskGroupById(taskGroupId), comment: taskGroupUpdateProperties.comment }
+        ]);
+    }
+
+    getTaskGroupsByIds(
+        groupsVersionsMap: { [key: string]: string[] },
+        _project: string,
+        _expand?: boolean
+    ): Promise<{ [key: string]: TaskGroup[] }> {
+        const groups = Object.fromEntries(
+            Object.entries(groupsVersionsMap).map(([taskGroupId, versions]) => [
+                taskGroupId,
+                versions.map(() => taskGroupById(taskGroupId))
+            ])
+        );
+        return Promise.resolve(groups);
+    }
+
+    deleteTaskDefinition(_taskId: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getTaskContentZip(
+        taskId: string,
+        versionString: string,
+        _visibility?: string[],
+        _scopeLocal?: boolean
+    ): Promise<ArrayBuffer> {
+        return Promise.resolve(encode(`task-${taskId}-${versionString}.zip`));
+    }
+
+    getTaskDefinition(
+        taskId: string,
+        _versionString: string,
+        _visibility?: string[],
+        _scopeLocal?: boolean
+    ): Promise<TaskDefinition> {
+        const found = taskDefinitions.find(d => d.id === taskId);
+        return Promise.resolve(found ?? { ...makeTaskDefinition(), id: taskId });
+    }
+
+    getTaskDefinitions(
+        taskId?: string,
+        _visibility?: string[],
+        _scopeLocal?: boolean,
+        _allVersions?: boolean
+    ): Promise<TaskDefinition[]> {
+        return Promise.resolve(
+            taskId === undefined ? taskDefinitions : taskDefinitions.filter(d => d.id === taskId)
+        );
+    }
+
+    shareVariableGroup(
+        _variableGroupProjectReferences: VariableGroupProjectReference[],
+        _variableGroupId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getVariableGroupsById(
+        _project: string,
+        groupIds: number[],
+        _loadSecrets?: boolean
+    ): Promise<VariableGroup[]> {
+        return Promise.resolve(variableGroups.filter(g => groupIds.includes(g.id)));
+    }
+
+    addVirtualMachineGroup(
+        createParameters: VirtualMachineGroupCreateParameters,
+        _project: string,
+        environmentId: number
+    ): Promise<VirtualMachineGroup> {
+        const created = { ...makeVirtualMachineGroup(), name: createParameters.name };
+        return Promise.resolve(inEnvironment(created, environmentId));
+    }
+
+    deleteVirtualMachineGroup(
+        _project: string,
+        _environmentId: number,
+        _resourceId: number
+    ): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getVirtualMachineGroup(
+        _project: string,
+        environmentId: number,
+        resourceId: number
+    ): Promise<VirtualMachineGroup> {
+        const found = virtualMachineGroups.find(g => g.id === resourceId);
+        const base = found ?? { ...makeVirtualMachineGroup(), id: resourceId };
+        return Promise.resolve(inEnvironment(base, environmentId));
+    }
+
+    updateVirtualMachineGroup(
+        resource: VirtualMachineGroup,
+        _project: string,
+        environmentId: number
+    ): Promise<VirtualMachineGroup> {
+        const updated = { ...makeVirtualMachineGroup(), ...resource };
+        return Promise.resolve(inEnvironment(updated, environmentId));
+    }
+
+    getVirtualMachines(
+        _project: string,
+        _environmentId: number,
+        _resourceId: number,
+        continuationToken?: string,
+        name?: string,
+        partialNameMatch?: boolean,
+        tags?: string[],
+        top?: number
+    ): Promise<PagedList<VirtualMachine>> {
+        const matched = byMachineName(byTags(virtualMachines, tags), name, partialNameMatch);
+        return Promise.resolve(page(take(matched, top), continuationToken ?? null));
+    }
+
+    updateVirtualMachines(
+        machines: VirtualMachine[],
+        _project: string,
+        _environmentId: number,
+        _resourceId: number
+    ): Promise<VirtualMachine[]> {
+        return Promise.resolve(machines.map(m => ({ ...makeVirtualMachine(), ...m })));
+    }
+
+    getYamlSchema(_validateTaskNames?: boolean): Promise<any> {
+        return Promise.resolve(yamlSchema);
+    }
 }
-
-
-
-
