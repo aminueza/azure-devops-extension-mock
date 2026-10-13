@@ -35,8 +35,10 @@ const methodNames = (source) => {
     return names;
 };
 
+const clientName = (area) => area.split(".").pop();
+
 const realMethods = (area) =>
-    methodNames(fs.readFileSync(path.join(API, area, `${area}Client.d.ts`), "utf8"));
+    methodNames(fs.readFileSync(path.join(API, area, `${clientName(area)}Client.d.ts`), "utf8"));
 
 const mockMethods = (mock) =>
     methodNames(fs.readFileSync(path.join(ROOT, "azure-devops-extension-api", mock), "utf8"));
