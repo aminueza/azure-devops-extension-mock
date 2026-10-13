@@ -4,10 +4,16 @@ import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient } from "azure-devops-extension-api/Git";
+import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
+import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
+import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
+import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
+import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 import { getClient, getRegisteredMockClient } from "../azure-devops-extension-api";
@@ -23,10 +29,16 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     CoreRestClient,
     DashboardRestClient,
     GitRestClient,
+    GraphRestClient,
     PipelinesRestClient,
+    PolicyRestClient,
     ReleaseRestClient,
+    ServiceEndpointRestClient,
     TaskAgentRestClient,
     TestRestClient,
+    TestPlanRestClient,
+    TestResultsRestClient,
+    TfvcRestClient,
     WikiRestClient,
     WorkItemTrackingRestClient
 };

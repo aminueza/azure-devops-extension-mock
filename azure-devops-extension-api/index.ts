@@ -5,10 +5,16 @@ import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { DashboardRestClient } from "azure-devops-extension-api/Dashboard";
 import { GitRestClient } from "azure-devops-extension-api/Git";
+import { GraphRestClient } from "azure-devops-extension-api/Graph";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
+import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
+import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
+import { TestPlanRestClient } from "azure-devops-extension-api/TestPlan";
+import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
+import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 
@@ -26,10 +32,16 @@ import { MockBuildRestClient } from "./build/Build";
 import { MockCoreRestClient } from "./core/Core";
 import { MockDashboardRestClient } from "./dashboard/Dashboard";
 import { MockGitRestClient } from "./git/Git";
+import { MockGraphRestClient } from "./graph/Graph";
 import { MockPipelinesRestClient } from "./pipelines/Pipelines";
+import { MockPolicyRestClient } from "./policy/Policy";
 import { MockReleaseRestClient } from "./release/Release";
+import { MockServiceEndpointRestClient } from "./serviceEndpoint/ServiceEndpoint";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
+import { MockTestPlanRestClient } from "./testPlan/TestPlan";
+import { MockTestResultsRestClient } from "./testResults/TestResults";
+import { MockTfvcRestClient } from "./tfvc/Tfvc";
 import { MockWikiRestClient } from "./wiki/Wiki";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
 
@@ -47,10 +59,16 @@ registerMockClient(BuildRestClient, MockBuildRestClient as any);
 registerMockClient(CoreRestClient, MockCoreRestClient as any);
 registerMockClient(DashboardRestClient, MockDashboardRestClient as any);
 registerMockClient(GitRestClient, MockGitRestClient as any);
+registerMockClient(GraphRestClient, MockGraphRestClient as any);
 registerMockClient(PipelinesRestClient, MockPipelinesRestClient as any);
+registerMockClient(PolicyRestClient, MockPolicyRestClient as any);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
+registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient as any);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
 registerMockClient(TestRestClient, MockTestRestClient as any);
+registerMockClient(TestPlanRestClient, MockTestPlanRestClient as any);
+registerMockClient(TestResultsRestClient, MockTestResultsRestClient as any);
+registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
 registerMockClient(WikiRestClient, MockWikiRestClient as any);
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient as any);
 
@@ -104,10 +122,16 @@ export {
     MockCoreRestClient,
     MockDashboardRestClient,
     MockGitRestClient,
+    MockGraphRestClient,
     MockPipelinesRestClient,
+    MockPolicyRestClient,
     MockReleaseRestClient,
+    MockServiceEndpointRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
+    MockTestPlanRestClient,
+    MockTestResultsRestClient,
+    MockTfvcRestClient,
     MockWikiRestClient,
     MockWorkItemTrackingRestClient
 };

@@ -11,10 +11,16 @@ const CLIENTS = [
     { area: "Core", real: "CoreRestClient", mock: "core/Core.ts" },
     { area: "Dashboard", real: "DashboardRestClient", mock: "dashboard/Dashboard.ts" },
     { area: "Git", real: "GitRestClient", mock: "git/Git.ts" },
+    { area: "Graph", real: "GraphRestClient", mock: "graph/Graph.ts" },
     { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
+    { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
     { area: "Release", real: "ReleaseRestClient", mock: "release/Release.ts" },
+    { area: "ServiceEndpoint", real: "ServiceEndpointRestClient", mock: "serviceEndpoint/ServiceEndpoint.ts" },
     { area: "TaskAgent", real: "TaskAgentRestClient", mock: "taskAgent/TaskAgent.ts" },
     { area: "Test", real: "TestRestClient", mock: "test/Test.ts" },
+    { area: "TestPlan", real: "TestPlanRestClient", mock: "testPlan/TestPlan.ts" },
+    { area: "TestResults", real: "TestResultsRestClient", mock: "testResults/TestResults.ts" },
+    { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
     { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" }
 ];

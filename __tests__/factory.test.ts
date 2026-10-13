@@ -149,10 +149,16 @@ describe("index re-exports", () => {
             api.MockCoreRestClient,
             api.MockDashboardRestClient,
             api.MockGitRestClient,
+            api.MockGraphRestClient,
             api.MockPipelinesRestClient,
+            api.MockPolicyRestClient,
             api.MockReleaseRestClient,
+            api.MockServiceEndpointRestClient,
             api.MockTaskAgentRestClient,
             api.MockTestRestClient,
+            api.MockTestPlanRestClient,
+            api.MockTestResultsRestClient,
+            api.MockTfvcRestClient,
             api.MockWikiRestClient,
             api.MockWorkItemTrackingRestClient
         ];
