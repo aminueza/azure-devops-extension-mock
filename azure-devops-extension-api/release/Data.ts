@@ -47,29 +47,239 @@ import {
     ReleaseTask,
     ReleaseTaskAttachment,
     ReleaseTriggerType,
-    TaskStatus
+    TaskStatus,
+    ApprovalExecutionOrder,
+    ConditionType,
+    DeploymentOperationStatus,
+    DeploymentReason,
+    DeployPhase,
+    DeployPhaseTypes,
+    EnvironmentOptions,
+    PipelineProcessTypes,
+    ReleaseDefinitionApprovals,
+    ReleaseDefinitionGatesStep,
+    ReleaseDefinitionSource,
+    ReleaseEnvironmentShallowReference,
+    ReleaseReason,
+    ReleaseReference,
+    WorkflowTask
 } from "azure-devops-extension-api/Release";
 import { InputValuesQuery } from "azure-devops-extension-api/FormInput";
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
-export const makeEnvironment = (name = "Production"): ReleaseEnvironment => ({
+export const makeReleaseShallowReference = (id: number): ReleaseShallowReference => ({
+    _links: {},
+    id,
+    name: `Release-${id}`,
+    url: fake.internet.url()
+});
+
+export const makeReleaseDefinitionShallowReference = (
+    id: number
+): ReleaseDefinitionShallowReference => ({
+    _links: {},
+    id,
+    name: fake.lorem.slug(),
+    path: "\\",
+    projectReference: makeProjectReference(),
+    url: fake.internet.url()
+});
+
+export const makeReleaseEnvironmentShallowReference = (
+    name = "Production"
+): ReleaseEnvironmentShallowReference => ({
+    _links: {},
     id: fake.number.id(),
-    releaseId: fake.number.int(),
     name,
-    status: EnvironmentStatus.Succeeded,
-    deploySteps: [],
-    variables: {},
-    variableGroups: [],
+    url: fake.internet.url()
+});
+
+export const makeReleaseReference = (): ReleaseReference => {
+    const id = fake.number.id();
+    return {
+        _links: {},
+        artifacts: [],
+        createdBy: makeIdentityRef(),
+        createdOn: fake.date.recent(),
+        description: fake.lorem.sentence(),
+        id,
+        modifiedBy: makeIdentityRef(),
+        name: `Release-${id}`,
+        reason: ReleaseReason.Manual,
+        releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
+        url: fake.internet.url(),
+        webAccessUri: fake.internet.url()
+    };
+};
+
+export const makeEnvironmentRetentionPolicy = (
+    daysToKeep: number,
+    releasesToKeep: number
+): EnvironmentRetentionPolicy => ({
+    daysToKeep,
+    releasesToKeep,
+    retainBuild: true
+});
+
+export const makeEnvironmentOptions = (): EnvironmentOptions => ({
+    autoLinkWorkItems: false,
+    badgeEnabled: false,
+    emailNotificationType: "OnlyOnFailure",
+    emailRecipients: "release.environment.owner;release.creator",
+    enableAccessToken: false,
+    publishDeploymentStatus: true,
+    pullRequestDeploymentEnabled: false,
+    skipArtifactsDownload: false,
+    timeoutInMinutes: 0
+});
+
+export const makeWorkflowTask = (): WorkflowTask => ({
+    alwaysRun: false,
+    checkConfig: {
+        id: fake.number.id(),
+        resourceName: fake.lorem.slug(),
+        resourceType: "endpoint",
+        version: 1
+    },
+    condition: "succeeded()",
+    continueOnError: false,
+    definitionType: "task",
+    enabled: true,
+    environment: {},
+    inputs: { script: "echo deploy" },
+    name: fake.lorem.slug(2),
+    overrideInputs: {},
+    refName: fake.lorem.slug(),
+    retryCountOnTaskFailure: 0,
+    taskId: fake.string.uuid(),
+    timeoutInMinutes: 0,
+    version: "2.*"
+});
+
+export const makeDeployPhase = (): DeployPhase => ({
+    name: "Agent job",
+    phaseType: DeployPhaseTypes.AgentBasedDeployment,
     rank: 1,
+    refName: fake.lorem.slug(),
+    workflowTasks: [makeWorkflowTask()]
+});
+
+export const makeReleaseDefinitionApprovals = (): ReleaseDefinitionApprovals => ({
+    approvalOptions: {
+        autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped: false,
+        enforceIdentityRevalidation: false,
+        executionOrder: ApprovalExecutionOrder.BeforeGates,
+        releaseCreatorCanBeApprover: false,
+        requiredApproverCount: 1,
+        timeoutInMinutes: 0
+    },
+    approvals: [
+        {
+            approver: makeIdentityRef(),
+            id: fake.number.id(),
+            isAutomated: false,
+            isNotificationOn: true,
+            rank: 1
+        }
+    ]
+});
+
+export const makeReleaseDefinitionGatesStep = (): ReleaseDefinitionGatesStep => ({
+    gates: [],
+    gatesOptions: {
+        isEnabled: false,
+        minimumSuccessDuration: 0,
+        samplingInterval: 15,
+        stabilizationTime: 5,
+        timeout: 1440
+    },
+    id: fake.number.id()
+});
+
+export const makeProcessParameters = (): ReleaseEnvironment["processParameters"] => ({
+    dataSourceBindings: [],
+    inputs: [],
+    sourceDefinitions: []
+});
+
+export const makeDefinitionEnvironment = (
+    name = "Production",
+    rank = 1
+): ReleaseDefinitionEnvironment => ({
+    badgeUrl: fake.internet.url(),
+    conditions: [
+        {
+            conditionType: ConditionType.Event,
+            name: "ReleaseStarted",
+            result: true,
+            value: ""
+        }
+    ],
+    currentRelease: makeReleaseShallowReference(fake.number.id()),
+    demands: [],
+    deployPhases: [makeDeployPhase()],
+    deployStep: { id: fake.number.id(), tasks: [] },
+    environmentOptions: makeEnvironmentOptions(),
+    environmentTriggers: [],
+    executionPolicy: { concurrencyCount: 1, queueDepthCount: 0 },
+    id: fake.number.id(),
+    name,
     owner: makeIdentityRef(),
-    createdOn: fake.date.recent(),
-    modifiedOn: fake.date.recent(),
-    conditions: [],
-    postDeployApprovals: [],
-    preDeployApprovals: [],
-    _links: {} as any
-} as unknown as ReleaseEnvironment);
+    postDeployApprovals: makeReleaseDefinitionApprovals(),
+    postDeploymentGates: makeReleaseDefinitionGatesStep(),
+    preDeployApprovals: makeReleaseDefinitionApprovals(),
+    preDeploymentGates: makeReleaseDefinitionGatesStep(),
+    processParameters: makeProcessParameters(),
+    properties: {},
+    queueId: fake.number.id(),
+    rank,
+    retentionPolicy: makeEnvironmentRetentionPolicy(30, 3),
+    runOptions: {},
+    schedules: [],
+    variableGroups: [],
+    variables: {}
+});
+
+export const makeEnvironment = (name = "Production"): ReleaseEnvironment => {
+    const releaseId = fake.number.int();
+    return {
+        id: fake.number.id(),
+        releaseId,
+        name,
+        status: EnvironmentStatus.Succeeded,
+        deploySteps: [],
+        variables: {},
+        variableGroups: [],
+        rank: 1,
+        owner: makeIdentityRef(),
+        createdOn: fake.date.recent(),
+        modifiedOn: fake.date.recent(),
+        conditions: [],
+        postDeployApprovals: [],
+        preDeployApprovals: [],
+        definitionEnvironmentId: fake.number.id(),
+        demands: [],
+        deployPhasesSnapshot: [makeDeployPhase()],
+        environmentOptions: makeEnvironmentOptions(),
+        nextScheduledUtcTime: fake.date.recent(),
+        postApprovalsSnapshot: makeReleaseDefinitionApprovals(),
+        postDeploymentGatesSnapshot: makeReleaseDefinitionGatesStep(),
+        preApprovalsSnapshot: makeReleaseDefinitionApprovals(),
+        preDeploymentGatesSnapshot: makeReleaseDefinitionGatesStep(),
+        processParameters: makeProcessParameters(),
+        queueId: fake.number.id(),
+        release: makeReleaseShallowReference(releaseId),
+        releaseCreatedBy: makeIdentityRef(),
+        releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
+        releaseDescription: fake.lorem.sentence(),
+        scheduledDeploymentTime: fake.date.recent(),
+        schedules: [],
+        timeToDeploy: fake.number.int({ min: 1, max: 60 }),
+        triggerReason: "Manual",
+        workflowTasks: []
+    };
+};
 
 export const makeReleaseDefinition = (): ReleaseDefinition => ({
     id: fake.number.id(),
@@ -82,14 +292,28 @@ export const makeReleaseDefinition = (): ReleaseDefinition => ({
     modifiedBy: makeIdentityRef(),
     modifiedOn: fake.date.recent(),
     description: fake.lorem.sentence(),
-    environments: [makeEnvironment("Dev"), makeEnvironment("QA"), makeEnvironment("Production")],
+    environments: [
+        makeDefinitionEnvironment("Dev", 1),
+        makeDefinitionEnvironment("QA", 2),
+        makeDefinitionEnvironment("Production", 3)
+    ],
     artifacts: [],
     triggers: [],
     variables: {},
     variableGroups: [],
     tags: [],
-    _links: {} as any
-} as unknown as ReleaseDefinition);
+    _links: {},
+    comment: "",
+    isDeleted: false,
+    isDisabled: false,
+    lastRelease: makeReleaseReference(),
+    pipelineProcess: { type: PipelineProcessTypes.Designer },
+    projectReference: makeProjectReference(),
+    properties: {},
+    releaseNameFormat: "Release-$(rev:r)",
+    retentionPolicy: { daysToKeep: 30 },
+    source: ReleaseDefinitionSource.UserInterface
+});
 
 export const makeRelease = (): Release => ({
     id: fake.number.id(),
@@ -103,24 +327,30 @@ export const makeRelease = (): Release => ({
     variables: {},
     variableGroups: [],
     artifacts: [],
-    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
+    releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
     description: fake.lorem.sentence(),
-    reason: 1 as any,
+    reason: ReleaseReason.Manual,
     releaseNameFormat: "Release-$(rev:r)",
     keepForever: false,
     definitionSnapshotRevision: 1,
     logsContainerUrl: fake.internet.url(),
     url: fake.internet.url(),
     tags: [],
-    projectReference: makeProjectReference() as any,
-    _links: {} as any
-} as unknown as Release);
+    projectReference: makeProjectReference(),
+    _links: {},
+    comment: "",
+    createdFor: makeIdentityRef(),
+    poolName: "Azure Pipelines",
+    properties: {},
+    releaseDefinitionRevision: 1,
+    triggeringArtifactAlias: ""
+});
 
 export const makeDeployment = (): Deployment => ({
     id: fake.number.id(),
-    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` } as any,
-    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
-    releaseEnvironment: { id: fake.number.id(), name: "Production" } as any,
+    release: makeReleaseReference(),
+    releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
+    releaseEnvironment: makeReleaseEnvironmentShallowReference(),
     deploymentStatus: DeploymentStatus.Succeeded,
     requestedBy: makeIdentityRef(),
     requestedFor: makeIdentityRef(),
@@ -128,15 +358,24 @@ export const makeDeployment = (): Deployment => ({
     startedOn: fake.date.recent(),
     completedOn: fake.date.recent(),
     attempt: 1,
-    reason: 1 as any,
-    _links: {} as any
-} as unknown as Deployment);
+    reason: DeploymentReason.Manual,
+    _links: {},
+    conditions: [],
+    definitionEnvironmentId: fake.number.id(),
+    lastModifiedBy: makeIdentityRef(),
+    lastModifiedOn: fake.date.recent(),
+    operationStatus: DeploymentOperationStatus.PhaseSucceeded,
+    postDeployApprovals: [],
+    preDeployApprovals: [],
+    projectReference: makeProjectReference(),
+    scheduledDeploymentTime: fake.date.recent()
+});
 
 export const makeApproval = (): ReleaseApproval => ({
     id: fake.number.id(),
-    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` } as any,
-    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() } as any,
-    releaseEnvironment: { id: fake.number.id(), name: "Production" } as any,
+    release: makeReleaseShallowReference(fake.number.id()),
+    releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
+    releaseEnvironment: makeReleaseEnvironmentShallowReference(),
     approver: makeIdentityRef(),
     approvedBy: makeIdentityRef(),
     status: ApprovalStatus.Pending,
@@ -147,8 +386,12 @@ export const makeApproval = (): ReleaseApproval => ({
     modifiedOn: fake.date.recent(),
     comments: "",
     url: fake.internet.url(),
-    _links: {} as any
-} as unknown as ReleaseApproval);
+    history: [],
+    isAutomated: false,
+    isNotificationOn: true,
+    revision: 1,
+    trialNumber: 1
+});
 
 export const makeFolder = (path = `\\${fake.lorem.slug(2)}`): Folder => ({
     path,
@@ -175,7 +418,7 @@ export const makeEnvironmentTemplate = (isDeleted = false): ReleaseDefinitionEnv
     iconUri: fake.image.url(),
     canDelete: true,
     isDeleted,
-    environment: {} as ReleaseDefinitionEnvironment
+    environment: makeDefinitionEnvironment()
 });
 
 export const releaseDefinitions = Array.from({ length: 3 }, makeReleaseDefinition);
@@ -183,12 +426,12 @@ export const releases = Array.from({ length: 5 }, makeRelease);
 export const deployments = Array.from({ length: 5 }, makeDeployment);
 export const approvals = Array.from({ length: 3 }, makeApproval);
 
-export const releaseDefinitionsPage: PagedList<ReleaseDefinition> =
-    Object.assign([...releaseDefinitions], { continuationToken: "" }) as PagedList<ReleaseDefinition>;
-export const deploymentsPage: PagedList<Deployment> =
-    Object.assign([...deployments], { continuationToken: "" }) as PagedList<Deployment>;
-export const approvalsPage: PagedList<ReleaseApproval> =
-    Object.assign([...approvals], { continuationToken: "" }) as PagedList<ReleaseApproval>;
+export const makePagedList = <T>(items: T[]): PagedList<T> =>
+    Object.assign([...items], { continuationToken: "" });
+
+export const releaseDefinitionsPage = makePagedList(releaseDefinitions);
+export const deploymentsPage = makePagedList(deployments);
+export const approvalsPage = makePagedList(approvals);
 
 export const releaseTags = ["candidate", "hotfix", "verified"];
 export const definitionTags = ["nightly", "production"];
@@ -332,14 +575,22 @@ export const makeManualIntervention = (): ManualIntervention => ({
     instructions: fake.lorem.paragraph(),
     modifiedOn: fake.date.recent(),
     name: fake.lorem.slug(2),
-    release: { id: fake.number.id(), name: `Release-${fake.number.int()}` },
-    releaseDefinition: { id: fake.number.id(), name: fake.lorem.slug() },
-    releaseEnvironment: { id: fake.number.id(), name: "Production" },
+    poPTenant: {
+        authority: "https://login.microsoftonline.com",
+        domainHint: fake.internet.domainName(),
+        resources: [],
+        tenantId: fake.string.uuid(),
+        tenantName: fake.company.name(),
+        timeout: 30
+    },
+    release: makeReleaseShallowReference(fake.number.id()),
+    releaseDefinition: makeReleaseDefinitionShallowReference(fake.number.id()),
+    releaseEnvironment: makeReleaseEnvironmentShallowReference(),
     status: ManualInterventionStatus.Pending,
     taskInstanceId: fake.string.uuid(),
     type: ManualInterventionType.Task,
     url: fake.internet.url()
-} as unknown as ManualIntervention);
+});
 
 export const makeReleaseGates = (id: number): ReleaseGates => ({
     deploymentJobs: [],
@@ -433,24 +684,6 @@ export const makeReleaseDefinitionRevision = (
     revision
 });
 
-export const makeReleaseShallowReference = (id: number): ReleaseShallowReference => ({
-    _links: {},
-    id,
-    name: `Release-${id}`,
-    url: fake.internet.url()
-});
-
-export const makeReleaseDefinitionShallowReference = (
-    id: number
-): ReleaseDefinitionShallowReference => ({
-    _links: {},
-    id,
-    name: fake.lorem.slug(),
-    path: "\\",
-    projectReference: makeProjectReference(),
-    url: fake.internet.url()
-});
-
 export const makeReleaseDefinitionEnvironmentSummary = (
     id: number
 ): ReleaseDefinitionEnvironmentSummary => ({
@@ -533,15 +766,6 @@ export const releaseWorkItemRefs = [
 export const releaseProjects: ProjectReference[] = Array.from({ length: 3 }, makeProjectReference);
 
 export const makeMetric = (name: string, value: number): Metric => ({ name, value });
-
-export const makeEnvironmentRetentionPolicy = (
-    daysToKeep: number,
-    releasesToKeep: number
-): EnvironmentRetentionPolicy => ({
-    daysToKeep,
-    releasesToKeep,
-    retainBuild: true
-});
 
 export const makeReleaseSettings = (): ReleaseSettings => ({
     complianceSettings: { checkForCredentialsAndOtherSecrets: true },
