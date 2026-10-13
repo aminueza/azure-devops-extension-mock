@@ -4,6 +4,7 @@ import * as path from "path";
 const root = path.join(__dirname, "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const lockfile = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
+const renovate = JSON.parse(fs.readFileSync(path.join(root, "renovate.json"), "utf8"));
 
 const SHIPPED_SOURCE_DIRECTORIES = ["azure-devops-extension-api", "azure-devops-extension-sdk", "jest-helpers"];
 const TEST_FRAMEWORK_IMPORT = /(?:require\(|from\s+|import\()\s*["'](?:jest|@jest\/[^"']+|vitest|mocha)["']/;
@@ -42,6 +43,15 @@ describe("package manifest", () => {
         expect(installed.length).toBeGreaterThan(100);
         expect(installed.filter(name => /(^|\/)node_modules\/sprintf-js$/.test(name))).toEqual([]);
         expect(lockfile.packages["node_modules/js-yaml"].version).toMatch(/^4\./);
+    });
+
+    it("stops renovate from raising the js-yaml override to a new major", () => {
+        expect(manifest.overrides["@istanbuljs/load-nyc-config"]["js-yaml"]).toMatch(/^\^4\./);
+        expect(renovate.packageRules).toContainEqual({
+            matchPackageNames: ["js-yaml"],
+            matchUpdateTypes: ["major"],
+            enabled: false
+        });
     });
 
     it("detects a test framework import when one is present", () => {
