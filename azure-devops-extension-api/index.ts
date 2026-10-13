@@ -10,6 +10,7 @@ import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { TaskAgentRestClient } from "azure-devops-extension-api/TaskAgent";
 import { TestRestClient } from "azure-devops-extension-api/Test";
+import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
 
@@ -32,6 +33,7 @@ import { MockPolicyRestClient } from "./policy/Policy";
 import { MockReleaseRestClient } from "./release/Release";
 import { MockTaskAgentRestClient } from "./taskAgent/TaskAgent";
 import { MockTestRestClient } from "./test/Test";
+import { MockTfvcRestClient } from "./tfvc/Tfvc";
 import { MockWikiRestClient } from "./wiki/Wiki";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
 
@@ -54,6 +56,7 @@ registerMockClient(PolicyRestClient, MockPolicyRestClient as any);
 registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
 registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
 registerMockClient(TestRestClient, MockTestRestClient as any);
+registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
 registerMockClient(WikiRestClient, MockWikiRestClient as any);
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient as any);
 
@@ -112,6 +115,7 @@ export {
     MockReleaseRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,
+    MockTfvcRestClient,
     MockWikiRestClient,
     MockWorkItemTrackingRestClient
 };
