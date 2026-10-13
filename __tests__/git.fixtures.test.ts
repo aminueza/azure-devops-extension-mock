@@ -13,6 +13,7 @@ import {
     commits,
     items,
     makeBranchStats,
+    makeComment,
     makeCommentThread,
     makeCommit,
     makeFileDiffDetail,
@@ -21,7 +22,9 @@ import {
     makeGitRef,
     makeGitRepository,
     makePullRequest,
+    makePullRequestThread,
     makePush,
+    pullRequestThreads,
     pullRequests,
     refs,
     repositories
@@ -213,6 +216,16 @@ describe("Git fixtures without casts", () => {
         expect(comment.isDeleted).toBe(false);
         expect(comment.usersLiked).toEqual([]);
         expect(comment._links).toEqual({});
+    });
+
+    it("derives thread identities from the comments passed in", () => {
+        const comments = [makeComment(1), makeComment(2)];
+        const thread = makePullRequestThread(7, CommentThreadStatus.Fixed, comments);
+        expect(thread.identities).toEqual({
+            [comments[0].author.id]: comments[0].author,
+            [comments[1].author.id]: comments[1].author
+        });
+        expect(pullRequestThreads[0].isDeleted).toBe(false);
     });
 
     it("keeps the newer file diff fields", () => {

@@ -737,6 +737,7 @@ export const makePullRequestThread = (
 ): GitPullRequestCommentThread => ({
     ...makeCommentThread(),
     comments,
+    identities: Object.fromEntries(comments.map(comment => [comment.author.id, comment.author])),
     id,
     status
 });
