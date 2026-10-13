@@ -12,6 +12,7 @@ const CLIENTS = [
     { area: "Dashboard", real: "DashboardRestClient", mock: "dashboard/Dashboard.ts" },
     { area: "Git", real: "GitRestClient", mock: "git/Git.ts" },
     { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
+    { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
     { area: "Release", real: "ReleaseRestClient", mock: "release/Release.ts" },
     { area: "TaskAgent", real: "TaskAgentRestClient", mock: "taskAgent/TaskAgent.ts" },
     { area: "Test", real: "TestRestClient", mock: "test/Test.ts" },
