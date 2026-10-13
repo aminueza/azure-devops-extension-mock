@@ -76,6 +76,7 @@ import {
     makeDefinitionResourceReference,
     makeFolder,
     makeLeaseFromNew,
+    makePagedList,
     makePullRequest,
     makeRetentionLease,
     makeStageTimeline,
@@ -112,9 +113,7 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     getDefinitions(_project: string): Promise<PagedList<BuildDefinitionReference>> {
-        return Promise.resolve(
-            Object.assign([...buildDefinitions], { continuationToken: "" }) as unknown as PagedList<BuildDefinitionReference>
-        );
+        return Promise.resolve(makePagedList<BuildDefinitionReference>(buildDefinitions));
     }
 
     getDefinition(_project: string, definitionId: number): Promise<BuildDefinition> {
@@ -202,9 +201,7 @@ export class MockBuildRestClient extends RestClientBase {
     }
 
     getBuildChanges(_project: string, _buildId: number): Promise<PagedList<Change>> {
-        return Promise.resolve(
-            Object.assign([...changes], { continuationToken: "" }) as unknown as PagedList<Change>
-        );
+        return Promise.resolve(makePagedList<Change>(changes));
     }
 
     getBuildLog(): Promise<string> {
