@@ -6,6 +6,8 @@ const API = path.join(ROOT, "node_modules", "azure-devops-extension-api");
 
 const CLIENTS = [
     { area: "Accounts", real: "AccountsRestClient", mock: "accounts/Accounts.ts" },
+    { area: "AdvancedSecurity.Reporting", real: "ReportingRestClient", mock: "advancedSecurityReporting/Reporting.ts" },
+    { area: "Alert", real: "AlertRestClient", mock: "alert/Alert.ts" },
     { area: "Work", real: "WorkRestClient", mock: "boards/Boards.ts" },
     { area: "Build", real: "BuildRestClient", mock: "build/Build.ts" },
     { area: "Contributions", real: "ContributionsRestClient", mock: "contributions/Contributions.ts" },

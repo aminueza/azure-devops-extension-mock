@@ -1,5 +1,7 @@
 import { CommonServiceIds } from "azure-devops-extension-api/Common";
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
+import { ReportingRestClient } from "azure-devops-extension-api/AdvancedSecurity.Reporting";
+import { AlertRestClient } from "azure-devops-extension-api/Alert";
 import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { ContributionsRestClient } from "azure-devops-extension-api/Contributions";
@@ -46,6 +48,8 @@ import {
     MockProjectPageService
 } from "./common/CommonServices";
 import { MockAccountsRestClient } from "./accounts/Accounts";
+import { MockReportingRestClient } from "./advancedSecurityReporting/Reporting";
+import { MockAlertRestClient } from "./alert/Alert";
 import { MockBoardsRestClient } from "./boards/Boards";
 import { MockBuildRestClient } from "./build/Build";
 import { MockContributionsRestClient } from "./contributions/Contributions";
@@ -92,6 +96,8 @@ import {
 
 // Register the real → mock client mapping once at module load.
 registerMockClient(AccountsRestClient, MockAccountsRestClient);
+registerMockClient(ReportingRestClient, MockReportingRestClient);
+registerMockClient(AlertRestClient, MockAlertRestClient);
 registerMockClient(WorkRestClient, MockBoardsRestClient);
 registerMockClient(BuildRestClient, MockBuildRestClient);
 registerMockClient(ContributionsRestClient, MockContributionsRestClient);
@@ -174,6 +180,7 @@ export { mockClient, registerMockClient, getRegisteredMockClient, MockOverrides 
 // Re-export mock clients for direct import.
 export {
     MockAccountsRestClient,
+    MockAlertRestClient,
     MockBoardsRestClient,
     MockBuildRestClient,
     MockContributionsRestClient,
@@ -200,6 +207,7 @@ export {
     MockProfileRestClient,
     MockReleaseRestClient,
     MockResourceUsageRestClient,
+    MockReportingRestClient,
     MockServiceEndpointRestClient,
     MockTaskAgentRestClient,
     MockTestRestClient,

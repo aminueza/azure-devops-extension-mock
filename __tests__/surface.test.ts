@@ -1,4 +1,6 @@
 import { AccountsRestClient } from "azure-devops-extension-api/Accounts";
+import { ReportingRestClient } from "azure-devops-extension-api/AdvancedSecurity.Reporting";
+import { AlertRestClient } from "azure-devops-extension-api/Alert";
 import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { ContributionsRestClient } from "azure-devops-extension-api/Contributions";
@@ -43,6 +45,8 @@ const surface = require("../scripts/surface.js");
 
 const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     AccountsRestClient,
+    ReportingRestClient,
+    AlertRestClient,
     WorkRestClient,
     BuildRestClient,
     ContributionsRestClient,

@@ -154,6 +154,7 @@ describe("index re-exports", () => {
     it("exposes every mock client class", () => {
         const classes = [
             api.MockAccountsRestClient,
+            api.MockAlertRestClient,
             api.MockBoardsRestClient,
             api.MockBuildRestClient,
             api.MockContributionsRestClient,
@@ -180,6 +181,7 @@ describe("index re-exports", () => {
             api.MockProfileRestClient,
             api.MockReleaseRestClient,
             api.MockResourceUsageRestClient,
+            api.MockReportingRestClient,
             api.MockServiceEndpointRestClient,
             api.MockTaskAgentRestClient,
             api.MockTestRestClient,

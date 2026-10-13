@@ -1,3 +1,5 @@
+import * as advancedSecurityReporting from "../azure-devops-extension-api/advancedSecurityReporting/Data";
+import * as alert from "../azure-devops-extension-api/alert/Data";
 import * as boards from "../azure-devops-extension-api/boards/Data";
 import * as build from "../azure-devops-extension-api/build/Data";
 import * as contributions from "../azure-devops-extension-api/contributions/Data";
@@ -37,6 +39,8 @@ import * as workItemTrackingProcess from "../azure-devops-extension-api/workItem
 import { fake } from "../azure-devops-extension-api/common/fixtures";
 
 const MODULES: Array<[string, Record<string, unknown>]> = [
+    ["advancedSecurityReporting", advancedSecurityReporting],
+    ["alert", alert],
     ["boards", boards],
     ["build", build],
     ["contributions", contributions],
