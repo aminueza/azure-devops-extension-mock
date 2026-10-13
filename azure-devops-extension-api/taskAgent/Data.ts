@@ -30,7 +30,22 @@ import {
     TaskAgentPoolMaintenanceJobStatus,
     TaskAgentPoolMaintenanceScheduleDays,
     TaskOrchestrationOwner,
-    TaskResult
+    TaskResult,
+    AuditAction,
+    AzureManagementGroup,
+    AzureSubscription,
+    EnvironmentDeploymentExecutionRecord,
+    EnvironmentInstance,
+    EnvironmentResource,
+    KubernetesResource,
+    PackageMetadata,
+    PackageVersion,
+    SecureFile,
+    TaskCommandMode,
+    TaskDefinition,
+    TaskGroupRevision,
+    VirtualMachine,
+    VirtualMachineGroup
 } from "azure-devops-extension-api/TaskAgent";
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef } from "../core/Data";
@@ -474,3 +489,328 @@ export const deploymentMachines: DeploymentMachine[] = Array.from(
         tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
     })
 );
+
+export const makeAzureManagementGroup = (): AzureManagementGroup => ({
+    displayName: fake.company.name(),
+    id: `/providers/Microsoft.Management/managementGroups/${fake.lorem.slug()}`,
+    name: fake.lorem.slug(),
+    tenantId: fake.string.uuid()
+});
+
+export const makeAzureSubscription = (): AzureSubscription => ({
+    displayName: fake.company.name(),
+    subscriptionId: fake.string.uuid(),
+    subscriptionTenantId: fake.string.uuid(),
+    subscriptionTenantName: fake.company.name()
+});
+
+export const makeEnvironment = (): EnvironmentInstance => ({
+    createdBy: makeIdentityRef(),
+    createdOn: fake.date.past(),
+    description: fake.lorem.sentence(),
+    id: fake.number.id(),
+    lastModifiedBy: makeIdentityRef(),
+    lastModifiedOn: fake.date.recent(),
+    name: fake.lorem.slug(),
+    project: { id: fake.string.uuid(), name: fake.company.name() },
+    resources: [
+        {
+            id: fake.number.id(),
+            name: fake.lorem.slug(),
+            tags: [fake.lorem.word()],
+            type: EnvironmentResourceType.Kubernetes
+        }
+    ]
+});
+
+export const makeEnvironmentDeploymentRecord = (): EnvironmentDeploymentExecutionRecord => ({
+    definition: makeOrchestrationOwner(),
+    environmentId: fake.number.id(),
+    finishTime: fake.date.recent(),
+    id: fake.number.id(),
+    jobAttempt: 1,
+    jobName: fake.lorem.slug(),
+    owner: makeOrchestrationOwner(),
+    planId: fake.string.uuid(),
+    planType: "Build",
+    queueTime: fake.date.past(),
+    requestIdentifier: fake.string.uuid(),
+    resourceId: fake.number.id(),
+    result: TaskResult.Succeeded,
+    scopeId: fake.string.uuid(),
+    serviceOwner: fake.string.uuid(),
+    stageAttempt: 1,
+    stageName: fake.lorem.slug(),
+    startTime: fake.date.recent()
+});
+
+export const makeEnvironmentResource = (type: EnvironmentResourceType): EnvironmentResource => ({
+    createdBy: makeIdentityRef(),
+    createdOn: fake.date.past(),
+    environmentReference: { id: fake.number.id(), name: fake.lorem.slug() },
+    id: fake.number.id(),
+    lastModifiedBy: makeIdentityRef(),
+    lastModifiedOn: fake.date.recent(),
+    name: fake.lorem.slug(),
+    tags: [fake.lorem.word()],
+    type
+});
+
+export const makeKubernetesResource = (): KubernetesResource => ({
+    ...makeEnvironmentResource(EnvironmentResourceType.Kubernetes),
+    clusterName: `aks-${fake.lorem.slug()}`,
+    namespace: fake.lorem.word(),
+    serviceEndpointId: fake.string.uuid()
+});
+
+export const makeVirtualMachineGroup = (): VirtualMachineGroup => ({
+    ...makeEnvironmentResource(EnvironmentResourceType.VirtualMachine),
+    poolId: fake.number.id()
+});
+
+export const makeVirtualMachine = (name?: string): VirtualMachine => ({
+    agent: makeAgent(name),
+    id: fake.number.id(),
+    tags: [fake.lorem.word(), fake.lorem.word()]
+});
+
+export const parsePackageVersion = (version: string): PackageVersion => {
+    const [major = 0, minor = 0, patch = 0] = version
+        .split(".")
+        .map(part => Number.parseInt(part, 10))
+        .filter(part => !Number.isNaN(part));
+    return { major, minor, patch };
+};
+
+export const makePackageMetadata = (
+    type = "agent",
+    platform = "linux-x64",
+    version = `${fake.number.int({ min: 2, max: 4 })}.${fake.number.int({ min: 200, max: 260 })}.${fake.number.int({ min: 0, max: 9 })}`
+): PackageMetadata => {
+    const parsed = parsePackageVersion(version);
+    const label = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+    const filename = `vsts-${type}-${platform}-${label}.${platform.startsWith("win") ? "zip" : "tar.gz"}`;
+    return {
+        createdOn: fake.date.past(),
+        downloadUrl: `https://download.agent.dev.azure.com/${type}/${label}/${filename}`,
+        filename,
+        hashValue: fake.git.commitSha(),
+        infoUrl: `https://go.microsoft.com/fwlink/?LinkId=${fake.number.int({ min: 100_000, max: 999_999 })}`,
+        platform,
+        type,
+        version: parsed
+    };
+};
+
+export const makeTaskGroupRevision = (): TaskGroupRevision => ({
+    changedBy: makeIdentityRef(),
+    changedDate: fake.date.recent(),
+    changeType: AuditAction.Update,
+    comment: fake.lorem.sentence(),
+    fileId: fake.number.id(),
+    majorVersion: 1,
+    revision: fake.number.int({ min: 1, max: 50 }),
+    taskGroupId: fake.string.uuid()
+});
+
+export const makeSecureFile = (name?: string): SecureFile => ({
+    createdBy: makeIdentityRef(),
+    createdOn: fake.date.past(),
+    id: fake.string.uuid(),
+    modifiedBy: makeIdentityRef(),
+    modifiedOn: fake.date.recent(),
+    name: name ?? `${fake.lorem.slug()}.${fake.helpers.arrayElement(["pfx", "p12", "mobileprovision", "keystore"])}`,
+    properties: { environment: fake.lorem.word() },
+    ticket: fake.string.alphanumeric(32)
+});
+
+export const makeTaskDefinition = (): TaskDefinition => {
+    const name = fake.lorem.slug(2);
+    const base: Omit<TaskDefinition, "deprecationMessage" | "retiredDate"> = {
+        _buildConfigMapping: { Default: "1.0.0" },
+        agentExecution: {
+            execTask: {
+                buildConfig: "Default",
+                contributionIdentifier: `ms.vss-distributed-task.${name}`,
+                contributionVersion: "1.0.0",
+                id: fake.string.uuid(),
+                inputs: {},
+                name,
+                version: "1.0.0"
+            },
+            platformInstructions: {}
+        },
+        author: fake.company.name(),
+        buildConfig: "Default",
+        category: fake.helpers.arrayElement(["Build", "Deploy", "Package", "Test", "Utility"]),
+        contentsUploaded: true,
+        contributionIdentifier: `ms.vss-distributed-task.${name}`,
+        contributionVersion: "1.0.0",
+        dataSourceBindings: [],
+        definitionType: "task",
+        demands: [{ name: "Agent.Version", value: "2.218.0" }],
+        deprecated: false,
+        description: fake.lorem.sentence(),
+        disabled: false,
+        ecosystem: "",
+        execution: { Node20_1: { target: "index.js" } },
+        friendlyName: fake.commerce.productName(),
+        groups: [
+            {
+                displayName: "Advanced",
+                isExpanded: false,
+                name: "advanced",
+                tags: [],
+                visibleRule: ""
+            }
+        ],
+        helpMarkDown: fake.lorem.sentence(),
+        helpUrl: fake.internet.url(),
+        hostType: "",
+        iconUrl: fake.image.url(),
+        id: fake.string.uuid(),
+        inputs: [
+            {
+                aliases: [],
+                defaultValue: "",
+                groupName: "advanced",
+                helpMarkDown: fake.lorem.sentence(),
+                label: "Working directory",
+                name: "workingDirectory",
+                options: {},
+                properties: {},
+                required: false,
+                type: "filePath",
+                validation: { expression: "", message: "" },
+                visibleRule: ""
+            }
+        ],
+        instanceNameFormat: `Run ${name}`,
+        minimumAgentVersion: "2.144.0",
+        name,
+        outputVariables: [{ description: fake.lorem.sentence(), name: "result" }],
+        packageLocation: "",
+        packageType: "",
+        postJobExecution: {},
+        preJobExecution: {},
+        preview: false,
+        release: { ordinal: 1, sprint: fake.number.int({ min: 180, max: 260 }) },
+        releaseNotes: fake.lorem.sentence(),
+        restrictions: {
+            commands: { mode: TaskCommandMode.Any },
+            settableVariables: { allowed: [] }
+        },
+        runsOn: ["Agent", "DeploymentGroup"],
+        satisfies: [],
+        serverOwned: true,
+        showEnvironmentVariables: false,
+        sourceDefinitions: [],
+        sourceLocation: "",
+        version: {
+            build: "",
+            isTest: false,
+            major: fake.number.int({ min: 0, max: 5 }),
+            minor: fake.number.int({ min: 0, max: 260 }),
+            patch: fake.number.int({ min: 0, max: 20 }),
+            preRelease: ""
+        },
+        visibility: ["Build", "Release"]
+    };
+    const newerFields = { deprecationMessage: "", retiredDate: fake.date.future() };
+    return { ...base, ...newerFields };
+};
+
+export const azureManagementGroups: AzureManagementGroup[] = Array.from(
+    { length: 2 },
+    makeAzureManagementGroup
+);
+
+export const azureSubscriptions: AzureSubscription[] = Array.from(
+    { length: 3 },
+    makeAzureSubscription
+);
+
+export const endpointQueryResults: string[] = fake.helpers.distinct(
+    3,
+    () => fake.lorem.slug(),
+    item => item
+);
+
+export const environments: EnvironmentInstance[] = fake.helpers.distinct(
+    3,
+    makeEnvironment,
+    item => item.name
+);
+
+export const environmentDeploymentRecords: EnvironmentDeploymentExecutionRecord[] = Array.from(
+    { length: 3 },
+    makeEnvironmentDeploymentRecord
+);
+
+export const kubernetesResources: KubernetesResource[] = Array.from(
+    { length: 2 },
+    makeKubernetesResource
+);
+
+export const virtualMachineGroups: VirtualMachineGroup[] = Array.from(
+    { length: 2 },
+    makeVirtualMachineGroup
+);
+
+export const virtualMachines: VirtualMachine[] = fake.helpers
+    .distinct(4, () => makeVirtualMachine(), item => item.agent.name)
+    .map((machine, index) => ({
+        ...machine,
+        tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
+    }));
+
+export const packages: PackageMetadata[] = [
+    makePackageMetadata("agent", "win-x64", "4.248.0"),
+    makePackageMetadata("agent", "linux-x64", "4.248.0"),
+    makePackageMetadata("agent", "osx-x64", "4.248.0"),
+    makePackageMetadata("agent", "linux-x64", "3.246.0"),
+    makePackageMetadata("pipelines-agent", "linux-arm64", "4.248.0")
+];
+
+export const taskGroupRevisions: TaskGroupRevision[] = Array.from(
+    { length: 3 },
+    (_value, index) => ({
+        ...makeTaskGroupRevision(),
+        changeType: index === 0 ? AuditAction.Add : AuditAction.Update,
+        revision: index + 1
+    })
+);
+
+export const secureFiles: SecureFile[] = fake.helpers.distinct(
+    3,
+    () => makeSecureFile(),
+    item => item.name
+);
+
+export const taskDefinitions: TaskDefinition[] = fake.helpers.distinct(
+    3,
+    makeTaskDefinition,
+    item => item.name
+);
+
+export const yamlSchema: Record<string, unknown> = {
+    $schema: "http://json-schema.org/draft-07/schema#",
+    $id: "https://github.com/Microsoft/azure-pipelines-vscode/blob/main/service-schema.json",
+    $comment: "v1.248.0",
+    title: "Pipeline schema",
+    description: "A pipeline definition",
+    oneOf: [{ $ref: "#/definitions/pipeline" }],
+    definitions: {
+        pipeline: {
+            type: "object",
+            properties: {
+                trigger: { $ref: "#/definitions/trigger" },
+                pool: { $ref: "#/definitions/pool" },
+                steps: { type: "array", items: { $ref: "#/definitions/step" } }
+            }
+        },
+        trigger: { type: ["string", "array", "object"] },
+        pool: { type: ["string", "object"] },
+        step: { type: "object", properties: { task: { type: "string" } } }
+    }
+};

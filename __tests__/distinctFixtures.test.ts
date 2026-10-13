@@ -43,4 +43,30 @@ describe("seeded lists that are searched by name", () => {
             )
         ).toEqual([]);
     });
+
+    it("never seeds two environments with the same name", () => {
+        expect(
+            collisions(() =>
+                require("../azure-devops-extension-api/taskAgent/Data").environments.map((e: { name: string }) => e.name)
+            )
+        ).toEqual([]);
+    });
+
+    it("never seeds two secure files with the same name", () => {
+        expect(
+            collisions(() =>
+                require("../azure-devops-extension-api/taskAgent/Data").secureFiles.map((f: { name: string }) => f.name)
+            )
+        ).toEqual([]);
+    });
+
+    it("never seeds two virtual machines with the same agent name", () => {
+        expect(
+            collisions(() =>
+                require("../azure-devops-extension-api/taskAgent/Data").virtualMachines.map(
+                    (m: { agent: { name: string } }) => m.agent.name
+                )
+            )
+        ).toEqual([]);
+    });
 });
