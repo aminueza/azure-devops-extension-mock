@@ -53,24 +53,24 @@ import {
 } from "./factory";
 
 // Register the real → mock client mapping once at module load.
-registerMockClient(AccountsRestClient, MockAccountsRestClient as any);
-registerMockClient(WorkRestClient, MockBoardsRestClient as any);
-registerMockClient(BuildRestClient, MockBuildRestClient as any);
-registerMockClient(CoreRestClient, MockCoreRestClient as any);
-registerMockClient(DashboardRestClient, MockDashboardRestClient as any);
-registerMockClient(GitRestClient, MockGitRestClient as any);
-registerMockClient(GraphRestClient, MockGraphRestClient as any);
-registerMockClient(PipelinesRestClient, MockPipelinesRestClient as any);
-registerMockClient(PolicyRestClient, MockPolicyRestClient as any);
-registerMockClient(ReleaseRestClient, MockReleaseRestClient as any);
-registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient as any);
-registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient as any);
-registerMockClient(TestRestClient, MockTestRestClient as any);
-registerMockClient(TestPlanRestClient, MockTestPlanRestClient as any);
-registerMockClient(TestResultsRestClient, MockTestResultsRestClient as any);
-registerMockClient(TfvcRestClient, MockTfvcRestClient as any);
-registerMockClient(WikiRestClient, MockWikiRestClient as any);
-registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient as any);
+registerMockClient(AccountsRestClient, MockAccountsRestClient);
+registerMockClient(WorkRestClient, MockBoardsRestClient);
+registerMockClient(BuildRestClient, MockBuildRestClient);
+registerMockClient(CoreRestClient, MockCoreRestClient);
+registerMockClient(DashboardRestClient, MockDashboardRestClient);
+registerMockClient(GitRestClient, MockGitRestClient);
+registerMockClient(GraphRestClient, MockGraphRestClient);
+registerMockClient(PipelinesRestClient, MockPipelinesRestClient);
+registerMockClient(PolicyRestClient, MockPolicyRestClient);
+registerMockClient(ReleaseRestClient, MockReleaseRestClient);
+registerMockClient(ServiceEndpointRestClient, MockServiceEndpointRestClient);
+registerMockClient(TaskAgentRestClient, MockTaskAgentRestClient);
+registerMockClient(TestRestClient, MockTestRestClient);
+registerMockClient(TestPlanRestClient, MockTestPlanRestClient);
+registerMockClient(TestResultsRestClient, MockTestResultsRestClient);
+registerMockClient(TfvcRestClient, MockTfvcRestClient);
+registerMockClient(WikiRestClient, MockWikiRestClient);
+registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient);
 
 const serviceDictionary: { [key: string]: any } = {
     [CommonServiceIds.ExtensionDataService]: MockExtensionDataService,

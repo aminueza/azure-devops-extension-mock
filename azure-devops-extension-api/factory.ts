@@ -12,7 +12,7 @@ const registry = new Map<Class, Class>();
 
 export function registerMockClient<T extends object>(
     real: Class<T>,
-    mock: Class<T>
+    mock: Class<Partial<T>>
 ): void {
     registry.set(real, mock);
 }
