@@ -167,6 +167,7 @@ export function getClient<T extends object>(
 }
 
 export { mockClient, registerMockClient, getRegisteredMockClient, MockOverrides };
+export { stateful } from "./common/state";
 
 // Re-export mock clients for direct import.
 export {
