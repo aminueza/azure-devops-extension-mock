@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- An opt-in stateful mode. After `stateful.enable()`, what a test creates, updates or deletes through `GitRestClient`, `WorkItemTrackingRestClient` or `BuildRestClient` is returned by later reads, and `stateful.reset()` restores the seeded data. The mode is off by default, so existing tests see no change. The readme lists the reads that do not follow writes.
+
 ### Changed
 
 - The mock classes no longer use `any`. Parameters and return values that the real clients type as `any` are `unknown` in the `Mock*RestClient` classes. `getClient` still returns the real client's type, so code that goes through `getClient` is unaffected; code that calls a `Mock*RestClient` class directly may need a type annotation.

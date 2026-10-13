@@ -821,6 +821,8 @@ export const likedComments: Comment[] = [
     { ...makeComment(6502), usersLiked: [{ ...makeIdentityRef(), id: "liker-observer" }] }
 ];
 
+export const likingUser: IdentityRef = { ...makeIdentityRef(), id: "liker-current" };
+
 export const makeEnablementStatus = (
     projectId: string,
     repositoryId: string,
