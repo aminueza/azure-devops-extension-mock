@@ -39,7 +39,8 @@
     "test": "jest --verbose --coverage",
     "surface": "node scripts/surface.js",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
-    "prepublishOnly": "npm run build && npm test && npm run audit:prod"
+    "prepublishOnly": "npm run build && npm test && npm run audit:prod",
+    "compat": "node scripts/compat.js"
   },
   "repository": {
     "type": "git",
@@ -60,8 +61,8 @@
   },
   "homepage": "https://github.com/aminueza/azure-devops-extension-mock#readme",
   "peerDependencies": {
-    "azure-devops-extension-api": "^4.0.0 || ^5.272.3",
-    "azure-devops-extension-sdk": "^4.0.0 || ^5.0.0"
+    "azure-devops-extension-api": "^5.273.0",
+    "azure-devops-extension-sdk": "^4.0.2 || ^5.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.0",

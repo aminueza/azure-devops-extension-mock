@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The peer range for `azure-devops-extension-api` is now `^5.273.0`. The previous range, `^4.0.0 || ^5.272.3`, claimed support that never worked: every 1.x release requires `azure-devops-extension-api/Pipelines`, which v4 and 5.271 do not ship, so the package failed to load there, and 5.272 lacks a type the TaskAgent mock imports.
+- The peer range for `azure-devops-extension-sdk` is now `^4.0.2 || ^5.0.0`. Versions 4.0.0 and 4.0.1 are published without usable type declarations.
+
+### Fixed
+
+- The SDK mock's declarations import their types from `azure-devops-extension-sdk` instead of `azure-devops-extension-sdk/SDK`. The SDK does not export that subpath, so the old import failed to resolve under `bundler` and `node16` module resolution.
+
 ## [1.1.0] - 2026-10-01
 
 ### Added
