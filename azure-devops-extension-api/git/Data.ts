@@ -14,7 +14,6 @@ import {
     GitBranchStats,
     GitRef,
     GitItem,
-    GitVersionType,
     PullRequestStatus,
     GitObjectType,
     GitPullRequestStatus,

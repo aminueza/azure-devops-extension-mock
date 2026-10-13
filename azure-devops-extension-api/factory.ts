@@ -1,4 +1,3 @@
-import { RestClientBase } from "./common/RestClientBase";
 import { IVssRestClientOptions } from "azure-devops-extension-api/Common";
 
 type Class<T = unknown> = new (...args: any[]) => T;

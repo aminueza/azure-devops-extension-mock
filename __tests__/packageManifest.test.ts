@@ -97,6 +97,18 @@ describe("package manifest", () => {
         expect(manifest.scripts.compat).toBe("node scripts/compat.js");
     });
 
+    it("lints in CI", () => {
+        expect(manifest.scripts.lint).toBe("eslint .");
+        expect(workflow).toContain("- run: npm run lint");
+    });
+
+    it("tests the oldest supported node version in CI", () => {
+        const oldest = `${manifest.engines.node.match(/^>=(\d+)\./)[1]}.x`;
+        const versions = workflow.match(/node-version: \[(.+)\]/)![1].split(", ");
+        expect(versions[0]).toBe(oldest);
+        expect(workflow).toContain(`- target: floor\n            node-version: ${oldest}`);
+    });
+
     it("keeps renovate from automerging or rewriting the mocked peers", () => {
         const rules: Array<Record<string, unknown>> = renovate.packageRules;
         const devAutomerge = rules.findIndex(rule => JSON.stringify(rule.matchDepTypes) === '["devDependencies"]');

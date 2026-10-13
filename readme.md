@@ -170,6 +170,7 @@ module.exports = {
 
 ```bash
 npm ci
+npm run lint          # eslint with the typescript-eslint recommended rules
 npm test              # runs jest with coverage (90% threshold enforced)
 npm run build         # emits dist/
 npm run surface       # compares the mocks with the real client declarations
@@ -177,7 +178,7 @@ npm run audit:prod    # production dependency audit
 npm run compat floor  # installs the packed build next to the oldest supported peers
 ```
 
-CI runs tests on Node 22 and 24 and checks the packed build against the
+CI runs tests on Node 20, 22 and 24 and checks the packed build against the
 oldest and the latest supported peers (`node.js.yml`), weekly `npm audit` and
 Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
 scanning setup.

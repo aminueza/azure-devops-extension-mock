@@ -62,7 +62,6 @@ import {
     makeApproval,
     makeArtifactVersion,
     makeBuffer,
-    makeDeployment,
     makeEnvironment,
     makeEnvironmentTemplate,
     makeFavoriteItem,

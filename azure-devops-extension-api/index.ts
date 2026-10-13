@@ -68,7 +68,7 @@ const serviceDictionary: { [key: string]: any } = {
  * services via `registerMockService`.
  */
 export const getService = <T = any>(serviceId: string): T => {
-    if (serviceDictionary.hasOwnProperty(serviceId)) {
+    if (Object.prototype.hasOwnProperty.call(serviceDictionary, serviceId)) {
         return serviceDictionary[serviceId] as T;
     }
     throw new Error(`Unknown service id for mock: ${serviceId}`);

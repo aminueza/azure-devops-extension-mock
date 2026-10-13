@@ -230,7 +230,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         postedNode: WorkItemClassificationNode,
         _project: string,
         structureGroup: TreeStructureGroup,
-        path?: string
+        _path?: string
     ): Promise<WorkItemClassificationNode> {
         const structureType = structureGroup === TreeStructureGroup.Areas
             ? TreeNodeStructureType.Area

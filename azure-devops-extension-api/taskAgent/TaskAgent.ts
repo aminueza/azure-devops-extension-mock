@@ -73,7 +73,6 @@ import {
     maintenanceJobs,
     makeQueueRestrictions,
     makeResourceUsage,
-    makeTaskGroup,
     makeTaskHubLicenseDetails,
     makeVariableGroup,
     messages,
