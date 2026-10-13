@@ -41,7 +41,9 @@
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "prepublishOnly": "npm run build && npm test && npm run audit:prod",
     "compat": "node scripts/compat.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -74,6 +76,7 @@
     "azure-devops-extension-sdk": "^4.2.0",
     "eslint": "^10.12.0",
     "jest": "^30.0.0",
+    "prettier": "^3.9.10",
     "ts-jest": "^29.1.1",
     "typescript": "^6.0.0",
     "typescript-eslint": "^8.71.2"

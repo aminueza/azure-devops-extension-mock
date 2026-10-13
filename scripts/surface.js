@@ -12,9 +12,17 @@ const CLIENTS = [
     { area: "Contributions", real: "ContributionsRestClient", mock: "contributions/Contributions.ts" },
     { area: "Core", real: "CoreRestClient", mock: "core/Core.ts" },
     { area: "Dashboard", real: "DashboardRestClient", mock: "dashboard/Dashboard.ts" },
-    { area: "ExtensionManagement", real: "ExtensionManagementRestClient", mock: "extensionManagement/ExtensionManagement.ts" },
+    {
+        area: "ExtensionManagement",
+        real: "ExtensionManagementRestClient",
+        mock: "extensionManagement/ExtensionManagement.ts"
+    },
     { area: "Favorite", real: "FavoriteRestClient", mock: "favorite/Favorite.ts" },
-    { area: "FeatureAvailability", real: "FeatureAvailabilityRestClient", mock: "featureAvailability/FeatureAvailability.ts" },
+    {
+        area: "FeatureAvailability",
+        real: "FeatureAvailabilityRestClient",
+        mock: "featureAvailability/FeatureAvailability.ts"
+    },
     { area: "FeatureManagement", real: "FeatureManagementRestClient", mock: "featureManagement/FeatureManagement.ts" },
     { area: "FileContainer", real: "FileContainerRestClient", mock: "fileContainer/FileContainer.ts" },
     { area: "Gallery", real: "GalleryRestClient", mock: "gallery/Gallery.ts" },
@@ -40,11 +48,19 @@ const CLIENTS = [
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
     { area: "Work", real: "WorkRestClient", mock: "boards/Boards.ts" },
     { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" },
-    { area: "WorkItemTrackingProcess", real: "WorkItemTrackingProcessRestClient", mock: "workItemTrackingProcess/WorkItemTrackingProcess.ts" },
-    { area: "WorkItemTrackingProcessDefinitions", real: "WorkItemTrackingProcessDefinitionsRestClient", mock: "workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions.ts" }
+    {
+        area: "WorkItemTrackingProcess",
+        real: "WorkItemTrackingProcessRestClient",
+        mock: "workItemTrackingProcess/WorkItemTrackingProcess.ts"
+    },
+    {
+        area: "WorkItemTrackingProcessDefinitions",
+        real: "WorkItemTrackingProcessDefinitionsRestClient",
+        mock: "workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions.ts"
+    }
 ];
 
-const methodNames = (source) => {
+const methodNames = source => {
     const names = new Set();
     for (const match of source.matchAll(/^ {4}([a-zA-Z0-9]+)\(/gm)) {
         if (match[1] !== "constructor") {
@@ -54,29 +70,28 @@ const methodNames = (source) => {
     return names;
 };
 
-const clientName = (area) => area.split(".").pop();
+const clientName = area => area.split(".").pop();
 
-const realMethods = (area) =>
+const realMethods = area =>
     methodNames(fs.readFileSync(path.join(API, area, `${clientName(area)}Client.d.ts`), "utf8"));
 
-const mockMethods = (mock) =>
-    methodNames(fs.readFileSync(path.join(ROOT, "azure-devops-extension-api", mock), "utf8"));
+const classBody = source => source.slice(source.indexOf("export class "));
+
+const mockMethods = mock =>
+    methodNames(classBody(fs.readFileSync(path.join(ROOT, "azure-devops-extension-api", mock), "utf8")));
 
 const report = () =>
     CLIENTS.map(({ area, real, mock }) => {
         const realSet = realMethods(area);
         const mockSet = mockMethods(mock);
-        const implemented = [...mockSet].filter((name) => realSet.has(name));
-        const phantom = [...mockSet].filter((name) => !realSet.has(name));
-        const missing = [...realSet].filter((name) => !mockSet.has(name));
+        const implemented = [...mockSet].filter(name => realSet.has(name));
+        const phantom = [...mockSet].filter(name => !realSet.has(name));
+        const missing = [...realSet].filter(name => !mockSet.has(name));
         return { area, real, implemented, phantom, missing, total: realSet.size };
     });
 
-const markdown = (rows) => {
-    const lines = [
-        "| Client | Hand-written | Stubbed | Total |",
-        "| --- | ---: | ---: | ---: |"
-    ];
+const markdown = rows => {
+    const lines = ["| Client | Hand-written | Stubbed | Total |", "| --- | ---: | ---: | ---: |"];
     for (const row of rows) {
         lines.push(`| \`${row.real}\` | ${row.implemented.length} | ${row.missing.length} | ${row.total} |`);
     }
@@ -86,12 +101,12 @@ const markdown = (rows) => {
     return lines.join("\n");
 };
 
-module.exports = { CLIENTS, methodNames, realMethods, mockMethods, report, markdown };
+module.exports = { CLIENTS, classBody, methodNames, realMethods, mockMethods, report, markdown };
 
 if (require.main === module) {
     const rows = report();
     console.log(markdown(rows));
-    const phantom = rows.filter((row) => row.phantom.length > 0);
+    const phantom = rows.filter(row => row.phantom.length > 0);
     if (phantom.length > 0) {
         console.error("\nMock methods that do not exist on the real client:");
         for (const row of phantom) {
