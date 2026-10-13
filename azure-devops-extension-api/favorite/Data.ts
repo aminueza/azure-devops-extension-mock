@@ -39,7 +39,11 @@ export const makeFavorite = (): Favorite => ({
 export const favoriteProviders: FavoriteProvider[] = [
     { ...makeFavoriteProvider(), artifactType: "Microsoft.TeamFoundation.Git.Repository", pluralName: "Repositories" },
     { ...makeFavoriteProvider(), artifactType: "Microsoft.TeamFoundation.Build.Definition", pluralName: "Pipelines" },
-    { ...makeFavoriteProvider(), artifactType: "Microsoft.TeamFoundation.Classification.TeamProject", pluralName: "Projects" }
+    {
+        ...makeFavoriteProvider(),
+        artifactType: "Microsoft.TeamFoundation.Classification.TeamProject",
+        pluralName: "Projects"
+    }
 ];
 
 export const favoriteScopes: ArtifactScope[] = [makeArtifactScope(), { ...makeArtifactScope(), type: "Collection" }];

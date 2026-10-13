@@ -197,7 +197,11 @@ export const makeFormLayout = (): FormLayout => ({
                         label: "Planning",
                         order: 1
                     },
-                    { ...makeGroup([makeControl("Custom.Effort"), makeControl("Custom.Risk")]), label: "Custom", order: 2 }
+                    {
+                        ...makeGroup([makeControl("Custom.Effort"), makeControl("Custom.Risk")]),
+                        label: "Custom",
+                        order: 2
+                    }
                 ]),
                 makeSection("Section3", [
                     { ...makeGroup([makeContributionControl()]), label: "Extensions", order: 1 },
@@ -467,11 +471,7 @@ export const workItemTypes: ProcessWorkItemType[] = [
     makeSystemWorkItemType("Feature", "icon_trophy"),
     makeSystemWorkItemType("Task", "icon_clipboard"),
     makeSystemWorkItemType("User Story", "icon_book"),
-    ...fake.helpers.distinct(
-        2,
-        makeProcessWorkItemType,
-        type => type.referenceName
-    )
+    ...fake.helpers.distinct(2, makeProcessWorkItemType, type => type.referenceName)
 ];
 
 export const fields: ProcessWorkItemTypeField[] = [

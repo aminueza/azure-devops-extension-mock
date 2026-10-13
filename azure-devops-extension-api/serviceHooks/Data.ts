@@ -317,7 +317,11 @@ export const subscriptions: Subscription[] = [
         consumerId: "azureStorageQueue",
         consumerActionId: "enqueue",
         actionDescription: "To an Azure Storage queue",
-        consumerInputs: { accountName: fake.lorem.word(), accountKey: SECRET_PLACEHOLDER, queueName: fake.lorem.slug(2) }
+        consumerInputs: {
+            accountName: fake.lorem.word(),
+            accountKey: SECRET_PLACEHOLDER,
+            queueName: fake.lorem.slug(2)
+        }
     }
 ];
 

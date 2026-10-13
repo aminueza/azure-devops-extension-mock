@@ -23,8 +23,12 @@ import {
 } from "../azure-devops-extension-api/workItemTracking/Data";
 
 describe("WorkItemTrackingRestClient mock", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(WorkItemTrackingRestClient);
 

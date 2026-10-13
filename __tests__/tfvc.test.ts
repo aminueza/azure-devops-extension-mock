@@ -149,7 +149,18 @@ describe("TfvcRestClient mock", () => {
 
     it("gets a known changeset", async () => {
         const [first] = data.changesets;
-        const changeset = await client.getChangeset(first.changesetId, "proj", 10, true, true, 80, false, 0, 5, "id desc");
+        const changeset = await client.getChangeset(
+            first.changesetId,
+            "proj",
+            10,
+            true,
+            true,
+            80,
+            false,
+            0,
+            5,
+            "id desc"
+        );
         expect(changeset).toBe(first);
         expect(changeset.changes.length).toBe(3);
         expect(changeset.checkinNotes[0].name).toBe("Code Reviewer");
@@ -214,7 +225,10 @@ describe("TfvcRestClient mock", () => {
     });
 
     it("gets a batch of items as a zip", async () => {
-        const zip = await client.getItemsBatchZip(itemRequest("$/Project/Main/readme.md", "$/Project/Main/src"), "proj");
+        const zip = await client.getItemsBatchZip(
+            itemRequest("$/Project/Main/readme.md", "$/Project/Main/src"),
+            "proj"
+        );
         expect(zip).toBeInstanceOf(ArrayBuffer);
         expect(decode(zip)).toBe("$/Project/Main/readme.md\n$/Project/Main/src");
     });
@@ -268,7 +282,13 @@ describe("TfvcRestClient mock", () => {
     });
 
     it("lists the items below a scope path", async () => {
-        const items = await client.getItems("proj", "$/Project/Main/src", VersionControlRecursionType.Full, false, version);
+        const items = await client.getItems(
+            "proj",
+            "$/Project/Main/src",
+            VersionControlRecursionType.Full,
+            false,
+            version
+        );
         expect(items.map(i => i.path)).toEqual([
             "$/Project/Main/src",
             "$/Project/Main/src/app.ts",

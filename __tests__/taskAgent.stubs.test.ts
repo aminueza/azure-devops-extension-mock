@@ -128,10 +128,7 @@ describe("TaskAgentRestClient environments, resources and packages", () => {
     });
 
     it("creates an environment from the create parameter", async () => {
-        const environment = await client.addEnvironment(
-            { name: "staging", description: "Staging slots" },
-            "contoso"
-        );
+        const environment = await client.addEnvironment({ name: "staging", description: "Staging slots" }, "contoso");
         expect(environment.name).toBe("staging");
         expect(environment.description).toBe("Staging slots");
         expect(environment.project.name).toBe("contoso");
@@ -267,9 +264,7 @@ describe("TaskAgentRestClient environments, resources and packages", () => {
     });
 
     it("makes environment resources of the requested type", () => {
-        expect(makeEnvironmentResource(EnvironmentResourceType.Generic).type).toBe(
-            EnvironmentResourceType.Generic
-        );
+        expect(makeEnvironmentResource(EnvironmentResourceType.Generic).type).toBe(EnvironmentResourceType.Generic);
         expect(makeKubernetesResource().type).toBe(EnvironmentResourceType.Kubernetes);
         expect(makeVirtualMachineGroup().type).toBe(EnvironmentResourceType.VirtualMachine);
         expect(kubernetesResources.length).toBe(2);
@@ -294,9 +289,7 @@ describe("TaskAgentRestClient environments, resources and packages", () => {
         expect(packages).not.toContain(metadata);
         expect(metadata.type).toBe(type);
         expect(metadata.platform).toBe(platform);
-        expect(`${metadata.version.major}.${metadata.version.minor}.${metadata.version.patch}`).toBe(
-            version
-        );
+        expect(`${metadata.version.major}.${metadata.version.minor}.${metadata.version.patch}`).toBe(version);
     });
 
     it("lists the packages of a type", async () => {
@@ -329,30 +322,20 @@ describe("TaskAgentRestClient environments, resources and packages", () => {
         expect(metadata.filename.endsWith(".tar.gz")).toBe(true);
         expect(metadata.downloadUrl.endsWith(metadata.filename)).toBe(true);
         expect(metadata.version.major).toBeGreaterThanOrEqual(2);
-        expect(makePackageMetadata("agent", "win-x64", "4.248.0").filename).toBe(
-            "vsts-agent-win-x64-4.248.0.zip"
-        );
+        expect(makePackageMetadata("agent", "win-x64", "4.248.0").filename).toBe("vsts-agent-win-x64-4.248.0.zip");
     });
 
     it("returns the revision history stamped with the task group id", async () => {
         const history = await client.getTaskGroupHistory("proj", "group-1");
         expect(history.map(r => r.revision)).toEqual([1, 2, 3]);
-        expect(history.map(r => r.changeType)).toEqual([
-            AuditAction.Add,
-            AuditAction.Update,
-            AuditAction.Update
-        ]);
+        expect(history.map(r => r.changeType)).toEqual([AuditAction.Add, AuditAction.Update, AuditAction.Update]);
         expect(history.every(r => r.taskGroupId === "group-1")).toBe(true);
         expect(history.length).toBe(taskGroupRevisions.length);
         expect(makeTaskGroupRevision().changeType).toBe(AuditAction.Update);
     });
 
     it("returns the seeded variable groups for the requested ids", async () => {
-        const groups = await client.getVariableGroupsById(
-            "proj",
-            [variableGroups[1].id, unmatchedId],
-            true
-        );
+        const groups = await client.getVariableGroupsById("proj", [variableGroups[1].id, unmatchedId], true);
         expect(groups).toEqual([variableGroups[1]]);
     });
 
@@ -410,27 +393,10 @@ describe("TaskAgentRestClient environments, resources and packages", () => {
     });
 
     it("filters virtual machines by tags, limits them and echoes the token", async () => {
-        const tagged = await client.getVirtualMachines(
-            "proj",
-            61,
-            71,
-            "next",
-            undefined,
-            undefined,
-            ["db", "staging"]
-        );
+        const tagged = await client.getVirtualMachines("proj", 61, 71, "next", undefined, undefined, ["db", "staging"]);
         expect(tagged.map(m => m.id)).toEqual([virtualMachines[1].id, virtualMachines[3].id]);
         expect(tagged.continuationToken).toBe("next");
-        const limited = await client.getVirtualMachines(
-            "proj",
-            61,
-            71,
-            undefined,
-            undefined,
-            undefined,
-            ["web"],
-            1
-        );
+        const limited = await client.getVirtualMachines("proj", 61, 71, undefined, undefined, undefined, ["web"], 1);
         expect(limited.map(m => m.id)).toEqual([virtualMachines[0].id]);
     });
 

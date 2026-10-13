@@ -169,9 +169,9 @@ describe("alert fixtures", () => {
         expect(result.result.resultType).toBe(ResultType.VersionControl);
         expect(result.result.dependencyResult).toBeUndefined();
         expect(result.result.versionControlResult.resultId).toBe(result.result.resultId);
-        expect(result.result.versionControlResult.versionControlSnippet.versionControlFilePath.versionControlFilePathId).toBe(
-            result.result.versionControlResult.versionControlSnippet.versionControlFilePathId
-        );
+        expect(
+            result.result.versionControlResult.versionControlSnippet.versionControlFilePath.versionControlFilePathId
+        ).toBe(result.result.versionControlResult.versionControlSnippet.versionControlFilePathId);
         expect(makeAnalysisResult(State.Dismissed).state).toBe(State.Dismissed);
     });
 

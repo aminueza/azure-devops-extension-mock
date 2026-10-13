@@ -185,7 +185,9 @@ describe("TestPlanRestClient mock", () => {
 
         it("combines the owner and active filters", async () => {
             const all = await client.getTestPlans("proj");
-            expect(await client.getTestPlans("proj", all[3].owner.id, undefined, undefined, true)).not.toContain(all[3]);
+            expect(await client.getTestPlans("proj", all[3].owner.id, undefined, undefined, true)).not.toContain(
+                all[3]
+            );
         });
 
         it("gets a known plan", async () => {
@@ -202,7 +204,10 @@ describe("TestPlanRestClient mock", () => {
         it("creates a plan echoing the parameters", async () => {
             const [template] = await client.getTestPlans("proj");
             const { id: _id, ...parameters } = template;
-            const created = await client.createTestPlan({ ...parameters, name: "Release 2", areaPath: "proj\\area" }, "proj");
+            const created = await client.createTestPlan(
+                { ...parameters, name: "Release 2", areaPath: "proj\\area" },
+                "proj"
+            );
             expect(created.name).toBe("Release 2");
             expect(created.areaPath).toBe("proj\\area");
             expect(created.owner).toBe(template.owner);
@@ -212,7 +217,11 @@ describe("TestPlanRestClient mock", () => {
 
         it("updates a known plan", async () => {
             const all = await client.getTestPlans("proj");
-            const updated = await client.updateTestPlan({ ...all[0], name: "Renamed", revision: 77 }, "proj", all[1].id);
+            const updated = await client.updateTestPlan(
+                { ...all[0], name: "Renamed", revision: 77 },
+                "proj",
+                all[1].id
+            );
             expect(updated.id).toBe(all[1].id);
             expect(updated.name).toBe("Renamed");
             expect(updated.revision).toBe(77);

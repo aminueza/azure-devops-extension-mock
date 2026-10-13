@@ -30,7 +30,12 @@ import { makeIdentityRef } from "../core/Data";
 export const SECRET_PLACEHOLDER = "***";
 
 export const endpointKinds: { name: string; displayName: string; scheme: string; secretInput: string }[] = [
-    { name: "azurerm", displayName: "Azure Resource Manager", scheme: "ServicePrincipal", secretInput: "serviceprincipalkey" },
+    {
+        name: "azurerm",
+        displayName: "Azure Resource Manager",
+        scheme: "ServicePrincipal",
+        secretInput: "serviceprincipalkey"
+    },
     { name: "github", displayName: "GitHub", scheme: "Token", secretInput: "accessToken" },
     { name: "dockerregistry", displayName: "Docker Registry", scheme: "UsernamePassword", secretInput: "password" },
     { name: "generic", displayName: "Generic", scheme: "UsernamePassword", secretInput: "password" }
@@ -268,7 +273,9 @@ export const makeAzureSubscriptionQueryResult = (value: AzureSubscription[]): Az
     value
 });
 
-export const makeAzureManagementGroupQueryResult = (value: AzureManagementGroup[]): AzureManagementGroupQueryResult => ({
+export const makeAzureManagementGroupQueryResult = (
+    value: AzureManagementGroup[]
+): AzureManagementGroupQueryResult => ({
     errorMessage: "",
     value
 });

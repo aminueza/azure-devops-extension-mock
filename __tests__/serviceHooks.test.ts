@@ -528,7 +528,9 @@ describe("service hooks fixtures", () => {
 
     it("masks every confidential consumer input", () => {
         const confidential = new Set(
-            consumers.flatMap(c => c.actions.flatMap(a => a.inputDescriptors.filter(d => d.isConfidential).map(d => d.id)))
+            consumers.flatMap(c =>
+                c.actions.flatMap(a => a.inputDescriptors.filter(d => d.isConfidential).map(d => d.id))
+            )
         );
         expect([...confidential].sort()).toEqual(["accountKey", "basicAuthPassword", "url"]);
         const inputs = [
@@ -537,7 +539,9 @@ describe("service hooks fixtures", () => {
         ];
         for (const [consumerId, values] of inputs) {
             const consumer = consumers.find(c => c.id === consumerId)!;
-            const secret = consumer.actions.flatMap(a => a.inputDescriptors.filter(d => d.isConfidential).map(d => d.id));
+            const secret = consumer.actions.flatMap(a =>
+                a.inputDescriptors.filter(d => d.isConfidential).map(d => d.id)
+            );
             for (const [key, value] of Object.entries(values)) {
                 if (secret.includes(key) || SECRET_KEYS.test(key)) {
                     expect(value).toBe("***");

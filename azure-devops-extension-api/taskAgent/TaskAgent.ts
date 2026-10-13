@@ -140,11 +140,7 @@ const encode = (value: string): ArrayBuffer => {
     return buffer;
 };
 
-const stampMachine = (
-    machine: DeploymentMachine,
-    project: string,
-    deploymentGroupId: number
-): DeploymentMachine => {
+const stampMachine = (machine: DeploymentMachine, project: string, deploymentGroupId: number): DeploymentMachine => {
     return { ...machine, properties: { ...machine.properties, project, deploymentGroupId } };
 };
 
@@ -154,16 +150,10 @@ const machineById = (machineId: number): DeploymentMachine => {
 };
 
 const byTags = <T extends { tags: string[] }>(machines: T[], tags?: string[]): T[] => {
-    return tags === undefined
-        ? machines
-        : machines.filter(m => tags.every(tag => m.tags.includes(tag)));
+    return tags === undefined ? machines : machines.filter(m => tags.every(tag => m.tags.includes(tag)));
 };
 
-const stampGroupMachine = (
-    machine: DeploymentMachine,
-    project: string,
-    machineGroupId: number
-): DeploymentMachine => {
+const stampGroupMachine = (machine: DeploymentMachine, project: string, machineGroupId: number): DeploymentMachine => {
     return { ...machine, properties: { ...machine.properties, project, machineGroupId } };
 };
 
@@ -174,9 +164,7 @@ const byMachineName = <T extends { agent: { name: string } }>(
 ): T[] => {
     return name === undefined
         ? machines
-        : machines.filter(m =>
-              partialNameMatch === true ? m.agent.name.includes(name) : m.agent.name === name
-          );
+        : machines.filter(m => (partialNameMatch === true ? m.agent.name.includes(name) : m.agent.name === name));
 };
 
 const byEnabled = (machines: DeploymentMachine[], enabled?: boolean): DeploymentMachine[] => {
@@ -208,10 +196,7 @@ const requestsForMachines = (
     return ids.flatMap(id => requestsForMachine(deploymentGroupId, id, completedRequestCount));
 };
 
-const statusMatches = (
-    machine: DeploymentMachine,
-    agentStatus?: TaskAgentStatusFilter
-): boolean => {
+const statusMatches = (machine: DeploymentMachine, agentStatus?: TaskAgentStatusFilter): boolean => {
     if (agentStatus === TaskAgentStatusFilter.Online) {
         return machine.agent.status === TaskAgentStatus.Online;
     }
@@ -324,10 +309,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve({ ...makeVariableGroup(), ...group });
     }
 
-    updateVariableGroup(
-        group: VariableGroupParameters,
-        groupId: number
-    ): Promise<VariableGroup> {
+    updateVariableGroup(group: VariableGroupParameters, groupId: number): Promise<VariableGroup> {
         return Promise.resolve({
             ...makeVariableGroup(),
             ...group,
@@ -360,10 +342,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getAgentPoolsByIds(
-        poolIds: number[],
-        _actionFilter?: TaskAgentPoolActionFilter
-    ): Promise<TaskAgentPool[]> {
+    getAgentPoolsByIds(poolIds: number[], _actionFilter?: TaskAgentPoolActionFilter): Promise<TaskAgentPool[]> {
         return Promise.resolve(agentPools.filter(p => poolIds.includes(p.id)));
     }
 
@@ -379,11 +358,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(true);
     }
 
-    addAgentQueue(
-        queue: TaskAgentQueue,
-        _project?: string,
-        _authorizePipelines?: boolean
-    ): Promise<TaskAgentQueue> {
+    addAgentQueue(queue: TaskAgentQueue, _project?: string, _authorizePipelines?: boolean): Promise<TaskAgentQueue> {
         return Promise.resolve({ ...makeAgentQueue(), ...queue });
     }
 
@@ -441,10 +416,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(agentClouds);
     }
 
-    updateAgentCloud(
-        updatedCloud: TaskAgentCloud,
-        agentCloudId: number
-    ): Promise<TaskAgentCloud> {
+    updateAgentCloud(updatedCloud: TaskAgentCloud, agentCloudId: number): Promise<TaskAgentCloud> {
         return Promise.resolve({ ...makeAgentCloud(), ...updatedCloud, agentCloudId });
     }
 
@@ -495,11 +467,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve({ ...makeAgent(), ...agent, id: agentId });
     }
 
-    updateAgentUpdateState(
-        _poolId: number,
-        agentId: number,
-        currentState: string
-    ): Promise<TaskAgent> {
+    updateAgentUpdateState(_poolId: number, agentId: number, currentState: string): Promise<TaskAgent> {
         const found = agents.find(a => a.id === agentId);
         return Promise.resolve({
             ...(found ?? makeAgent()),
@@ -517,11 +485,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve({ ...(found ?? makeAgent()), id: agentId, userCapabilities });
     }
 
-    getAgentRequest(
-        poolId: number,
-        requestId: number,
-        _includeStatus?: boolean
-    ): Promise<TaskAgentJobRequest> {
+    getAgentRequest(poolId: number, requestId: number, _includeStatus?: boolean): Promise<TaskAgentJobRequest> {
         const found = agentRequests.find(r => r.requestId === requestId);
         return Promise.resolve(found ?? { ...makeAgentJobRequest(), requestId, poolId });
     }
@@ -549,20 +513,12 @@ export class MockTaskAgentRestClient extends RestClientBase {
         agentIds?: number[],
         completedRequestCount?: number
     ): Promise<TaskAgentJobRequest[]> {
-        const matched = agentIds
-            ? agentRequests.filter(r => agentIds.includes(r.reservedAgent.id))
-            : agentRequests;
+        const matched = agentIds ? agentRequests.filter(r => agentIds.includes(r.reservedAgent.id)) : agentRequests;
         return Promise.resolve(take(matched, completedRequestCount).map(r => ({ ...r, poolId })));
     }
 
-    getAgentRequestsForPlan(
-        poolId: number,
-        planId: string,
-        jobId?: string
-    ): Promise<TaskAgentJobRequest[]> {
-        const matched = agentRequests.filter(
-            r => r.planId === planId && (jobId === undefined || r.jobId === jobId)
-        );
+    getAgentRequestsForPlan(poolId: number, planId: string, jobId?: string): Promise<TaskAgentJobRequest[]> {
+        const matched = agentRequests.filter(r => r.planId === planId && (jobId === undefined || r.jobId === jobId));
         return Promise.resolve(matched.map(r => ({ ...r, poolId })));
     }
 
@@ -579,11 +535,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(page(items, continuationToken ?? null));
     }
 
-    queueAgentRequest(
-        request: TaskAgentJobRequest,
-        project: string,
-        queueId: number
-    ): Promise<TaskAgentJobRequest> {
+    queueAgentRequest(request: TaskAgentJobRequest, project: string, queueId: number): Promise<TaskAgentJobRequest> {
         return Promise.resolve({
             ...makeAgentJobRequest(),
             ...request,
@@ -592,10 +544,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         });
     }
 
-    queueAgentRequestByPool(
-        request: TaskAgentJobRequest,
-        poolId: number
-    ): Promise<TaskAgentJobRequest> {
+    queueAgentRequestByPool(request: TaskAgentJobRequest, poolId: number): Promise<TaskAgentJobRequest> {
         return Promise.resolve({ ...makeAgentJobRequest(), ...request, poolId });
     }
 
@@ -625,10 +574,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    createAgentSession(
-        session: TaskAgentSession,
-        _poolId: number
-    ): Promise<TaskAgentSession> {
+    createAgentSession(session: TaskAgentSession, _poolId: number): Promise<TaskAgentSession> {
         return Promise.resolve({ ...makeAgentSession(), ...session });
     }
 
@@ -636,11 +582,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getMessage(
-        _poolId: number,
-        _sessionId: string,
-        lastMessageId?: number
-    ): Promise<TaskAgentMessage> {
+    getMessage(_poolId: number, _sessionId: string, lastMessageId?: number): Promise<TaskAgentMessage> {
         const found = messages.find(m => m.messageId === lastMessageId);
         return Promise.resolve(found ?? makeAgentMessage());
     }
@@ -649,11 +591,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    sendMessage(
-        _message: TaskAgentMessage,
-        _poolId: number,
-        _requestId: number
-    ): Promise<void> {
+    sendMessage(_message: TaskAgentMessage, _poolId: number, _requestId: number): Promise<void> {
         return Promise.resolve();
     }
 
@@ -687,10 +625,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         });
     }
 
-    deleteAgentPoolMaintenanceDefinition(
-        _poolId: number,
-        _definitionId: number
-    ): Promise<void> {
+    deleteAgentPoolMaintenanceDefinition(_poolId: number, _definitionId: number): Promise<void> {
         return Promise.resolve();
     }
 
@@ -702,12 +637,8 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(found ?? { ...makeMaintenanceDefinition(), id: definitionId });
     }
 
-    getAgentPoolMaintenanceDefinitions(
-        poolId: number
-    ): Promise<TaskAgentPoolMaintenanceDefinition[]> {
-        return Promise.resolve(
-            maintenanceDefinitions.map(d => ({ ...d, pool: { ...d.pool, id: poolId } }))
-        );
+    getAgentPoolMaintenanceDefinitions(poolId: number): Promise<TaskAgentPoolMaintenanceDefinition[]> {
+        return Promise.resolve(maintenanceDefinitions.map(d => ({ ...d, pool: { ...d.pool, id: poolId } })));
     }
 
     updateAgentPoolMaintenanceDefinition(
@@ -728,10 +659,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getAgentPoolMaintenanceJob(
-        poolId: number,
-        jobId: number
-    ): Promise<TaskAgentPoolMaintenanceJob> {
+    getAgentPoolMaintenanceJob(poolId: number, jobId: number): Promise<TaskAgentPoolMaintenanceJob> {
         const found = maintenanceJobs.find(j => j.jobId === jobId);
         const base = found ?? makeMaintenanceJob();
         return Promise.resolve({ ...base, jobId, pool: { ...base.pool, id: poolId } });
@@ -741,14 +669,9 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(encode(`pool-${poolId}-maintenance-job-${jobId}`));
     }
 
-    getAgentPoolMaintenanceJobs(
-        poolId: number,
-        definitionId?: number
-    ): Promise<TaskAgentPoolMaintenanceJob[]> {
+    getAgentPoolMaintenanceJobs(poolId: number, definitionId?: number): Promise<TaskAgentPoolMaintenanceJob[]> {
         const matched =
-            definitionId === undefined
-                ? maintenanceJobs
-                : maintenanceJobs.filter(j => j.definitionId === definitionId);
+            definitionId === undefined ? maintenanceJobs : maintenanceJobs.filter(j => j.definitionId === definitionId);
         return Promise.resolve(matched.map(j => ({ ...j, pool: { ...j.pool, id: poolId } })));
     }
 
@@ -779,10 +702,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         });
     }
 
-    addDeploymentGroup(
-        deploymentGroup: DeploymentGroupCreateParameter,
-        project: string
-    ): Promise<DeploymentGroup> {
+    addDeploymentGroup(deploymentGroup: DeploymentGroupCreateParameter, project: string): Promise<DeploymentGroup> {
         const base = makeDeploymentGroup();
         return Promise.resolve({
             ...base,
@@ -821,9 +741,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         const matched =
             deploymentGroupName === undefined
                 ? deploymentGroupMetrics
-                : deploymentGroupMetrics.filter(
-                      m => m.deploymentGroup.name === deploymentGroupName
-                  );
+                : deploymentGroupMetrics.filter(m => m.deploymentGroup.name === deploymentGroupName);
         const items = take(matched, top).map(m => ({
             ...m,
             deploymentGroup: {
@@ -834,10 +752,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(page(items, continuationToken ?? null));
     }
 
-    generateDeploymentGroupAccessToken(
-        project: string,
-        deploymentGroupId: number
-    ): Promise<string> {
+    generateDeploymentGroupAccessToken(project: string, deploymentGroupId: number): Promise<string> {
         return Promise.resolve(`${project}-deployment-group-${deploymentGroupId}-token`);
     }
 
@@ -854,15 +769,11 @@ export class MockTaskAgentRestClient extends RestClientBase {
             poolName === undefined
                 ? deploymentPoolSummaries
                 : deploymentPoolSummaries.filter(s => s.pool.name === poolName);
-        const byId =
-            poolIds === undefined ? byName : byName.filter(s => poolIds.includes(s.pool.id));
+        const byId = poolIds === undefined ? byName : byName.filter(s => poolIds.includes(s.pool.id));
         return Promise.resolve(byId);
     }
 
-    addDeploymentMachineGroup(
-        machineGroup: DeploymentMachineGroup,
-        project: string
-    ): Promise<DeploymentMachineGroup> {
+    addDeploymentMachineGroup(machineGroup: DeploymentMachineGroup, project: string): Promise<DeploymentMachineGroup> {
         const base = makeDeploymentMachineGroup();
         return Promise.resolve({
             ...base,
@@ -898,9 +809,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
             machineGroupName === undefined
                 ? deploymentMachineGroups
                 : deploymentMachineGroups.filter(g => g.name === machineGroupName);
-        return Promise.resolve(
-            matched.map(g => ({ ...g, project: { ...g.project, name: project } }))
-        );
+        return Promise.resolve(matched.map(g => ({ ...g, project: { ...g.project, name: project } })));
     }
 
     updateDeploymentMachineGroup(
@@ -917,10 +826,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         });
     }
 
-    generateDeploymentMachineGroupAccessToken(
-        project: string,
-        machineGroupId: number
-    ): Promise<string> {
+    generateDeploymentMachineGroupAccessToken(project: string, machineGroupId: number): Promise<string> {
         return Promise.resolve(`${project}-machine-group-${machineGroupId}-token`);
     }
 
@@ -933,11 +839,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(stampMachine(created, project, deploymentGroupId));
     }
 
-    deleteDeploymentMachine(
-        _project: string,
-        _deploymentGroupId: number,
-        _machineId: number
-    ): Promise<void> {
+    deleteDeploymentMachine(_project: string, _deploymentGroupId: number, _machineId: number): Promise<void> {
         return Promise.resolve();
     }
 
@@ -1021,11 +923,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(stampMachine(created, project, deploymentGroupId));
     }
 
-    deleteDeploymentTarget(
-        _project: string,
-        _deploymentGroupId: number,
-        _targetId: number
-    ): Promise<void> {
+    deleteDeploymentTarget(_project: string, _deploymentGroupId: number, _targetId: number): Promise<void> {
         return Promise.resolve();
     }
 
@@ -1101,9 +999,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         machineId: number,
         completedRequestCount?: number
     ): Promise<TaskAgentJobRequest[]> {
-        return Promise.resolve(
-            requestsForMachine(deploymentGroupId, machineId, completedRequestCount)
-        );
+        return Promise.resolve(requestsForMachine(deploymentGroupId, machineId, completedRequestCount));
     }
 
     getAgentRequestsForDeploymentMachines(
@@ -1112,9 +1008,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         machineIds?: number[],
         completedRequestCount?: number
     ): Promise<TaskAgentJobRequest[]> {
-        return Promise.resolve(
-            requestsForMachines(deploymentGroupId, machineIds, completedRequestCount)
-        );
+        return Promise.resolve(requestsForMachines(deploymentGroupId, machineIds, completedRequestCount));
     }
 
     getAgentRequestsForDeploymentTarget(
@@ -1123,9 +1017,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         targetId: number,
         completedRequestCount?: number
     ): Promise<TaskAgentJobRequest[]> {
-        return Promise.resolve(
-            requestsForMachine(deploymentGroupId, targetId, completedRequestCount)
-        );
+        return Promise.resolve(requestsForMachine(deploymentGroupId, targetId, completedRequestCount));
     }
 
     getAgentRequestsForDeploymentTargets(
@@ -1136,9 +1028,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         _completedOn?: Date,
         completedRequestCount?: number
     ): Promise<TaskAgentJobRequest[]> {
-        return Promise.resolve(
-            requestsForMachines(deploymentGroupId, targetIds, completedRequestCount)
-        );
+        return Promise.resolve(requestsForMachines(deploymentGroupId, targetIds, completedRequestCount));
     }
 
     getAzureManagementGroups(): Promise<AzureManagementGroupQueryResult> {
@@ -1198,8 +1088,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         continuationToken?: string,
         top?: number
     ): Promise<PagedList<EnvironmentInstance>> {
-        const matched =
-            name === undefined ? environments : environments.filter(e => e.name === name);
+        const matched = name === undefined ? environments : environments.filter(e => e.name === name);
         const items = take(matched, top).map(e => inProject(e, project));
         return Promise.resolve(page(items, continuationToken ?? null));
     }
@@ -1217,9 +1106,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(inProject(updated, project));
     }
 
-    validateInputs(
-        inputValidationRequest: InputValidationRequest
-    ): Promise<InputValidationRequest> {
+    validateInputs(inputValidationRequest: InputValidationRequest): Promise<InputValidationRequest> {
         const inputs = Object.fromEntries(
             Object.entries(inputValidationRequest.inputs).map(([key, item]) => [
                 key,
@@ -1244,19 +1131,11 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(inEnvironment(created, environmentId));
     }
 
-    deleteKubernetesResource(
-        _project: string,
-        _environmentId: number,
-        _resourceId: number
-    ): Promise<void> {
+    deleteKubernetesResource(_project: string, _environmentId: number, _resourceId: number): Promise<void> {
         return Promise.resolve();
     }
 
-    getKubernetesResource(
-        _project: string,
-        environmentId: number,
-        resourceId: number
-    ): Promise<KubernetesResource> {
+    getKubernetesResource(_project: string, environmentId: number, resourceId: number): Promise<KubernetesResource> {
         const found = kubernetesResources.find(r => r.id === resourceId);
         const base = found ?? { ...makeKubernetesResource(), id: resourceId };
         return Promise.resolve(inEnvironment(base, environmentId));
@@ -1334,20 +1213,12 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(matched.map(f => withTicket(f, includeDownloadTickets)));
     }
 
-    querySecureFilesByProperties(
-        _condition: string,
-        _project: string,
-        namePattern?: string
-    ): Promise<SecureFile[]> {
+    querySecureFilesByProperties(_condition: string, _project: string, namePattern?: string): Promise<SecureFile[]> {
         const matched = byNamePattern(secureFiles, namePattern);
         return Promise.resolve(matched.map(f => withTicket(f)));
     }
 
-    updateSecureFile(
-        secureFile: SecureFile,
-        _project: string,
-        secureFileId: string
-    ): Promise<SecureFile> {
+    updateSecureFile(secureFile: SecureFile, _project: string, secureFileId: string): Promise<SecureFile> {
         return Promise.resolve({ ...makeSecureFile(), ...secureFile, id: secureFileId });
     }
 
@@ -1381,11 +1252,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(taskGroupById(taskGroupId));
     }
 
-    getTaskGroupRevision(
-        _project: string,
-        taskGroupId: string,
-        revision: number
-    ): Promise<string> {
+    getTaskGroupRevision(_project: string, taskGroupId: string, revision: number): Promise<string> {
         return Promise.resolve(JSON.stringify({ ...taskGroupById(taskGroupId), revision }));
     }
 
@@ -1409,11 +1276,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve([{ ...makeTaskGroup(), ...taskGroup, deleted: false }]);
     }
 
-    updateTaskGroup(
-        taskGroup: TaskGroupUpdateParameter,
-        _project: string,
-        taskGroupId?: string
-    ): Promise<TaskGroup> {
+    updateTaskGroup(taskGroup: TaskGroupUpdateParameter, _project: string, taskGroupId?: string): Promise<TaskGroup> {
         return Promise.resolve({
             ...makeTaskGroup(),
             ...taskGroup,
@@ -1427,9 +1290,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         taskGroupId: string,
         _disablePriorVersions?: boolean
     ): Promise<TaskGroup[]> {
-        return Promise.resolve([
-            { ...taskGroupById(taskGroupId), comment: taskGroupUpdateProperties.comment }
-        ]);
+        return Promise.resolve([{ ...taskGroupById(taskGroupId), comment: taskGroupUpdateProperties.comment }]);
     }
 
     getTaskGroupsByIds(
@@ -1475,9 +1336,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         _scopeLocal?: boolean,
         _allVersions?: boolean
     ): Promise<TaskDefinition[]> {
-        return Promise.resolve(
-            taskId === undefined ? taskDefinitions : taskDefinitions.filter(d => d.id === taskId)
-        );
+        return Promise.resolve(taskId === undefined ? taskDefinitions : taskDefinitions.filter(d => d.id === taskId));
     }
 
     shareVariableGroup(
@@ -1487,11 +1346,7 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getVariableGroupsById(
-        _project: string,
-        groupIds: number[],
-        _loadSecrets?: boolean
-    ): Promise<VariableGroup[]> {
+    getVariableGroupsById(_project: string, groupIds: number[], _loadSecrets?: boolean): Promise<VariableGroup[]> {
         return Promise.resolve(variableGroups.filter(g => groupIds.includes(g.id)));
     }
 
@@ -1504,19 +1359,11 @@ export class MockTaskAgentRestClient extends RestClientBase {
         return Promise.resolve(inEnvironment(created, environmentId));
     }
 
-    deleteVirtualMachineGroup(
-        _project: string,
-        _environmentId: number,
-        _resourceId: number
-    ): Promise<void> {
+    deleteVirtualMachineGroup(_project: string, _environmentId: number, _resourceId: number): Promise<void> {
         return Promise.resolve();
     }
 
-    getVirtualMachineGroup(
-        _project: string,
-        environmentId: number,
-        resourceId: number
-    ): Promise<VirtualMachineGroup> {
+    getVirtualMachineGroup(_project: string, environmentId: number, resourceId: number): Promise<VirtualMachineGroup> {
         const found = virtualMachineGroups.find(g => g.id === resourceId);
         const base = found ?? { ...makeVirtualMachineGroup(), id: resourceId };
         return Promise.resolve(inEnvironment(base, environmentId));

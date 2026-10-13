@@ -43,10 +43,7 @@ export const makeProjectReference = (): TeamProjectReference => ({
     url: fake.internet.url(),
     state: "wellFormed",
     revision: fake.number.int({ min: 1, max: 100 }),
-    visibility: fake.helpers.arrayElement([
-        ProjectVisibility.Private,
-        ProjectVisibility.Public
-    ]),
+    visibility: fake.helpers.arrayElement([ProjectVisibility.Private, ProjectVisibility.Public]),
     lastUpdateTime: fake.date.recent(),
     defaultTeamImageUrl: fake.image.avatar()
 });
@@ -208,11 +205,7 @@ export const teams: WebApiTeam[] = fake.helpers.distinct(3, makeTeam, t => t.nam
 export const readableTeams: WebApiTeam[] = Array.from({ length: 2 }, makeTeam);
 export const processes: Process[] = Array.from({ length: 4 }, makeProcess);
 export const teamMembers: TeamMember[] = Array.from({ length: 5 }, makeTeamMember);
-export const projectCollections: TeamProjectCollection[] = fake.helpers.distinct(
-    2,
-    makeProjectCollection,
-    c => c.name
-);
+export const projectCollections: TeamProjectCollection[] = fake.helpers.distinct(2, makeProjectCollection, c => c.name);
 export const identityMru: IdentityRef[] = Array.from({ length: 3 }, makeIdentityRef);
 export const connectedServices: WebApiConnectedService[] = Array.from({ length: 4 }, makeConnectedService);
 export const projectHistory: ProjectInfo[] = Array.from({ length: 5 }, (_, index) => ({

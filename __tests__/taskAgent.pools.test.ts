@@ -34,10 +34,7 @@ describe("TaskAgentRestClient pools, queues and clouds", () => {
     const resolving: Array<[string, () => Promise<unknown>]> = [
         ["addAgentPool", () => client.addAgentPool(makeAgentPool("Custom"))],
         ["updateAgentPool", () => client.updateAgentPool(makeAgentPool("Custom"), 12)],
-        [
-            "getAgentPoolsByIds",
-            () => client.getAgentPoolsByIds([agentPools[0].id], TaskAgentPoolActionFilter.Manage)
-        ],
+        ["getAgentPoolsByIds", () => client.getAgentPoolsByIds([agentPools[0].id], TaskAgentPoolActionFilter.Manage)],
         ["getAgentPoolMetadata", () => client.getAgentPoolMetadata(agentPools[0].id)],
         ["hasPoolPermissions", () => client.hasPoolPermissions(agentPools[0].id, 2)],
         ["addAgentQueue", () => client.addAgentQueue(makeAgentQueue("Hosted"), "proj", true)],
@@ -67,10 +64,7 @@ describe("TaskAgentRestClient pools, queues and clouds", () => {
         ["getResourceLimits", () => client.getResourceLimits()],
         ["getResourceUsage", () => client.getResourceUsage("Public", true, false)],
         ["getTaskHubLicenseDetails", () => client.getTaskHubLicenseDetails("build", true, true)],
-        [
-            "updateTaskHubLicenseDetails",
-            () => client.updateTaskHubLicenseDetails(makeTaskHubLicenseDetails(), "build")
-        ]
+        ["updateTaskHubLicenseDetails", () => client.updateTaskHubLicenseDetails(makeTaskHubLicenseDetails(), "build")]
     ];
 
     it.each(resolving)("%s resolves", async (_name, call) => {

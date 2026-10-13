@@ -88,21 +88,19 @@ describe("GitRestClient mock items, diffs, merges, tags and statuses", () => {
         ["getCommitDiffs", () => client.getCommitDiffs("repo-id")],
         ["getFileDiffs", () => client.getFileDiffs(diffsCriteria, "proj", "repo-id")],
         ["getMergeBases", () => client.getMergeBases("repo-id", commits[0].commitId, commits[1].commitId)],
-        ["createMergeRequest", () => client.createMergeRequest(
-            { comment: "merge", parents: [commits[0].commitId] },
-            "proj",
-            "repo-id"
-        )],
+        [
+            "createMergeRequest",
+            () => client.createMergeRequest({ comment: "merge", parents: [commits[0].commitId] }, "proj", "repo-id")
+        ],
         ["getMergeRequest", () => client.getMergeRequest("proj", "repo-id", merges[0].mergeOperationId)],
         ["getPushCommits", () => client.getPushCommits("repo-id", 7)],
         ["createAnnotatedTag", () => client.createAnnotatedTag(makeAnnotatedTag("v9.9.9"), "proj", "repo-id")],
         ["getAnnotatedTag", () => client.getAnnotatedTag("proj", "repo-id", annotatedTags[0].objectId)],
         ["getStatuses", () => client.getStatuses(commits[0].commitId, "repo-id")],
-        ["createCommitStatus", () => client.createCommitStatus(
-            makeGitStatus(900, GitStatusState.Error),
-            commits[0].commitId,
-            "repo-id"
-        )]
+        [
+            "createCommitStatus",
+            () => client.createCommitStatus(makeGitStatus(900, GitStatusState.Error), commits[0].commitId, "repo-id")
+        ]
     ];
 
     it.each(cases)("%s resolves", async (_name, call) => {
@@ -206,7 +204,18 @@ describe("GitRestClient mock items, diffs, merges, tags and statuses", () => {
     });
 
     it("scopes hfs items to a path prefix", async () => {
-        const scoped = await client.getHfsItems("repo-id", "proj", "/src", 120, true, true, true, true, baseDescriptor, true);
+        const scoped = await client.getHfsItems(
+            "repo-id",
+            "proj",
+            "/src",
+            120,
+            true,
+            true,
+            true,
+            true,
+            baseDescriptor,
+            true
+        );
         expect(scoped.length).toBe(items.filter(i => i.path.startsWith("/src")).length);
         expect(scoped.every(i => i.path.startsWith("/src"))).toBe(true);
     });
@@ -291,8 +300,7 @@ describe("GitRestClient mock items, diffs, merges, tags and statuses", () => {
     });
 
     it("returns a known merge request", async () => {
-        await expect(client.getMergeRequest("proj", "repo-id", merges[0].mergeOperationId))
-            .resolves.toBe(merges[0]);
+        await expect(client.getMergeRequest("proj", "repo-id", merges[0].mergeOperationId)).resolves.toBe(merges[0]);
     });
 
     it("fabricates and links an unknown merge request", async () => {
@@ -322,8 +330,9 @@ describe("GitRestClient mock items, diffs, merges, tags and statuses", () => {
     });
 
     it("returns a known annotated tag", async () => {
-        await expect(client.getAnnotatedTag("proj", "repo-id", annotatedTags[1].objectId))
-            .resolves.toBe(annotatedTags[1]);
+        await expect(client.getAnnotatedTag("proj", "repo-id", annotatedTags[1].objectId)).resolves.toBe(
+            annotatedTags[1]
+        );
     });
 
     it("fabricates an unknown annotated tag", async () => {

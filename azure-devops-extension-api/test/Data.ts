@@ -77,12 +77,7 @@ import {
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import { makeIdentityRef, makeProjectReference } from "../core/Data";
 
-const outcomeValues = [
-    TestOutcome.Passed,
-    TestOutcome.Failed,
-    TestOutcome.NotExecuted,
-    TestOutcome.Blocked
-];
+const outcomeValues = [TestOutcome.Passed, TestOutcome.Failed, TestOutcome.NotExecuted, TestOutcome.Blocked];
 
 const makeOutcomeName = (): string => TestOutcome[fake.helpers.arrayElement(outcomeValues)];
 
@@ -370,8 +365,10 @@ export const makeAttachmentRef = (): TestAttachmentReference => ({
 
 export const testRuns: TestRun[] = Array.from({ length: 5 }, () => makeTestRun());
 export const testResults: TestCaseResult[] = Array.from({ length: 10 }, () => makeTestCaseResult());
-export const shallowResults: PagedList<ShallowTestCaseResult> =
-    Object.assign(Array.from({ length: 10 }, makeShallowResult), { continuationToken: "" });
+export const shallowResults: PagedList<ShallowTestCaseResult> = Object.assign(
+    Array.from({ length: 10 }, makeShallowResult),
+    { continuationToken: "" }
+);
 export const attachments: TestAttachment[] = Array.from({ length: 2 }, makeAttachment);
 
 export const makeWorkItemReference = (): WorkItemReference => ({
@@ -822,7 +819,10 @@ export const customFields: CustomTestFieldDefinition[] = [
     CustomTestFieldScope.TestRun
 ].map(makeCustomTestFieldDefinition);
 export const resultRetentionSettings: ResultRetentionSettings = makeResultRetentionSettings();
-export const resultTrendData: AggregatedDataForResultTrend[] = Array.from({ length: 4 }, makeAggregatedDataForResultTrend);
+export const resultTrendData: AggregatedDataForResultTrend[] = Array.from(
+    { length: 4 },
+    makeAggregatedDataForResultTrend
+);
 export const testResultMetaData: TestResultMetaData[] = Array.from({ length: 3 }, makeTestResultMetaData);
 
 const queryableRunSpecs: Array<[number, string, TestRunState]> = [

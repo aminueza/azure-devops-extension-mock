@@ -216,7 +216,11 @@ export const dashboardAlerts: DashboardAlert[] = [
     { ...makeDashboardAlert(AlertType.Secret, reportingProjects[0]), severity: Severity.Critical },
     makeDashboardAlert(AlertType.Code, reportingProjects[0]),
     { ...makeDashboardAlert(AlertType.Code, reportingProjects[1]), severity: Severity.Medium, state: State.Fixed },
-    { ...makeDashboardAlert(AlertType.Dependency, reportingProjects[1]), severity: Severity.Low, state: State.Dismissed }
+    {
+        ...makeDashboardAlert(AlertType.Dependency, reportingProjects[1]),
+        severity: Severity.Low,
+        state: State.Dismissed
+    }
 ];
 
 export const projectAlertSummaries: ProjectAlertSummary[] = reportingProjects.map(project => ({

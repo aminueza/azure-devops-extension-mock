@@ -173,7 +173,9 @@ export class MockAlertRestClient extends RestClientBase {
         _project: string,
         _repository: string
     ): Promise<Alert[]> {
-        return Promise.resolve(request.alertStateUpdateList.map(update => applyState(findAlert(update.alertId), update)));
+        return Promise.resolve(
+            request.alertStateUpdateList.map(update => applyState(findAlert(update.alertId), update))
+        );
     }
 
     queryAlerts(
@@ -213,7 +215,12 @@ export class MockAlertRestClient extends RestClientBase {
         return Promise.resolve(uxFilters);
     }
 
-    createAutofixRequest(_project: string, _alertId: number, _repository: string, _ref?: string): Promise<AutofixRequest> {
+    createAutofixRequest(
+        _project: string,
+        _alertId: number,
+        _repository: string,
+        _ref?: string
+    ): Promise<AutofixRequest> {
         return Promise.resolve(makeAutofixRequest());
     }
 

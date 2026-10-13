@@ -73,7 +73,9 @@ export const makeWorkItemFieldReference = (name = fake.lorem.word()): WorkItemFi
     url: fake.internet.url()
 });
 
-export const makeWorkItemTypeReference = (name = fake.helpers.arrayElement(WORK_ITEM_TYPES)): WorkItemTypeReference => ({
+export const makeWorkItemTypeReference = (
+    name = fake.helpers.arrayElement(WORK_ITEM_TYPES)
+): WorkItemTypeReference => ({
     name,
     url: fake.internet.url()
 });
@@ -107,7 +109,9 @@ export const makeBacklog = (
 });
 
 export const makeBacklogConfiguration = (): BacklogConfiguration => ({
-    backlogFields: { typeFields: { Order: "Microsoft.VSTS.Common.StackRank", Effort: "Microsoft.VSTS.Scheduling.StoryPoints" } },
+    backlogFields: {
+        typeFields: { Order: "Microsoft.VSTS.Common.StackRank", Effort: "Microsoft.VSTS.Scheduling.StoryPoints" }
+    },
     bugsBehavior: BugsBehavior.AsRequirements,
     hiddenBacklogs: [],
     isBugsBehaviorConfigured: true,
@@ -125,8 +129,14 @@ export const makeBacklogLevelWorkItems = (): BacklogLevelWorkItems => ({
     workItems: Array.from({ length: 3 }, makeWorkItemLink)
 });
 
-export const makeBoardColumn = (name = fake.helpers.arrayElement(["New", "Active", "Resolved", "Closed"])): BoardColumn => ({
-    columnType: fake.helpers.arrayElement([BoardColumnType.Incoming, BoardColumnType.InProgress, BoardColumnType.Outgoing]),
+export const makeBoardColumn = (
+    name = fake.helpers.arrayElement(["New", "Active", "Resolved", "Closed"])
+): BoardColumn => ({
+    columnType: fake.helpers.arrayElement([
+        BoardColumnType.Incoming,
+        BoardColumnType.InProgress,
+        BoardColumnType.Outgoing
+    ]),
     description: fake.lorem.sentence(),
     id: fake.string.uuid(),
     isSplit: fake.datatype.boolean(),
@@ -141,7 +151,9 @@ export const makeBoardRow = (name = fake.lorem.word()): BoardRow => ({
     name
 });
 
-export const makeBoardReference = (name = fake.helpers.arrayElement(["Stories", "Features", "Epics"])): BoardReference => ({
+export const makeBoardReference = (
+    name = fake.helpers.arrayElement(["Stories", "Features", "Epics"])
+): BoardReference => ({
     id: fake.string.uuid(),
     name,
     url: fake.internet.url()
@@ -247,12 +259,16 @@ export const makeBoardCardSettings = (): BoardCardSettings => ({
     }
 });
 
-export const makeBoardChartReference = (name = fake.helpers.arrayElement(["cumulativeFlow", "leadTime", "cycleTime"])): BoardChartReference => ({
+export const makeBoardChartReference = (
+    name = fake.helpers.arrayElement(["cumulativeFlow", "leadTime", "cycleTime"])
+): BoardChartReference => ({
     name,
     url: fake.internet.url()
 });
 
-export const makeBoardChart = (name = fake.helpers.arrayElement(["cumulativeFlow", "leadTime", "cycleTime"])): BoardChart => ({
+export const makeBoardChart = (
+    name = fake.helpers.arrayElement(["cumulativeFlow", "leadTime", "cycleTime"])
+): BoardChart => ({
     ...makeBoardChartReference(name),
     _links: {},
     settings: { chartType: "cumulativeFlow", showTrendline: true }
@@ -339,14 +355,18 @@ export const makePlan = (): Plan => ({
     modifiedByIdentity: makeIdentityRef(),
     modifiedDate: fake.date.recent(),
     name: `${fake.lorem.word()} delivery plan`,
-    properties: { teamBacklogMappings: [{ teamId: fake.string.uuid(), categoryReferenceName: "Microsoft.RequirementCategory" }] },
+    properties: {
+        teamBacklogMappings: [{ teamId: fake.string.uuid(), categoryReferenceName: "Microsoft.RequirementCategory" }]
+    },
     revision: fake.number.int({ min: 1, max: 20 }),
     type: PlanType.DeliveryTimelineView,
     url: fake.internet.url(),
     userPermissions: PlanUserPermissions.AllPermissions
 });
 
-export const makeCategoryConfiguration = (name = fake.helpers.arrayElement(["Epic", "Feature", "Requirement", "Task", "Bug"])): CategoryConfiguration => ({
+export const makeCategoryConfiguration = (
+    name = fake.helpers.arrayElement(["Epic", "Feature", "Requirement", "Task", "Bug"])
+): CategoryConfiguration => ({
     name,
     referenceName: `Microsoft.${name}Category`,
     workItemTypes: [makeWorkItemTypeReference()]
@@ -365,7 +385,9 @@ export const makeProcessConfiguration = (): ProcessConfiguration => ({
     url: fake.internet.url()
 });
 
-export const makeTaskboardColumn = (name = fake.helpers.arrayElement(["To Do", "In Progress", "Done"])): TaskboardColumn => ({
+export const makeTaskboardColumn = (
+    name = fake.helpers.arrayElement(["To Do", "In Progress", "Done"])
+): TaskboardColumn => ({
     id: fake.string.uuid(),
     mappings: [{ state: name, workItemType: "Task" }],
     name,
@@ -453,4 +475,6 @@ export const boardCharts: BoardChartReference[] = [
     makeBoardChartReference("cycleTime")
 ];
 export const columnSuggestedValues: BoardSuggestedValue[] = STATES.map(makeBoardSuggestedValue);
-export const rowSuggestedValues: BoardSuggestedValue[] = ["Expedite", "Blocked", "Standard"].map(makeBoardSuggestedValue);
+export const rowSuggestedValues: BoardSuggestedValue[] = ["Expedite", "Blocked", "Standard"].map(
+    makeBoardSuggestedValue
+);

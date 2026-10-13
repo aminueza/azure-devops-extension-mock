@@ -13,26 +13,18 @@ export class MockAccountsRestClient extends RestClientBase {
         super(options);
     }
 
-    createAccount(
-        info: AccountCreateInfoInternal,
-        usePrecreated?: boolean
-    ): Promise<Account> {
-        console.log(`Creating account with info: ${JSON.stringify(info)}, usePrecreated: ${usePrecreated}`)
-        return new Promise((resolve) => resolve(fake.helpers.arrayElement(accounts)));
+    createAccount(info: AccountCreateInfoInternal, usePrecreated?: boolean): Promise<Account> {
+        console.log(`Creating account with info: ${JSON.stringify(info)}, usePrecreated: ${usePrecreated}`);
+        return new Promise(resolve => resolve(fake.helpers.arrayElement(accounts)));
     }
 
     getAccount(accountId: string): Promise<Account> {
-        console.log(`Getting account with id: ${accountId}`)
-        return new Promise((resolve) => resolve(fake.helpers.arrayElement(accounts)));
+        console.log(`Getting account with id: ${accountId}`);
+        return new Promise(resolve => resolve(fake.helpers.arrayElement(accounts)));
     }
 
-    getAccounts(
-        ownerId?: string,
-        memberId?: string,
-        properties?: string
-    ): Promise<Account[]> {
-        console.log(`Getting accounts with ownerId: ${ownerId}, memberId: ${memberId}, properties: ${properties}`)
-        return new Promise((resolve) => resolve(accounts));
+    getAccounts(ownerId?: string, memberId?: string, properties?: string): Promise<Account[]> {
+        console.log(`Getting accounts with ownerId: ${ownerId}, memberId: ${memberId}, properties: ${properties}`);
+        return new Promise(resolve => resolve(accounts));
     }
-
-};
+}

@@ -91,9 +91,7 @@ export class MockCoreRestClient extends RestClientBase {
 
     getConnectedServiceDetails(_projectId: string, name: string): Promise<WebApiConnectedServiceDetails> {
         const found = connectedServices.find(s => s.friendlyName === name || s.id === name);
-        return Promise.resolve(
-            makeConnectedServiceDetails(found ?? { ...makeConnectedService(), friendlyName: name })
-        );
+        return Promise.resolve(makeConnectedServiceDetails(found ?? { ...makeConnectedService(), friendlyName: name }));
     }
 
     getConnectedServices(_projectId: string, kind?: ConnectedServiceKind): Promise<WebApiConnectedService[]> {

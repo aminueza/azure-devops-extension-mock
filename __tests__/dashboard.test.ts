@@ -18,8 +18,12 @@ import {
 } from "../azure-devops-extension-api/dashboard/Data";
 
 describe("DashboardRestClient mock", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(DashboardRestClient);
     const teamContext = { projectId: "p", teamId: "t" } as any;
@@ -48,7 +52,11 @@ describe("DashboardRestClient mock", () => {
     it("creates and replaces dashboards", async () => {
         const created = await client.createDashboard({ name: "Custom", description: "mine" } as any, teamContext);
         expect(created).toMatchObject({ name: "Custom", description: "mine" });
-        const replaced = await client.replaceDashboard({ name: "Replaced", id: "ignored" } as any, teamContext, "dash-9");
+        const replaced = await client.replaceDashboard(
+            { name: "Replaced", id: "ignored" } as any,
+            teamContext,
+            "dash-9"
+        );
         expect(replaced).toMatchObject({ id: "dash-9", name: "Replaced" });
         await expect(client.deleteDashboard(teamContext, "dash-1")).resolves.toBeUndefined();
     });
@@ -67,9 +75,18 @@ describe("DashboardRestClient mock", () => {
     });
 
     it("creates, updates and replaces widgets", async () => {
-        const created = await client.createWidget({ name: "Burndown", settings: "{\"a\":1}" } as any, teamContext, "dash-1");
-        expect(created).toMatchObject({ name: "Burndown", settings: "{\"a\":1}" });
-        const updated = await client.updateWidget({ name: "Updated", id: "ignored" } as any, teamContext, "dash-1", "w-1");
+        const created = await client.createWidget(
+            { name: "Burndown", settings: '{"a":1}' } as any,
+            teamContext,
+            "dash-1"
+        );
+        expect(created).toMatchObject({ name: "Burndown", settings: '{"a":1}' });
+        const updated = await client.updateWidget(
+            { name: "Updated", id: "ignored" } as any,
+            teamContext,
+            "dash-1",
+            "w-1"
+        );
         expect(updated).toMatchObject({ id: "w-1", name: "Updated" });
         const replaced = await client.replaceWidget({ name: "Replaced" } as any, teamContext, "dash-1", "w-2");
         expect(replaced).toMatchObject({ id: "w-2", name: "Replaced" });

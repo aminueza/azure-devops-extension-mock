@@ -20,5 +20,9 @@ export declare class RestClientBase {
     constructor(options: IVssRestClientOptions);
     protected getRootPath(): Promise<string>;
     protected beginRequest<T>(requestParams: RestClientRequestParams): Promise<T>;
-    protected _issueRequest<T>(requestUrl: string, apiVersion: string, requestParams: RestClientRequestParams): Promise<T>;
+    protected _issueRequest<T>(
+        requestUrl: string,
+        apiVersion: string,
+        requestParams: RestClientRequestParams
+    ): Promise<T>;
 }

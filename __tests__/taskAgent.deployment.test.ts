@@ -37,103 +37,47 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
             "createAgentPoolMaintenanceDefinition",
             () => client.createAgentPoolMaintenanceDefinition(makeMaintenanceDefinition(), 11)
         ],
-        [
-            "getAgentPoolMaintenanceDefinition",
-            () => client.getAgentPoolMaintenanceDefinition(11, seededDefinition.id)
-        ],
-        [
-            "getAgentPoolMaintenanceDefinitions",
-            () => client.getAgentPoolMaintenanceDefinitions(11)
-        ],
+        ["getAgentPoolMaintenanceDefinition", () => client.getAgentPoolMaintenanceDefinition(11, seededDefinition.id)],
+        ["getAgentPoolMaintenanceDefinitions", () => client.getAgentPoolMaintenanceDefinitions(11)],
         [
             "updateAgentPoolMaintenanceDefinition",
-            () =>
-                client.updateAgentPoolMaintenanceDefinition(
-                    makeMaintenanceDefinition(),
-                    11,
-                    seededDefinition.id
-                )
+            () => client.updateAgentPoolMaintenanceDefinition(makeMaintenanceDefinition(), 11, seededDefinition.id)
         ],
-        [
-            "getAgentPoolMaintenanceJob",
-            () => client.getAgentPoolMaintenanceJob(11, seededJob.jobId)
-        ],
-        [
-            "getAgentPoolMaintenanceJobLogs",
-            () => client.getAgentPoolMaintenanceJobLogs(11, seededJob.jobId)
-        ],
-        [
-            "getAgentPoolMaintenanceJobs",
-            () => client.getAgentPoolMaintenanceJobs(11, seededJob.definitionId)
-        ],
-        [
-            "queueAgentPoolMaintenanceJob",
-            () => client.queueAgentPoolMaintenanceJob(makeMaintenanceJob(), 11)
-        ],
+        ["getAgentPoolMaintenanceJob", () => client.getAgentPoolMaintenanceJob(11, seededJob.jobId)],
+        ["getAgentPoolMaintenanceJobLogs", () => client.getAgentPoolMaintenanceJobLogs(11, seededJob.jobId)],
+        ["getAgentPoolMaintenanceJobs", () => client.getAgentPoolMaintenanceJobs(11, seededJob.definitionId)],
+        ["queueAgentPoolMaintenanceJob", () => client.queueAgentPoolMaintenanceJob(makeMaintenanceJob(), 11)],
         [
             "updateAgentPoolMaintenanceJob",
             () => client.updateAgentPoolMaintenanceJob(makeMaintenanceJob(), 11, seededJob.jobId)
         ],
         [
             "addDeploymentGroup",
-            () =>
-                client.addDeploymentGroup(
-                    { name: "group", description: "desc", pool: { id: 5 }, poolId: 5 },
-                    "proj"
-                )
+            () => client.addDeploymentGroup({ name: "group", description: "desc", pool: { id: 5 }, poolId: 5 }, "proj")
         ],
         [
             "updateDeploymentGroup",
             () => client.updateDeploymentGroup({ name: "group", description: "desc" }, "proj", 61)
         ],
-        [
-            "getDeploymentGroupsMetrics",
-            () => client.getDeploymentGroupsMetrics("proj", "group-900", "next", 1)
-        ],
-        [
-            "generateDeploymentGroupAccessToken",
-            () => client.generateDeploymentGroupAccessToken("proj", 62)
-        ],
+        ["getDeploymentGroupsMetrics", () => client.getDeploymentGroupsMetrics("proj", "group-900", "next", 1)],
+        ["generateDeploymentGroupAccessToken", () => client.generateDeploymentGroupAccessToken("proj", 62)],
         ["generateDeploymentPoolAccessToken", () => client.generateDeploymentPoolAccessToken(63)],
         [
             "getDeploymentPoolsSummary",
-            () =>
-                client.getDeploymentPoolsSummary(
-                    "pool-900",
-                    DeploymentPoolSummaryExpands.DeploymentGroups,
-                    [900]
-                )
+            () => client.getDeploymentPoolsSummary("pool-900", DeploymentPoolSummaryExpands.DeploymentGroups, [900])
         ],
-        [
-            "addDeploymentMachineGroup",
-            () => client.addDeploymentMachineGroup(makeDeploymentMachineGroup(), "proj")
-        ],
+        ["addDeploymentMachineGroup", () => client.addDeploymentMachineGroup(makeDeploymentMachineGroup(), "proj")],
         [
             "getDeploymentMachineGroup",
-            () =>
-                client.getDeploymentMachineGroup(
-                    "proj",
-                    seededMachineGroup.id,
-                    MachineGroupActionFilter.Manage
-                )
+            () => client.getDeploymentMachineGroup("proj", seededMachineGroup.id, MachineGroupActionFilter.Manage)
         ],
         [
             "getDeploymentMachineGroups",
-            () =>
-                client.getDeploymentMachineGroups(
-                    "proj",
-                    seededMachineGroup.name,
-                    MachineGroupActionFilter.Use
-                )
+            () => client.getDeploymentMachineGroups("proj", seededMachineGroup.name, MachineGroupActionFilter.Use)
         ],
         [
             "updateDeploymentMachineGroup",
-            () =>
-                client.updateDeploymentMachineGroup(
-                    makeDeploymentMachineGroup(),
-                    "proj",
-                    seededMachineGroup.id
-                )
+            () => client.updateDeploymentMachineGroup(makeDeploymentMachineGroup(), "proj", seededMachineGroup.id)
         ],
         [
             "generateDeploymentMachineGroupAccessToken",
@@ -150,15 +94,9 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
             "deleteAgentPoolMaintenanceDefinition",
             () => client.deleteAgentPoolMaintenanceDefinition(11, seededDefinition.id)
         ],
-        [
-            "deleteAgentPoolMaintenanceJob",
-            () => client.deleteAgentPoolMaintenanceJob(11, seededJob.jobId)
-        ],
+        ["deleteAgentPoolMaintenanceJob", () => client.deleteAgentPoolMaintenanceJob(11, seededJob.jobId)],
         ["deleteDeploymentGroup", () => client.deleteDeploymentGroup("proj", 41)],
-        [
-            "deleteDeploymentMachineGroup",
-            () => client.deleteDeploymentMachineGroup("proj", seededMachineGroup.id)
-        ]
+        ["deleteDeploymentMachineGroup", () => client.deleteDeploymentMachineGroup("proj", seededMachineGroup.id)]
     ];
 
     it.each(voiding)("%s resolves to undefined", async (_name, call) => {
@@ -180,9 +118,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
     });
 
     it("returns a seeded maintenance definition by id", async () => {
-        await expect(
-            client.getAgentPoolMaintenanceDefinition(11, seededDefinition.id)
-        ).resolves.toBe(seededDefinition);
+        await expect(client.getAgentPoolMaintenanceDefinition(11, seededDefinition.id)).resolves.toBe(seededDefinition);
     });
 
     it("fabricates a maintenance definition for an unknown id", async () => {
@@ -275,11 +211,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
     });
 
     it("maps update parameters onto an existing deployment group", async () => {
-        const group = await client.updateDeploymentGroup(
-            { name: "renamed", description: "new ring" },
-            "proj",
-            52
-        );
+        const group = await client.updateDeploymentGroup({ name: "renamed", description: "new ring" }, "proj", 52);
         expect(group.id).toBe(52);
         expect(group.name).toBe("renamed");
         expect(group.description).toBe("new ring");
@@ -293,11 +225,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
             "group-902"
         ]);
         expect(deploymentPoolSummaries.map(s => s.pool.id)).toEqual([900, 901, 902]);
-        expect(deploymentPoolSummaries.map(s => s.pool.name)).toEqual([
-            "pool-900",
-            "pool-901",
-            "pool-902"
-        ]);
+        expect(deploymentPoolSummaries.map(s => s.pool.name)).toEqual(["pool-900", "pool-901", "pool-902"]);
     });
 
     it("filters deployment metrics by group name and echoes the token", async () => {
@@ -305,9 +233,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
         expect(paged).toHaveLength(1);
         expect(paged.continuationToken).toBe("next");
         expect(paged[0].deploymentGroup.project.name).toBe("proj");
-        await expect(
-            client.getDeploymentGroupsMetrics("proj", "group-none")
-        ).resolves.toHaveLength(0);
+        await expect(client.getDeploymentGroupsMetrics("proj", "group-none")).resolves.toHaveLength(0);
     });
 
     it("returns every deployment metric with a null token when unfiltered", async () => {
@@ -326,15 +252,11 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
         await expect(client.generateDeploymentGroupAccessToken("proj", 71)).resolves.toBe(
             "proj-deployment-group-71-token"
         );
-        await expect(client.generateDeploymentPoolAccessToken(72)).resolves.toBe(
-            "deployment-pool-72-token"
-        );
+        await expect(client.generateDeploymentPoolAccessToken(72)).resolves.toBe("deployment-pool-72-token");
     });
 
     it("returns every pool summary when unfiltered", async () => {
-        await expect(client.getDeploymentPoolsSummary()).resolves.toHaveLength(
-            deploymentPoolSummaries.length
-        );
+        await expect(client.getDeploymentPoolsSummary()).resolves.toHaveLength(deploymentPoolSummaries.length);
     });
 
     it("filters pool summaries by name", async () => {
@@ -351,15 +273,11 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
             [901, 902]
         );
         expect(matched.map(s => s.pool.id)).toEqual([901, 902]);
-        await expect(
-            client.getDeploymentPoolsSummary(undefined, undefined, [unmatchedId])
-        ).resolves.toEqual([]);
+        await expect(client.getDeploymentPoolsSummary(undefined, undefined, [unmatchedId])).resolves.toEqual([]);
     });
 
     it("combines the pool summary name and id filters", async () => {
-        await expect(
-            client.getDeploymentPoolsSummary("pool-900", undefined, [901])
-        ).resolves.toEqual([]);
+        await expect(client.getDeploymentPoolsSummary("pool-900", undefined, [901])).resolves.toEqual([]);
     });
 
     it("echoes a created machine group under the project", async () => {
@@ -403,9 +321,7 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
         const groups = await client.getDeploymentMachineGroups("proj", "machine-group-901");
         expect(groups).toHaveLength(1);
         expect(groups[0].id).toBe(901);
-        await expect(
-            client.getDeploymentMachineGroups("proj", "machine-group-none")
-        ).resolves.toEqual([]);
+        await expect(client.getDeploymentMachineGroups("proj", "machine-group-none")).resolves.toEqual([]);
     });
 
     it("updates a machine group with the given id and project", async () => {
@@ -417,8 +333,8 @@ describe("TaskAgentRestClient maintenance and deployment groups", () => {
     });
 
     it("builds a machine group access token", async () => {
-        await expect(
-            client.generateDeploymentMachineGroupAccessToken("proj", 82)
-        ).resolves.toBe("proj-machine-group-82-token");
+        await expect(client.generateDeploymentMachineGroupAccessToken("proj", 82)).resolves.toBe(
+            "proj-machine-group-82-token"
+        );
     });
 });

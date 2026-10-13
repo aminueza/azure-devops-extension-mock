@@ -8,11 +8,7 @@ import {
 } from "azure-devops-extension-api/TaskAgent";
 
 import { getClient } from "../azure-devops-extension-api";
-import {
-    agentRequests,
-    deploymentMachines,
-    makeDeploymentMachine
-} from "../azure-devops-extension-api/taskAgent/Data";
+import { agentRequests, deploymentMachines, makeDeploymentMachine } from "../azure-devops-extension-api/taskAgent/Data";
 
 describe("TaskAgentRestClient deployment machines and targets", () => {
     beforeAll(() => {
@@ -28,19 +24,10 @@ describe("TaskAgentRestClient deployment machines and targets", () => {
     const seededMachine = deploymentMachines[0];
 
     const resolving: Array<[string, () => Promise<unknown>]> = [
-        [
-            "addDeploymentMachine",
-            () => client.addDeploymentMachine(makeDeploymentMachine(), "proj", 71)
-        ],
+        ["addDeploymentMachine", () => client.addDeploymentMachine(makeDeploymentMachine(), "proj", 71)],
         [
             "getDeploymentMachine",
-            () =>
-                client.getDeploymentMachine(
-                    "proj",
-                    71,
-                    seededMachine.id,
-                    DeploymentMachineExpands.Capabilities
-                )
+            () => client.getDeploymentMachine("proj", 71, seededMachine.id, DeploymentMachineExpands.Capabilities)
         ],
         [
             "getDeploymentMachines",
@@ -55,54 +42,22 @@ describe("TaskAgentRestClient deployment machines and targets", () => {
         ],
         [
             "replaceDeploymentMachine",
-            () =>
-                client.replaceDeploymentMachine(
-                    makeDeploymentMachine(),
-                    "proj",
-                    71,
-                    seededMachine.id
-                )
+            () => client.replaceDeploymentMachine(makeDeploymentMachine(), "proj", 71, seededMachine.id)
         ],
         [
             "updateDeploymentMachine",
-            () =>
-                client.updateDeploymentMachine(
-                    makeDeploymentMachine(),
-                    "proj",
-                    71,
-                    seededMachine.id
-                )
+            () => client.updateDeploymentMachine(makeDeploymentMachine(), "proj", 71, seededMachine.id)
         ],
-        [
-            "updateDeploymentMachines",
-            () => client.updateDeploymentMachines([makeDeploymentMachine()], "proj", 71)
-        ],
-        [
-            "getDeploymentMachineGroupMachines",
-            () => client.getDeploymentMachineGroupMachines("proj", 81, ["web"])
-        ],
+        ["updateDeploymentMachines", () => client.updateDeploymentMachines([makeDeploymentMachine()], "proj", 71)],
+        ["getDeploymentMachineGroupMachines", () => client.getDeploymentMachineGroupMachines("proj", 81, ["web"])],
         [
             "updateDeploymentMachineGroupMachines",
-            () =>
-                client.updateDeploymentMachineGroupMachines(
-                    [makeDeploymentMachine()],
-                    "proj",
-                    81
-                )
+            () => client.updateDeploymentMachineGroupMachines([makeDeploymentMachine()], "proj", 81)
         ],
-        [
-            "addDeploymentTarget",
-            () => client.addDeploymentTarget(makeDeploymentMachine(), "proj", 91)
-        ],
+        ["addDeploymentTarget", () => client.addDeploymentTarget(makeDeploymentMachine(), "proj", 91)],
         [
             "getDeploymentTarget",
-            () =>
-                client.getDeploymentTarget(
-                    "proj",
-                    91,
-                    seededMachine.id,
-                    DeploymentTargetExpands.LastCompletedRequest
-                )
+            () => client.getDeploymentTarget("proj", 91, seededMachine.id, DeploymentTargetExpands.LastCompletedRequest)
         ],
         [
             "getDeploymentTargets",
@@ -124,18 +79,13 @@ describe("TaskAgentRestClient deployment machines and targets", () => {
         ],
         [
             "replaceDeploymentTarget",
-            () =>
-                client.replaceDeploymentTarget(makeDeploymentMachine(), "proj", 91, seededMachine.id)
+            () => client.replaceDeploymentTarget(makeDeploymentMachine(), "proj", 91, seededMachine.id)
         ],
         [
             "updateDeploymentTarget",
-            () =>
-                client.updateDeploymentTarget(makeDeploymentMachine(), "proj", 91, seededMachine.id)
+            () => client.updateDeploymentTarget(makeDeploymentMachine(), "proj", 91, seededMachine.id)
         ],
-        [
-            "updateDeploymentTargets",
-            () => client.updateDeploymentTargets([{ id: 900, tags: ["web"] }], "proj", 91)
-        ],
+        ["updateDeploymentTargets", () => client.updateDeploymentTargets([{ id: 900, tags: ["web"] }], "proj", 91)],
         [
             "getAgentRequestsForDeploymentMachine",
             () => client.getAgentRequestsForDeploymentMachine("proj", 71, seededMachine.id, 2)
@@ -339,13 +289,7 @@ describe("TaskAgentRestClient deployment machines and targets", () => {
     });
 
     it("matches target names exactly when partial match is off", async () => {
-        const targets = await client.getDeploymentTargets(
-            "proj",
-            91,
-            undefined,
-            "target-901",
-            false
-        );
+        const targets = await client.getDeploymentTargets("proj", 91, undefined, "target-901", false);
         expect(targets.map(t => t.id)).toEqual([901]);
     });
 

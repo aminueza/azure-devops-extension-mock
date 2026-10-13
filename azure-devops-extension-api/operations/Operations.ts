@@ -7,7 +7,8 @@ const matches = (operation: Operation, operationId: string, pluginId?: string): 
     operation.id === operationId && (pluginId === undefined || operation.pluginId === pluginId);
 
 const findOperation = (operationId: string, pluginId?: string): Operation =>
-    operations.find(o => matches(o, operationId, pluginId)) ?? makeOperation(OperationStatus.Succeeded, operationId, pluginId);
+    operations.find(o => matches(o, operationId, pluginId)) ??
+    makeOperation(OperationStatus.Succeeded, operationId, pluginId);
 
 export class MockOperationsRestClient extends RestClientBase {
     public TYPE = OperationsRestClient;

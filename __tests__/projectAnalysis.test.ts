@@ -79,7 +79,12 @@ describe("ProjectAnalysisRestClient mock", () => {
 
     it("gets the activity metrics of a known repository", async () => {
         const seeded = repositoryActivityMetrics[2];
-        const metrics = await client.getRepositoryActivityMetrics("proj", seeded.repositoryId, FROM, AggregationType.Hourly);
+        const metrics = await client.getRepositoryActivityMetrics(
+            "proj",
+            seeded.repositoryId,
+            FROM,
+            AggregationType.Hourly
+        );
         expect(metrics.repositoryId).toBe(seeded.repositoryId);
         expect(metrics.codeChangesCount).toBe(seeded.codeChangesCount);
         expect(metrics.codeChangesTrend.map(i => i.value)).toEqual(seeded.codeChangesTrend.map(i => i.value));
@@ -87,7 +92,12 @@ describe("ProjectAnalysisRestClient mock", () => {
     });
 
     it("fabricates the activity metrics of an unknown repository", async () => {
-        const metrics = await client.getRepositoryActivityMetrics("proj", "missing-repository", FROM, AggregationType.Daily);
+        const metrics = await client.getRepositoryActivityMetrics(
+            "proj",
+            "missing-repository",
+            FROM,
+            AggregationType.Daily
+        );
         expect(metrics.repositoryId).toBe("missing-repository");
         expect(metrics.codeChangesTrend.length).toBe(7);
         expect(metrics.codeChangesTrend[0].time).toEqual(FROM);

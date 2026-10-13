@@ -44,11 +44,7 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve(dashboards);
     }
 
-    replaceDashboard(
-        dashboard: Dashboard,
-        _teamContext: TeamContext,
-        dashboardId: string
-    ): Promise<Dashboard> {
+    replaceDashboard(dashboard: Dashboard, _teamContext: TeamContext, dashboardId: string): Promise<Dashboard> {
         return Promise.resolve({ ...makeDashboard(), ...dashboard, id: dashboardId });
     }
 
@@ -56,47 +52,25 @@ export class MockDashboardRestClient extends RestClientBase {
         return Promise.resolve({ ...dashboardGroup, ...group });
     }
 
-    createWidget(
-        widget: Widget,
-        _teamContext: TeamContext,
-        _dashboardId: string
-    ): Promise<Widget> {
+    createWidget(widget: Widget, _teamContext: TeamContext, _dashboardId: string): Promise<Widget> {
         return Promise.resolve({ ...makeWidget(), ...widget });
     }
 
-    deleteWidget(
-        _teamContext: TeamContext,
-        dashboardId: string,
-        _widgetId: string
-    ): Promise<Dashboard> {
+    deleteWidget(_teamContext: TeamContext, dashboardId: string, _widgetId: string): Promise<Dashboard> {
         const found = dashboards.find(d => d.id === dashboardId);
         return Promise.resolve(found ?? { ...makeDashboard(), id: dashboardId });
     }
 
-    getWidget(
-        _teamContext: TeamContext,
-        _dashboardId: string,
-        widgetId: string
-    ): Promise<Widget> {
+    getWidget(_teamContext: TeamContext, _dashboardId: string, widgetId: string): Promise<Widget> {
         const found = widgets.find(w => w.id === widgetId);
         return Promise.resolve(found ?? { ...makeWidget(), id: widgetId });
     }
 
-    replaceWidget(
-        widget: Widget,
-        _teamContext: TeamContext,
-        _dashboardId: string,
-        widgetId: string
-    ): Promise<Widget> {
+    replaceWidget(widget: Widget, _teamContext: TeamContext, _dashboardId: string, widgetId: string): Promise<Widget> {
         return Promise.resolve({ ...makeWidget(), ...widget, id: widgetId });
     }
 
-    updateWidget(
-        widget: Widget,
-        _teamContext: TeamContext,
-        _dashboardId: string,
-        widgetId: string
-    ): Promise<Widget> {
+    updateWidget(widget: Widget, _teamContext: TeamContext, _dashboardId: string, widgetId: string): Promise<Widget> {
         return Promise.resolve({ ...makeWidget(), ...widget, id: widgetId });
     }
 

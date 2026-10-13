@@ -185,7 +185,10 @@ const dailyStats = (
     afterDate?: Date
 ): ExtensionDailyStats => {
     const stats = Array.from({ length: days }, (_, index) => makeExtensionDailyStat(index, version));
-    return makeExtensionDailyStats(extension, stats.filter(s => inDateRange(s.statisticDate, undefined, afterDate)));
+    return makeExtensionDailyStats(
+        extension,
+        stats.filter(s => inDateRange(s.statisticDate, undefined, afterDate))
+    );
 };
 
 export class MockGalleryRestClient extends RestClientBase {
@@ -442,11 +445,7 @@ export class MockGalleryRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getExtensionById(
-        extensionId: string,
-        version?: string,
-        _flags?: ExtensionQueryFlags
-    ): Promise<PublishedExtension> {
+    getExtensionById(extensionId: string, version?: string, _flags?: ExtensionQueryFlags): Promise<PublishedExtension> {
         return Promise.resolve(atVersion(findExtensionById(extensionId), version));
     }
 
@@ -840,9 +839,7 @@ export class MockGalleryRestClient extends RestClientBase {
         afterDate?: Date
     ): Promise<ExtensionDailyStats> {
         const extension = findExtension(publisherName, extensionName);
-        return Promise.resolve(
-            dailyStats(extension, days ?? DEFAULT_STAT_DAYS, latestVersion(extension), afterDate)
-        );
+        return Promise.resolve(dailyStats(extension, days ?? DEFAULT_STAT_DAYS, latestVersion(extension), afterDate));
     }
 
     getExtensionDailyStatsAnonymous(

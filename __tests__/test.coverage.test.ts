@@ -16,8 +16,12 @@ import {
 } from "../azure-devops-extension-api/test/Data";
 
 describe("TestRestClient mock coverage, custom fields, retention and reporting", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestRestClient);
 
@@ -33,7 +37,10 @@ describe("TestRestClient mock coverage, custom fields, retention and reporting",
         automatedResultsRetentionDuration: 11,
         manualResultsRetentionDuration: 22
     } as any;
-    const releases = [{ id: 51, environmentId: 61 }, { id: 52, environmentId: 62 }] as any;
+    const releases = [
+        { id: 51, environmentId: 61 },
+        { id: 52, environmentId: 62 }
+    ] as any;
     const resultsContext = { contextType: TestResultsContextType.Build } as any;
     const trendFilter = { buildCount: 2, definitionIds: [1], publishContext: "CI" } as any;
     const minDate = new Date("2024-01-01T00:00:00.000Z");

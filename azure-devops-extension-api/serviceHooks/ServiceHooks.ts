@@ -146,7 +146,9 @@ export class MockServiceHooksRestClient extends RestClientBase {
     ): Promise<Notification[]> {
         return Promise.resolve(
             findNotifications(subscriptionId)
-                .filter(n => (status === undefined || n.status === status) && (result === undefined || n.result === result))
+                .filter(
+                    n => (status === undefined || n.status === status) && (result === undefined || n.result === result)
+                )
                 .slice(0, maxResults)
         );
     }

@@ -9,8 +9,8 @@ const transformer = require("../jest-helpers/amd-transformer") as {
 type Loaded = { exports: unknown; required: string[]; factoryArguments: unknown[] };
 
 const AMD_SOURCE = [
-    "\"use strict\";",
-    "define([\"require\", \"exports\", \"module\", \"./Client\", \"../Common/RestClientBase.js\", \"azure-devops-extension-sdk\"], function (require, exports, module, client, rest, sdk) {",
+    '"use strict";',
+    'define(["require", "exports", "module", "./Client", "../Common/RestClientBase.js", "azure-devops-extension-sdk"], function (require, exports, module, client, rest, sdk) {',
     "    globalThis.__amdCapture = Array.prototype.slice.call(arguments);",
     "    exports.loaded = true;",
     "});"
@@ -33,13 +33,16 @@ const prologueOf = (code: string, source: string): string => code.slice(0, code.
 
 describe("amd-transformer", () => {
     it("returns commonjs modules unchanged", () => {
-        const source = "\"use strict\";\nObject.defineProperty(exports, \"__esModule\", { value: true });\nexports.a = require(\"./b\");";
+        const source =
+            '"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.a = require("./b");';
         expect(transformer.process(source).code).toBe(source);
     });
 
     it("returns every installed v5 module unchanged", () => {
         const root = path.join(__dirname, "..", "node_modules", "azure-devops-extension-api");
-        const files = ["Git/GitClient.js", "Common/CommonServices.js", "Core/CoreClient.js"].map(file => path.join(root, file));
+        const files = ["Git/GitClient.js", "Common/CommonServices.js", "Core/CoreClient.js"].map(file =>
+            path.join(root, file)
+        );
         for (const file of files) {
             const source = fs.readFileSync(file, "utf8");
             expect(transformer.process(source, file).code).toBe(source);
@@ -50,9 +53,9 @@ describe("amd-transformer", () => {
         const { code } = transformer.process(AMD_SOURCE);
         const prologue = prologueOf(code, AMD_SOURCE);
         expect(prologue).not.toMatch(/require\(\s*[^"\s]/);
-        expect(prologue).toContain("require(\"./Client.js\")");
-        expect(prologue).toContain("require(\"../Common/RestClientBase.js\")");
-        expect(prologue).toContain("require(\"azure-devops-extension-sdk\")");
+        expect(prologue).toContain('require("./Client.js")');
+        expect(prologue).toContain('require("../Common/RestClientBase.js")');
+        expect(prologue).toContain('require("azure-devops-extension-sdk")');
     });
 
     it("resolves relative ids to js files and leaves package ids alone", () => {
@@ -79,7 +82,7 @@ describe("amd-transformer", () => {
     });
 
     it("keeps exports when the factory returns nothing", () => {
-        const source = "define([\"exports\"], function (exports) { globalThis.__amdCapture = []; exports.kept = 2; });";
+        const source = 'define(["exports"], function (exports) { globalThis.__amdCapture = []; exports.kept = 2; });';
         expect(load(transformer.process(source).code).exports).toEqual({ kept: 2 });
     });
 
@@ -90,7 +93,7 @@ describe("amd-transformer", () => {
 
     it("rejects dependencies that are not string literals", () => {
         expect(() => transformer.process("define([1], function () {});")).toThrow(/string literals/);
-        expect(() => transformer.process("define([\"a\", b], function () {});")).toThrow(SyntaxError);
+        expect(() => transformer.process('define(["a", b], function () {});')).toThrow(SyntaxError);
     });
 
     it("derives a stable cache key from the source and the filename", () => {
@@ -116,7 +119,9 @@ describe("setup-globals", () => {
         delete globals.fetch;
         jest.isolateModules(() => require("../jest-helpers/setup-globals"));
         expect(globals.self).toBe(globalThis);
-        await expect((globals.fetch as () => Promise<unknown>)()).rejects.toThrow("fetch is not available in mock tests");
+        await expect((globals.fetch as () => Promise<unknown>)()).rejects.toThrow(
+            "fetch is not available in mock tests"
+        );
     });
 
     it("leaves existing globals untouched", () => {

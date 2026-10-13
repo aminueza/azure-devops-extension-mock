@@ -1,9 +1,4 @@
-import {
-    AdvSecEnablementUpdate,
-    GitRefFavorite,
-    GitRestClient,
-    RefFavoriteType
-} from "azure-devops-extension-api/Git";
+import { AdvSecEnablementUpdate, GitRefFavorite, GitRestClient, RefFavoriteType } from "azure-devops-extension-api/Git";
 
 import { getClient } from "../azure-devops-extension-api";
 import {
@@ -62,7 +57,10 @@ describe("GitRestClient mock advanced security, billing and ref favorites", () =
         ["getEnableOnCreateProject", () => client.getEnableOnCreateProject(advSecProjectIds[0])],
         ["getEstimatedBillablePushersOrg", () => client.getEstimatedBillablePushersOrg()],
         ["getEstimatedBillablePushersProject", () => client.getEstimatedBillablePushersProject(advSecProjectIds[0])],
-        ["getEstimatedBillableCommittersRepo", () => client.getEstimatedBillableCommittersRepo("proj", repositories[0].id)],
+        [
+            "getEstimatedBillableCommittersRepo",
+            () => client.getEstimatedBillableCommittersRepo("proj", repositories[0].id)
+        ],
         ["getBillableCommitters", () => client.getBillableCommitters("proj")],
         ["getBillableCommittersDetail", () => client.getBillableCommittersDetail("proj", "true")],
         ["createFavorite", () => client.createFavorite(favoriteToCreate, "proj")],
@@ -125,12 +123,10 @@ describe("GitRestClient mock advanced security, billing and ref favorites", () =
         await expect(client.getEnablementStatus(undefined, undefined, 1, 2)).resolves.toEqual(
             enablementStatuses.slice(1, 3)
         );
-        await expect(client.getEnablementStatus(undefined, undefined, 3)).resolves.toEqual(
-            enablementStatuses.slice(3)
-        );
-        await expect(client.getEnablementStatus([advSecProjectIds[0]], billingDate, undefined, 1)).resolves.toEqual(
-            [enablementStatuses[0]]
-        );
+        await expect(client.getEnablementStatus(undefined, undefined, 3)).resolves.toEqual(enablementStatuses.slice(3));
+        await expect(client.getEnablementStatus([advSecProjectIds[0]], billingDate, undefined, 1)).resolves.toEqual([
+            enablementStatuses[0]
+        ]);
     });
 
     it("echoes the host enable-on-create flag", async () => {
@@ -189,9 +185,9 @@ describe("GitRestClient mock advanced security, billing and ref favorites", () =
         await expect(client.getBillableCommitters("proj", billingDate, 3)).resolves.toEqual(
             billableCommitters.slice(3)
         );
-        await expect(client.getBillableCommitters("proj", undefined, undefined, 1)).resolves.toEqual(
-            [billableCommitters[0]]
-        );
+        await expect(client.getBillableCommitters("proj", undefined, undefined, 1)).resolves.toEqual([
+            billableCommitters[0]
+        ]);
     });
 
     it("returns a detail for every seeded billable committer", async () => {
@@ -241,20 +237,22 @@ describe("GitRestClient mock advanced security, billing and ref favorites", () =
 
     it("filters favorites by repository and identity", async () => {
         await expect(client.getRefFavorites("proj", repositories[1].id)).resolves.toEqual(refFavorites.slice(2));
-        await expect(client.getRefFavorites("proj", undefined, refFavoriteIdentityIds[1])).resolves.toEqual(
-            [refFavorites[1], refFavorites[3]]
-        );
-        await expect(client.getRefFavorites("proj", repositories[0].id, refFavoriteIdentityIds[1])).resolves.toEqual(
-            [refFavorites[1]]
-        );
+        await expect(client.getRefFavorites("proj", undefined, refFavoriteIdentityIds[1])).resolves.toEqual([
+            refFavorites[1],
+            refFavorites[3]
+        ]);
+        await expect(client.getRefFavorites("proj", repositories[0].id, refFavoriteIdentityIds[1])).resolves.toEqual([
+            refFavorites[1]
+        ]);
         await expect(client.getRefFavorites("proj", unknownGuid, refFavoriteIdentityIds[0])).resolves.toEqual([]);
     });
 
     it("returns project favorites, optionally filtered by identity", async () => {
         await expect(client.getRefFavoritesForProject("proj")).resolves.toBe(refFavorites);
-        await expect(client.getRefFavoritesForProject("proj", refFavoriteIdentityIds[0])).resolves.toEqual(
-            [refFavorites[0], refFavorites[2]]
-        );
+        await expect(client.getRefFavoritesForProject("proj", refFavoriteIdentityIds[0])).resolves.toEqual([
+            refFavorites[0],
+            refFavorites[2]
+        ]);
         await expect(client.getRefFavoritesForProject("proj", unknownGuid)).resolves.toEqual([]);
     });
 });

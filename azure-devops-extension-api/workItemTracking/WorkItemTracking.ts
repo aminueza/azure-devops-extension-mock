@@ -115,11 +115,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         super(options);
     }
 
-    getWorkItems(
-        ids: number[],
-        _project?: string,
-        _fields?: string[]
-    ): Promise<WorkItem[]> {
+    getWorkItems(ids: number[], _project?: string, _fields?: string[]): Promise<WorkItem[]> {
         return Promise.resolve(ids.map(id => makeWorkItem(id)));
     }
 
@@ -128,11 +124,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeWorkItem(id));
     }
 
-    createWorkItem(
-        document: any,
-        _project: string,
-        type: string
-    ): Promise<WorkItem> {
+    createWorkItem(document: any, _project: string, type: string): Promise<WorkItem> {
         const wi = makeWorkItem();
         const workItemFields: Record<string, any> = { ...wi.fields, "System.WorkItemType": type };
         for (const op of document ?? []) {
@@ -143,15 +135,15 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve({ ...wi, fields: workItemFields });
     }
 
-    updateWorkItem(
-        document: any,
-        id: number,
-        _project?: string
-    ): Promise<WorkItem> {
+    updateWorkItem(document: any, id: number, _project?: string): Promise<WorkItem> {
         const existing = workItems.find(w => w.id === id) ?? makeWorkItem(id);
         const workItemFields: Record<string, any> = { ...existing.fields };
         for (const op of document ?? []) {
-            if ((op.op === "add" || op.op === "replace") && typeof op.path === "string" && op.path.startsWith("/fields/")) {
+            if (
+                (op.op === "add" || op.op === "replace") &&
+                typeof op.path === "string" &&
+                op.path.startsWith("/fields/")
+            ) {
                 workItemFields[op.path.replace("/fields/", "")] = op.value;
             }
         }
@@ -202,9 +194,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     getField(fieldNameOrRefName: string, _project?: string): Promise<WorkItemField> {
-        const found = fields.find(
-            f => f.referenceName === fieldNameOrRefName || f.name === fieldNameOrRefName
-        );
+        const found = fields.find(f => f.referenceName === fieldNameOrRefName || f.name === fieldNameOrRefName);
         return Promise.resolve(found ?? makeWorkItemField(fieldNameOrRefName, FieldType.String));
     }
 
@@ -215,11 +205,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(fields.filter(f => !f.isDeleted));
     }
 
-    updateField(
-        payload: UpdateWorkItemField,
-        fieldNameOrRefName: string,
-        project?: string
-    ): Promise<WorkItemField> {
+    updateField(payload: UpdateWorkItemField, fieldNameOrRefName: string, project?: string): Promise<WorkItemField> {
         return this.getField(fieldNameOrRefName, project).then(field => ({
             ...field,
             isDeleted: payload.isDeleted
@@ -232,9 +218,8 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         structureGroup: TreeStructureGroup,
         _path?: string
     ): Promise<WorkItemClassificationNode> {
-        const structureType = structureGroup === TreeStructureGroup.Areas
-            ? TreeNodeStructureType.Area
-            : TreeNodeStructureType.Iteration;
+        const structureType =
+            structureGroup === TreeStructureGroup.Areas ? TreeNodeStructureType.Area : TreeNodeStructureType.Iteration;
         const base = makeClassificationNode(postedNode.name, structureType);
         return Promise.resolve({ ...base, ...postedNode, structureType });
     }
@@ -254,9 +239,8 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         path?: string,
         _depth?: number
     ): Promise<WorkItemClassificationNode> {
-        const structureType = structureGroup === TreeStructureGroup.Areas
-            ? TreeNodeStructureType.Area
-            : TreeNodeStructureType.Iteration;
+        const structureType =
+            structureGroup === TreeStructureGroup.Areas ? TreeNodeStructureType.Area : TreeNodeStructureType.Iteration;
         const scoped = classificationNodes.filter(node => node.structureType === structureType);
         const found = scoped.find(node => node.path === path || node.name === path);
         return Promise.resolve(found ?? makeClassificationNode(path ?? "Root", structureType));
@@ -268,10 +252,12 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         _depth?: number,
         _errorPolicy?: ClassificationNodesErrorPolicy
     ): Promise<WorkItemClassificationNode[]> {
-        return Promise.resolve(ids.map(id => {
-            const found = classificationNodes.find(node => node.id === id);
-            return found ?? { ...makeClassificationNode("Fabricated", TreeNodeStructureType.Area), id };
-        }));
+        return Promise.resolve(
+            ids.map(id => {
+                const found = classificationNodes.find(node => node.id === id);
+                return found ?? { ...makeClassificationNode("Fabricated", TreeNodeStructureType.Area), id };
+            })
+        );
     }
 
     getRootNodes(_project: string, depth?: number): Promise<WorkItemClassificationNode[]> {
@@ -307,14 +293,13 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getQueriesBatch(
-        queryGetRequest: QueryBatchGetRequest,
-        _project: string
-    ): Promise<QueryHierarchyItem[]> {
-        return Promise.resolve(queryGetRequest.ids.map(id => {
-            const found = queries.find(q => q.id === id);
-            return found ?? makeQuery(id);
-        }));
+    getQueriesBatch(queryGetRequest: QueryBatchGetRequest, _project: string): Promise<QueryHierarchyItem[]> {
+        return Promise.resolve(
+            queryGetRequest.ids.map(id => {
+                const found = queries.find(q => q.id === id);
+                return found ?? makeQuery(id);
+            })
+        );
     }
 
     getQueryResultCount(
@@ -364,21 +349,11 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(makeAttachmentReference());
     }
 
-    getAttachmentContent(
-        id: string,
-        _project?: string,
-        _fileName?: string,
-        _download?: boolean
-    ): Promise<ArrayBuffer> {
+    getAttachmentContent(id: string, _project?: string, _fileName?: string, _download?: boolean): Promise<ArrayBuffer> {
         return Promise.resolve(makeBuffer(id));
     }
 
-    getAttachmentZip(
-        id: string,
-        _project?: string,
-        _fileName?: string,
-        _download?: boolean
-    ): Promise<ArrayBuffer> {
+    getAttachmentZip(id: string, _project?: string, _fileName?: string, _download?: boolean): Promise<ArrayBuffer> {
         return Promise.resolve(makeBuffer(`${id}.zip`));
     }
 
@@ -401,12 +376,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(makeWorkItemComments(limited, matched.length, comments.length));
     }
 
-    getRevision(
-        id: number,
-        revisionNumber: number,
-        _project?: string,
-        _expand?: WorkItemExpand
-    ): Promise<WorkItem> {
+    getRevision(id: number, revisionNumber: number, _project?: string, _expand?: WorkItemExpand): Promise<WorkItem> {
         const found = revisions.find(r => r.id === id && r.rev === revisionNumber);
         return Promise.resolve(found ?? { ...makeWorkItem(id), rev: revisionNumber });
     }
@@ -430,12 +400,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeWorkItemUpdate(updateNumber, id));
     }
 
-    getUpdates(
-        id: number,
-        _project?: string,
-        top?: number,
-        skip?: number
-    ): Promise<WorkItemUpdate[]> {
+    getUpdates(id: number, _project?: string, top?: number, skip?: number): Promise<WorkItemUpdate[]> {
         const matched = updates.filter(u => u.workItemId === id);
         const source = matched.length > 0 ? matched : [makeWorkItemUpdate(1, id)];
         const start = skip ?? 0;
@@ -448,28 +413,24 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(found ?? makeWorkItemDelete(id));
     }
 
-    getDeletedWorkItemShallowReferences(
-        _project?: string
-    ): Promise<WorkItemDeleteShallowReference[]> {
+    getDeletedWorkItemShallowReferences(_project?: string): Promise<WorkItemDeleteShallowReference[]> {
         return Promise.resolve(deletedWorkItems.map(d => ({ id: d.id, url: d.url })));
     }
 
     getDeletedWorkItems(ids: number[], _project?: string): Promise<WorkItemDeleteReference[]> {
-        return Promise.resolve(ids.map(id => {
-            const found = deletedWorkItems.find(d => d.id === id);
-            return found ?? makeWorkItemDelete(id);
-        }));
+        return Promise.resolve(
+            ids.map(id => {
+                const found = deletedWorkItems.find(d => d.id === id);
+                return found ?? makeWorkItemDelete(id);
+            })
+        );
     }
 
     destroyWorkItem(_id: number, _project?: string): Promise<void> {
         return Promise.resolve();
     }
 
-    restoreWorkItem(
-        payload: WorkItemDeleteUpdate,
-        id: number,
-        project?: string
-    ): Promise<WorkItemDelete> {
+    restoreWorkItem(payload: WorkItemDeleteUpdate, id: number, project?: string): Promise<WorkItemDelete> {
         return this.getDeletedWorkItem(id, project).then(deleted => ({
             ...deleted,
             resource: {
@@ -479,11 +440,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         }));
     }
 
-    createTemplate(
-        template: WorkItemTemplate,
-        _project: string,
-        _team: string
-    ): Promise<WorkItemTemplate> {
+    createTemplate(template: WorkItemTemplate, _project: string, _team: string): Promise<WorkItemTemplate> {
         return Promise.resolve({ ...makeWorkItemTemplate(template.id), ...template });
     }
 
@@ -491,20 +448,12 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
-    getTemplate(
-        _project: string,
-        _team: string,
-        templateId: string
-    ): Promise<WorkItemTemplate> {
+    getTemplate(_project: string, _team: string, templateId: string): Promise<WorkItemTemplate> {
         const found = templates.find(t => t.id === templateId);
         return Promise.resolve(found ?? makeWorkItemTemplate(templateId));
     }
 
-    getTemplates(
-        _project: string,
-        _team: string,
-        workitemtypename?: string
-    ): Promise<WorkItemTemplateReference[]> {
+    getTemplates(_project: string, _team: string, workitemtypename?: string): Promise<WorkItemTemplateReference[]> {
         if (workitemtypename === undefined) {
             return Promise.resolve(templates);
         }
@@ -565,28 +514,28 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     getWorkItemTypeCategory(_project: string, category: string): Promise<WorkItemTypeCategory> {
-        const found = categories.find(
-            c => c.name === category || c.referenceName === category
-        );
+        const found = categories.find(c => c.name === category || c.referenceName === category);
         return Promise.resolve(found ?? makeWorkItemTypeCategory(category));
     }
 
-    getWorkItemTypeColors(
-        projectNames: string[]
-    ): Promise<{ key: string; value: WorkItemTypeColor[] }[]> {
-        return Promise.resolve(projectNames.map(key => ({
-            key,
-            value: workItemTypes.map(type => makeWorkItemTypeColor(type.name))
-        })));
+    getWorkItemTypeColors(projectNames: string[]): Promise<{ key: string; value: WorkItemTypeColor[] }[]> {
+        return Promise.resolve(
+            projectNames.map(key => ({
+                key,
+                value: workItemTypes.map(type => makeWorkItemTypeColor(type.name))
+            }))
+        );
     }
 
     getWorkItemTypeColorAndIcons(
         projectNames: string[]
     ): Promise<{ key: string; value: WorkItemTypeColorAndIcon[] }[]> {
-        return Promise.resolve(projectNames.map(key => ({
-            key,
-            value: workItemTypes.map(type => makeWorkItemTypeColorAndIcon(type.name))
-        })));
+        return Promise.resolve(
+            projectNames.map(key => ({
+                key,
+                value: workItemTypes.map(type => makeWorkItemTypeColorAndIcon(type.name))
+            }))
+        );
     }
 
     getWorkItemTypeFieldsWithReferences(
@@ -595,11 +544,13 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         expand?: WorkItemTypeFieldsExpandLevel
     ): Promise<WorkItemTypeFieldWithReferences[]> {
         if (expand === WorkItemTypeFieldsExpandLevel.None) {
-            return Promise.resolve(typeFields.map(field => ({
-                ...field,
-                allowedValues: [],
-                dependentFields: []
-            })));
+            return Promise.resolve(
+                typeFields.map(field => ({
+                    ...field,
+                    allowedValues: [],
+                    dependentFields: []
+                }))
+            );
         }
         return Promise.resolve(typeFields);
     }
@@ -637,10 +588,7 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(workItemIcons);
     }
 
-    getWorkItemNextStatesOnCheckinAction(
-        ids: number[],
-        action?: string
-    ): Promise<WorkItemNextStateOnTransition[]> {
+    getWorkItemNextStatesOnCheckinAction(ids: number[], action?: string): Promise<WorkItemNextStateOnTransition[]> {
         return Promise.resolve(ids.map(id => makeWorkItemNextState(id, action ?? "checkin")));
     }
 
@@ -648,17 +596,12 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         return Promise.resolve(projectNames.map(makeProjectWorkItemStateColors));
     }
 
-    getWorkItemsBatch(
-        workItemGetRequest: WorkItemBatchGetRequest,
-        _project?: string
-    ): Promise<WorkItem[]> {
+    getWorkItemsBatch(workItemGetRequest: WorkItemBatchGetRequest, _project?: string): Promise<WorkItem[]> {
         return Promise.resolve(workItemGetRequest.ids.map(id => makeWorkItem(id)));
     }
 
     getRelationType(relation: string): Promise<WorkItemRelationType> {
-        const found = relationTypes.find(
-            t => t.referenceName === relation || t.name === relation
-        );
+        const found = relationTypes.find(t => t.referenceName === relation || t.name === relation);
         return Promise.resolve(found ?? makeWorkItemRelationType(relation));
     }
 
@@ -688,9 +631,10 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
         continuationToken?: string,
         _startDateTime?: Date
     ): Promise<ReportingWorkItemLinksBatch> {
-        const values = linkTypes === undefined
-            ? workItemRelations
-            : workItemRelations.filter(relation => linkTypes.includes(relation.rel));
+        const values =
+            linkTypes === undefined
+                ? workItemRelations
+                : workItemRelations.filter(relation => linkTypes.includes(relation.rel));
         return Promise.resolve(makeLinksBatch(values, true, continuationToken ?? "links-1"));
     }
 
@@ -710,11 +654,9 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     ): Promise<ReportingWorkItemRevisionsBatch> {
         const source = includeLatestOnly ? revisions.slice(-1) : revisions;
         const values = maxPageSize === undefined ? source : source.slice(0, maxPageSize);
-        return Promise.resolve(makeRevisionsBatch(
-            values,
-            values.length === source.length,
-            continuationToken ?? "revisions-1"
-        ));
+        return Promise.resolve(
+            makeRevisionsBatch(values, values.length === source.length, continuationToken ?? "revisions-1")
+        );
     }
 
     readReportingRevisionsPost(
@@ -739,9 +681,8 @@ export class MockWorkItemTrackingRestClient extends RestClientBase {
     }
 
     getAccountMyWorkData(queryOption?: QueryOption): Promise<AccountMyWorkResult> {
-        const workItemDetails = queryOption === QueryOption.Done
-            ? myWorkItems.filter(item => item.state === "Closed")
-            : myWorkItems;
+        const workItemDetails =
+            queryOption === QueryOption.Done ? myWorkItems.filter(item => item.state === "Closed") : myWorkItems;
         return Promise.resolve({ querySizeLimitExceeded: false, workItemDetails });
     }
 

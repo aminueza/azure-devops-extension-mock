@@ -93,9 +93,7 @@ export class MockTfvcRestClient extends RestClientBase {
         includeDeleted?: boolean,
         _includeLinks?: boolean
     ): Promise<TfvcBranchRef[]> {
-        return Promise.resolve(
-            branches.filter(b => b.path.startsWith(scopePath) && (includeDeleted || !b.isDeleted))
-        );
+        return Promise.resolve(branches.filter(b => b.path.startsWith(scopePath) && (includeDeleted || !b.isDeleted)));
     }
 
     getChangesetChanges(id?: number, skip?: number, top?: number): Promise<PagedList<TfvcChange>> {
@@ -243,11 +241,7 @@ export class MockTfvcRestClient extends RestClientBase {
         return Promise.resolve(findShelveset(shelvesetId));
     }
 
-    getShelvesets(
-        _requestData?: TfvcShelvesetRequestData,
-        top?: number,
-        skip?: number
-    ): Promise<TfvcShelvesetRef[]> {
+    getShelvesets(_requestData?: TfvcShelvesetRequestData, top?: number, skip?: number): Promise<TfvcShelvesetRef[]> {
         return Promise.resolve(slicePage(shelvesets, skip, top));
     }
 

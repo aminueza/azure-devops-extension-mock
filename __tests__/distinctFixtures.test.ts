@@ -16,17 +16,27 @@ const collisions = (load: () => string[]): string[] => {
 
 describe("seeded lists that are searched by name", () => {
     it("never seeds two projects with the same name", () => {
-        expect(collisions(() => require("../azure-devops-extension-api/core/Data").projects.map((p: { name: string }) => p.name))).toEqual([]);
+        expect(
+            collisions(() =>
+                require("../azure-devops-extension-api/core/Data").projects.map((p: { name: string }) => p.name)
+            )
+        ).toEqual([]);
     });
 
     it("never seeds two teams with the same name", () => {
-        expect(collisions(() => require("../azure-devops-extension-api/core/Data").teams.map((t: { name: string }) => t.name))).toEqual([]);
+        expect(
+            collisions(() =>
+                require("../azure-devops-extension-api/core/Data").teams.map((t: { name: string }) => t.name)
+            )
+        ).toEqual([]);
     });
 
     it("never seeds two project collections with the same name", () => {
         expect(
             collisions(() =>
-                require("../azure-devops-extension-api/core/Data").projectCollections.map((c: { name: string }) => c.name)
+                require("../azure-devops-extension-api/core/Data").projectCollections.map(
+                    (c: { name: string }) => c.name
+                )
             )
         ).toEqual([]);
     });
@@ -34,12 +44,16 @@ describe("seeded lists that are searched by name", () => {
     it("never seeds two queries with the same path or name", () => {
         expect(
             collisions(() =>
-                require("../azure-devops-extension-api/workItemTracking/Data").queries.map((q: { path: string }) => q.path)
+                require("../azure-devops-extension-api/workItemTracking/Data").queries.map(
+                    (q: { path: string }) => q.path
+                )
             )
         ).toEqual([]);
         expect(
             collisions(() =>
-                require("../azure-devops-extension-api/workItemTracking/Data").queries.map((q: { name: string }) => q.name)
+                require("../azure-devops-extension-api/workItemTracking/Data").queries.map(
+                    (q: { name: string }) => q.name
+                )
             )
         ).toEqual([]);
     });
@@ -47,7 +61,9 @@ describe("seeded lists that are searched by name", () => {
     it("never seeds two environments with the same name", () => {
         expect(
             collisions(() =>
-                require("../azure-devops-extension-api/taskAgent/Data").environments.map((e: { name: string }) => e.name)
+                require("../azure-devops-extension-api/taskAgent/Data").environments.map(
+                    (e: { name: string }) => e.name
+                )
             )
         ).toEqual([]);
     });

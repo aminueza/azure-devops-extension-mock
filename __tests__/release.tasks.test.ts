@@ -56,29 +56,13 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
                     "output.txt"
                 )
         ],
-        [
-            "getReleaseTaskAttachments",
-            () => client.getReleaseTaskAttachments("proj", 1, 2, 3, "plan-1", "logs")
-        ],
+        ["getReleaseTaskAttachments", () => client.getReleaseTaskAttachments("proj", 1, 2, 3, "plan-1", "logs")],
         [
             "getTaskAttachmentContent",
-            () =>
-                client.getTaskAttachmentContent(
-                    "proj",
-                    1,
-                    2,
-                    3,
-                    "timeline-1",
-                    "record-1",
-                    "logs",
-                    "output.txt"
-                )
+            () => client.getTaskAttachmentContent("proj", 1, 2, 3, "timeline-1", "record-1", "logs", "output.txt")
         ],
         ["getTaskAttachments", () => client.getTaskAttachments("proj", 1, 2, 3, "timeline-1", "logs")],
-        [
-            "getManualIntervention",
-            () => client.getManualIntervention("proj", 1, manualInterventions[0].id)
-        ],
+        ["getManualIntervention", () => client.getManualIntervention("proj", 1, manualInterventions[0].id)],
         ["getManualInterventions", () => client.getManualInterventions("proj", 1)],
         [
             "updateManualIntervention",
@@ -90,16 +74,10 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
                     manualInterventions[0].id
                 )
         ],
-        [
-            "updateGates",
-            () => client.updateGates({ comment: "skip", gatesToIgnore: ["gate-a"] }, "proj", 7)
-        ],
+        ["updateGates", () => client.updateGates({ comment: "skip", gatesToIgnore: ["gate-a"] }, "proj", 7)],
         ["getIssues", () => client.getIssues("proj", 10)],
         ["getIssuesWithSource", () => client.getIssues("proj", 10, "source-1")],
-        [
-            "getAutoTriggerIssues",
-            () => client.getAutoTriggerIssues("Build", "source-1", "version-1")
-        ],
+        ["getAutoTriggerIssues", () => client.getAutoTriggerIssues("Build", "source-1", "version-1")],
         [
             "getAutoTriggerIssuesWithProject",
             () => client.getAutoTriggerIssues("Build", "source-1", "version-1", "proj")
@@ -167,11 +145,7 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
     });
 
     it("maps ignored gates from the update metadata", async () => {
-        const gates = await client.updateGates(
-            { comment: "skip", gatesToIgnore: ["gate-a", "gate-b"] },
-            "proj",
-            42
-        );
+        const gates = await client.updateGates({ comment: "skip", gatesToIgnore: ["gate-a", "gate-b"] }, "proj", 42);
         expect(gates.id).toBe(42);
         expect(gates.ignoredGates.map(gate => gate.name)).toEqual(["gate-a", "gate-b"]);
     });
@@ -181,10 +155,7 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
             [makeArtifact("primary"), makeArtifact("secondary")],
             "proj"
         );
-        expect(result.artifactVersions.map(version => version.alias)).toEqual([
-            "primary",
-            "secondary"
-        ]);
+        expect(result.artifactVersions.map(version => version.alias)).toEqual(["primary", "secondary"]);
     });
 
     it("echoes the caller input values query", async () => {
@@ -197,18 +168,7 @@ describe("ReleaseRestClient artifacts, logs, tasks and manual interventions", ()
     it("encodes release logs and attachment content", async () => {
         expect(decode(await client.getLogs("proj", 9))).toBe("release-9-logs");
         expect(
-            decode(
-                await client.getTaskAttachmentContent(
-                    "proj",
-                    9,
-                    2,
-                    3,
-                    "timeline-1",
-                    "record-1",
-                    "logs",
-                    "out.txt"
-                )
-            )
+            decode(await client.getTaskAttachmentContent("proj", 9, 2, 3, "timeline-1", "record-1", "logs", "out.txt"))
         ).toBe("task-9-record-1-out.txt");
         expect(
             decode(

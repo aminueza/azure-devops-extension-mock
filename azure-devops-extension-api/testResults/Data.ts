@@ -324,9 +324,15 @@ export const afdTcmEndpoint: string = fake.internet.url();
 
 export const testAgentToken: string = fake.string.alphanumeric(40);
 
-export const sourceViewBuildCoverages: SourceViewBuildCoverage[] = Array.from({ length: 2 }, makeSourceViewBuildCoverage);
+export const sourceViewBuildCoverages: SourceViewBuildCoverage[] = Array.from(
+    { length: 2 },
+    makeSourceViewBuildCoverage
+);
 
-export const flakyBranchInfos: TestCaseFlakinessBranchInfo[] = Array.from({ length: 3 }, makeTestCaseFlakinessBranchInfo);
+export const flakyBranchInfos: TestCaseFlakinessBranchInfo[] = Array.from(
+    { length: 3 },
+    makeTestCaseFlakinessBranchInfo
+);
 
 export const blobStoreAttachments: Array<TestAttachment & { dedupId: string; domainId: string }> =
     fake.helpers.distinct(3, makeBlobStoreTestAttachment, item => item.fileName);
@@ -335,11 +341,17 @@ export const testResultsSettings: TestResultsSettings = makeTestResultsSettings(
 
 export const testTags: TestTag[] = fake.helpers.distinct(3, makeTestTag, item => item.name);
 
-export const logStoreAttachments: TestLogStoreAttachment[] =
-    fake.helpers.distinct(3, makeTestLogStoreAttachment, item => item.fileName);
+export const logStoreAttachments: TestLogStoreAttachment[] = fake.helpers.distinct(
+    3,
+    makeTestLogStoreAttachment,
+    item => item.fileName
+);
 
-export const failureTypes: TestResultFailureType[] =
-    fake.helpers.distinct(3, makeTestResultFailureType, item => item.name);
+export const failureTypes: TestResultFailureType[] = fake.helpers.distinct(
+    3,
+    makeTestResultFailureType,
+    item => item.name
+);
 
 export const testLogs: TestLog[] = fake.helpers.distinct(4, makeTestLog, item => item.logReference.filePath);
 

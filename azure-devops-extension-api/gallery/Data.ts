@@ -112,14 +112,9 @@ export const makePublisher = (): Publisher => ({
     _links: {}
 });
 
-export const makePublisherFacts = ({
-    publisherId,
-    publisherName,
-    displayName,
-    flags,
-    domain,
-    isDomainVerified
-}: PublisherFacts = makePublisher()): PublisherFacts => ({
+export const makePublisherFacts = (
+    { publisherId, publisherName, displayName, flags, domain, isDomainVerified }: PublisherFacts = makePublisher()
+): PublisherFacts => ({
     publisherId,
     publisherName,
     displayName,

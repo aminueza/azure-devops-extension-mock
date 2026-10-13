@@ -1,8 +1,4 @@
-import {
-    FieldType,
-    PageType,
-    WorkItemTypeClass
-} from "azure-devops-extension-api/WorkItemTrackingProcessDefinitions";
+import { FieldType, PageType, WorkItemTypeClass } from "azure-devops-extension-api/WorkItemTrackingProcessDefinitions";
 import {
     behaviors,
     controls,

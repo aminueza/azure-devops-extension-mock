@@ -1,4 +1,9 @@
-import { IWorkItemChangedArgs, IWorkItemFieldChangedArgs, IWorkItemLoadedArgs, IWorkItemNotificationListener } from "azure-devops-extension-api/WorkItemTracking";
+import {
+    IWorkItemChangedArgs,
+    IWorkItemFieldChangedArgs,
+    IWorkItemLoadedArgs,
+    IWorkItemNotificationListener
+} from "azure-devops-extension-api/WorkItemTracking";
 
 export const instanceObjects: any = {};
 

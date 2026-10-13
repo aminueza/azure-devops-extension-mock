@@ -66,10 +66,10 @@ export class MockContributionsRestClient extends RestClientBase {
     ): Promise<InstalledExtension[]> {
         return Promise.resolve(
             installedExtensions
-                .filter(e => includeDisabledApps === true || (e.installState.flags & ExtensionStateFlags.Disabled) === 0)
                 .filter(
-                    e => contributionIds === undefined || e.contributions.some(c => contributionIds.includes(c.id))
+                    e => includeDisabledApps === true || (e.installState.flags & ExtensionStateFlags.Disabled) === 0
                 )
+                .filter(e => contributionIds === undefined || e.contributions.some(c => contributionIds.includes(c.id)))
         );
     }
 

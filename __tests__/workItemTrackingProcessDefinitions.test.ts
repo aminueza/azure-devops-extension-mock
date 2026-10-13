@@ -152,7 +152,13 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
         });
 
         it("edits an unknown control", async () => {
-            const edited = await client.editControl({ visible: false } as Control, PROCESS, TASK, "group", "Custom.Unknown");
+            const edited = await client.editControl(
+                { visible: false } as Control,
+                PROCESS,
+                TASK,
+                "group",
+                "Custom.Unknown"
+            );
             expect(edited.id).toBe("Custom.Unknown");
             expect(edited.visible).toBe(false);
             expect(typeof edited.label).toBe("string");
@@ -245,14 +251,23 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
         });
 
         it("edits an unknown group", async () => {
-            const edited = await client.editGroup({ visible: false } as Group, PROCESS, TASK, "page", "Section1", "g-1");
+            const edited = await client.editGroup(
+                { visible: false } as Group,
+                PROCESS,
+                TASK,
+                "page",
+                "Section1",
+                "g-1"
+            );
             expect(edited.id).toBe("g-1");
             expect(edited.visible).toBe(false);
             expect(Array.isArray(edited.controls)).toBe(true);
         });
 
         it("removes a group", async () => {
-            await expect(client.removeGroup(PROCESS, TASK, pages[0].id, "Section1", groups[0].id)).resolves.toBeUndefined();
+            await expect(
+                client.removeGroup(PROCESS, TASK, pages[0].id, "Section1", groups[0].id)
+            ).resolves.toBeUndefined();
         });
 
         it("sets a known group in a page", async () => {
@@ -497,14 +512,20 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
         });
 
         it("fills a partially posted behavior from a fixture", async () => {
-            const added = await client.addBehaviorToWorkItemType({ isDefault: true } as WorkItemTypeBehavior, PROCESS, TASK);
+            const added = await client.addBehaviorToWorkItemType(
+                { isDefault: true } as WorkItemTypeBehavior,
+                PROCESS,
+                TASK
+            );
             expect(added.isDefault).toBe(true);
             expect(added.isLegacyDefault).toBe(false);
             expect(typeof added.url).toBe("string");
         });
 
         it("gets a known behavior of a work item type", async () => {
-            expect(await client.getBehaviorForWorkItemType(PROCESS, TASK, TASK_BEHAVIOR)).toBe(workItemTypes[2].behaviors[0]);
+            expect(await client.getBehaviorForWorkItemType(PROCESS, TASK, TASK_BEHAVIOR)).toBe(
+                workItemTypes[2].behaviors[0]
+            );
         });
 
         it("fabricates an unknown behavior of a work item type", async () => {
@@ -560,7 +581,10 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
         });
 
         it("fills a partially posted work item type from a fixture", async () => {
-            const created = await client.createWorkItemType({ name: "Risk", color: "f6546a" } as WorkItemTypeModel, PROCESS);
+            const created = await client.createWorkItemType(
+                { name: "Risk", color: "f6546a" } as WorkItemTypeModel,
+                PROCESS
+            );
             expect(created.name).toBe("Risk");
             expect(created.color).toBe("f6546a");
             expect(created.id.startsWith("Custom.")).toBe(true);
@@ -574,7 +598,9 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
 
         it("gets a known work item type", async () => {
             expect(await client.getWorkItemType(PROCESS, TASK)).toBe(workItemTypes[2]);
-            expect(await client.getWorkItemType(PROCESS, "Custom.Bug", GetWorkItemTypeExpand.States)).toBe(workItemTypes[3]);
+            expect(await client.getWorkItemType(PROCESS, "Custom.Bug", GetWorkItemTypeExpand.States)).toBe(
+                workItemTypes[3]
+            );
         });
 
         it("fabricates an unknown work item type", async () => {
@@ -618,7 +644,11 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
         });
 
         it("fills a partially posted field from a fixture", async () => {
-            const added = await client.addFieldToWorkItemType({ readOnly: true } as WorkItemTypeFieldModel2, PROCESS, TASK);
+            const added = await client.addFieldToWorkItemType(
+                { readOnly: true } as WorkItemTypeFieldModel2,
+                PROCESS,
+                TASK
+            );
             expect(added.readOnly).toBe(true);
             expect(added.referenceName.startsWith("Custom.")).toBe(true);
             expect(added.type).toBe(FieldType.String);
@@ -652,7 +682,11 @@ describe("WorkItemTrackingProcessDefinitionsRestClient mock", () => {
 
         it("updates a known field of a work item type", async () => {
             const target = workItemTypeFields[2];
-            const updated = await client.updateWorkItemTypeField({ ...target, defaultValue: 1, required: true }, PROCESS, TASK);
+            const updated = await client.updateWorkItemTypeField(
+                { ...target, defaultValue: 1, required: true },
+                PROCESS,
+                TASK
+            );
             expect(updated).toEqual({ ...target, defaultValue: 1, required: true });
             expect(target.defaultValue).toBe(2);
         });

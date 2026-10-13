@@ -80,12 +80,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
 
     it("returns a seeded secure file with its download ticket when asked", async () => {
         const seeded = secureFiles[1];
-        const file = await client.getSecureFile(
-            "proj",
-            seeded.id,
-            true,
-            SecureFileActionFilter.Use
-        );
+        const file = await client.getSecureFile("proj", seeded.id, true, SecureFileActionFilter.Use);
         expect(file).toBe(seeded);
     });
 
@@ -104,12 +99,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
 
     it("filters listed secure files by name pattern and includes tickets", async () => {
         const seeded = secureFiles[2];
-        const files = await client.getSecureFiles(
-            "proj",
-            seeded.name,
-            true,
-            SecureFileActionFilter.Manage
-        );
+        const files = await client.getSecureFiles("proj", seeded.name, true, SecureFileActionFilter.Manage);
         expect(files).toEqual([seeded]);
         await expect(client.getSecureFiles("proj", "no-such-file")).resolves.toEqual([]);
     });
@@ -134,11 +124,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
         const all = await client.querySecureFilesByProperties("environment eq 'prod'", "proj");
         expect(all.map(f => f.id)).toEqual(secureFiles.map(f => f.id));
         expect(all.every(f => f.ticket === "")).toBe(true);
-        const named = await client.querySecureFilesByProperties(
-            "environment eq 'prod'",
-            "proj",
-            secureFiles[0].name
-        );
+        const named = await client.querySecureFilesByProperties("environment eq 'prod'", "proj", secureFiles[0].name);
         expect(named.map(f => f.id)).toEqual([secureFiles[0].id]);
     });
 
@@ -181,12 +167,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
     });
 
     it("returns a seeded task group by id", async () => {
-        const group = await client.getTaskGroup(
-            "proj",
-            taskGroups[1].id,
-            "1.*",
-            TaskGroupExpands.Tasks
-        );
+        const group = await client.getTaskGroup("proj", taskGroups[1].id, "1.*", TaskGroupExpands.Tasks);
         expect(group).toBe(taskGroups[1]);
     });
 
@@ -223,11 +204,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
         expect(published[0].parentDefinitionId).toBe("parent-1");
         expect(published[0].preview).toBe(true);
         expect(published[0].revision).toBe(5);
-        const unknown = await client.publishTaskGroup(
-            { ...metadata, taskGroupId: unmatchedId },
-            "proj",
-            "parent-1"
-        );
+        const unknown = await client.publishTaskGroup({ ...metadata, taskGroupId: unmatchedId }, "proj", "parent-1");
         expect(unknown[0].id).toBe(unmatchedId);
     });
 
@@ -260,11 +237,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
             true
         );
         expect(seeded).toEqual([{ ...taskGroups[1], comment: "Disable old versions" }]);
-        const unknown = await client.updateTaskGroupProperties(
-            { comment: "Missing" },
-            "proj",
-            unmatchedId
-        );
+        const unknown = await client.updateTaskGroupProperties({ comment: "Missing" }, "proj", unmatchedId);
         expect(unknown.length).toBe(1);
         expect(unknown[0].id).toBe(unmatchedId);
         expect(unknown[0].comment).toBe("Missing");
@@ -290,12 +263,7 @@ describe("TaskAgentRestClient secure files, task groups and task definitions", (
     });
 
     it("returns a seeded task definition by id", async () => {
-        const definition = await client.getTaskDefinition(
-            taskDefinitions[2].id,
-            "1.0.0",
-            ["Build"],
-            false
-        );
+        const definition = await client.getTaskDefinition(taskDefinitions[2].id, "1.0.0", ["Build"], false);
         expect(definition).toBe(taskDefinitions[2]);
     });
 

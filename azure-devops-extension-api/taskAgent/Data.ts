@@ -83,11 +83,7 @@ export const makeAgentReference = (name?: string): TaskAgentReference => ({
     version: `${fake.number.int({ min: 2, max: 3 })}.218.0`,
     status: TaskAgentStatus.Online,
     enabled: true,
-    osDescription: fake.helpers.arrayElement([
-        "Linux 5.15.0",
-        "Microsoft Windows 10.0.20348",
-        "Darwin 22.4.0"
-    ]),
+    osDescription: fake.helpers.arrayElement(["Linux 5.15.0", "Microsoft Windows 10.0.20348", "Darwin 22.4.0"]),
     provisioningState: "Provisioned",
     accessPoint: "CodexAccessMapping",
     _links: {}
@@ -312,7 +308,7 @@ export const makeVariableGroup = (name?: string): VariableGroup => ({
     type: "Vsts",
     providerData: {},
     variables: {
-        "MyVariable": { value: "myValue", isReadOnly: false, isSecret: false }
+        MyVariable: { value: "myValue", isReadOnly: false, isSecret: false }
     },
     variableGroupProjectReferences: [],
     createdBy: makeIdentityRef(),
@@ -401,10 +397,7 @@ export const agentPools: TaskAgentPool[] = [
     makeAgentPool("Self-Hosted")
 ];
 export const agents: TaskAgent[] = Array.from({ length: 3 }, () => makeAgent());
-export const agentQueues: TaskAgentQueue[] = [
-    makeAgentQueue("Azure Pipelines"),
-    makeAgentQueue("Default")
-];
+export const agentQueues: TaskAgentQueue[] = [makeAgentQueue("Azure Pipelines"), makeAgentQueue("Default")];
 export const agentClouds: TaskAgentCloud[] = Array.from({ length: 3 }, (_value, index) => ({
     ...makeAgentCloud(),
     agentCloudId: 900 + index
@@ -413,14 +406,12 @@ export const agentCloudTypes: TaskAgentCloudType[] = Array.from({ length: 2 }, m
 export const agentCloudRequests: TaskAgentCloudRequest[] = Array.from({ length: 2 }, makeAgentCloudRequest);
 export const resourceLimits: ResourceLimit[] = Array.from({ length: 2 }, makeResourceLimit);
 export const taskGroups: TaskGroup[] = Array.from({ length: 2 }, makeTaskGroup);
-export const variableGroups: VariableGroup[] = [
-    makeVariableGroup("Common"),
-    makeVariableGroup("Production")
-];
+export const variableGroups: VariableGroup[] = [makeVariableGroup("Common"), makeVariableGroup("Production")];
 export const deploymentGroups: DeploymentGroup[] = Array.from({ length: 2 }, makeDeploymentGroup);
 
-export const deploymentGroupsPage: PagedList<DeploymentGroup> =
-    Object.assign([...deploymentGroups], { continuationToken: "" });
+export const deploymentGroupsPage: PagedList<DeploymentGroup> = Object.assign([...deploymentGroups], {
+    continuationToken: ""
+});
 
 export const makeAgentSession = (): TaskAgentSession => ({
     agent: makeAgent(),
@@ -445,28 +436,25 @@ export const makeAgentMessage = (): TaskAgentMessage => ({
     messageType: fake.helpers.arrayElement(["PipelineAgentJobRequest", "AgentRefresh", "JobCancellation"])
 });
 
-export const agentRequests: TaskAgentJobRequest[] = Array.from(
-    { length: 3 },
-    (_value, index) => ({
-        ...makeAgentJobRequest(),
-        requestId: 900 + index,
-        planId: `plan-${900 + index}`,
-        jobId: `job-${900 + index}`,
-        queueId: 800 + index,
-        poolId: 600 + index,
-        reservedAgent: { ...makeAgentReference(), id: 700 + index }
-    })
-);
+export const agentRequests: TaskAgentJobRequest[] = Array.from({ length: 3 }, (_value, index) => ({
+    ...makeAgentJobRequest(),
+    requestId: 900 + index,
+    planId: `plan-${900 + index}`,
+    jobId: `job-${900 + index}`,
+    queueId: 800 + index,
+    poolId: 600 + index,
+    reservedAgent: { ...makeAgentReference(), id: 700 + index }
+}));
 
-export const agentSessions: TaskAgentSession[] = Array.from(
-    { length: 2 },
-    (_value, index) => ({ ...makeAgentSession(), sessionId: `session-${900 + index}` })
-);
+export const agentSessions: TaskAgentSession[] = Array.from({ length: 2 }, (_value, index) => ({
+    ...makeAgentSession(),
+    sessionId: `session-${900 + index}`
+}));
 
-export const messages: TaskAgentMessage[] = Array.from(
-    { length: 3 },
-    (_value, index) => ({ ...makeAgentMessage(), messageId: 900 + index })
-);
+export const messages: TaskAgentMessage[] = Array.from({ length: 3 }, (_value, index) => ({
+    ...makeAgentMessage(),
+    messageId: 900 + index
+}));
 
 export const vstsAadTenantId: string = fake.string.uuid();
 
@@ -516,14 +504,11 @@ export const maintenanceDefinitions: TaskAgentPoolMaintenanceDefinition[] = Arra
     (_value, index) => ({ ...makeMaintenanceDefinition(), id: 900 + index })
 );
 
-export const maintenanceJobs: TaskAgentPoolMaintenanceJob[] = Array.from(
-    { length: 3 },
-    (_value, index) => ({
-        ...makeMaintenanceJob(),
-        jobId: 900 + index,
-        definitionId: 950 + (index % 2)
-    })
-);
+export const maintenanceJobs: TaskAgentPoolMaintenanceJob[] = Array.from({ length: 3 }, (_value, index) => ({
+    ...makeMaintenanceJob(),
+    jobId: 900 + index,
+    definitionId: 950 + (index % 2)
+}));
 
 export const makeDeploymentGroupMetrics = (): DeploymentGroupMetrics => ({
     columnsHeader: {
@@ -566,56 +551,44 @@ export const makeDeploymentMachineGroup = (): DeploymentMachineGroup => ({
     size: fake.number.int({ min: 1, max: 20 })
 });
 
-export const deploymentGroupMetrics: DeploymentGroupMetrics[] = Array.from(
-    { length: 3 },
-    (_value, index) => {
-        const metrics = makeDeploymentGroupMetrics();
-        return {
-            ...metrics,
-            deploymentGroup: {
-                ...metrics.deploymentGroup,
-                id: 900 + index,
-                name: `group-${900 + index}`
-            }
-        };
-    }
-);
+export const deploymentGroupMetrics: DeploymentGroupMetrics[] = Array.from({ length: 3 }, (_value, index) => {
+    const metrics = makeDeploymentGroupMetrics();
+    return {
+        ...metrics,
+        deploymentGroup: {
+            ...metrics.deploymentGroup,
+            id: 900 + index,
+            name: `group-${900 + index}`
+        }
+    };
+});
 
-export const deploymentPoolSummaries: DeploymentPoolSummary[] = Array.from(
-    { length: 3 },
-    (_value, index) => {
-        const summary = makeDeploymentPoolSummary();
-        return {
-            ...summary,
-            pool: { ...summary.pool, id: 900 + index, name: `pool-${900 + index}` }
-        };
-    }
-);
+export const deploymentPoolSummaries: DeploymentPoolSummary[] = Array.from({ length: 3 }, (_value, index) => {
+    const summary = makeDeploymentPoolSummary();
+    return {
+        ...summary,
+        pool: { ...summary.pool, id: 900 + index, name: `pool-${900 + index}` }
+    };
+});
 
-export const deploymentMachineGroups: DeploymentMachineGroup[] = Array.from(
-    { length: 3 },
-    (_value, index) => ({
-        ...makeDeploymentMachineGroup(),
-        id: 900 + index,
-        name: `machine-group-${900 + index}`
-    })
-);
+export const deploymentMachineGroups: DeploymentMachineGroup[] = Array.from({ length: 3 }, (_value, index) => ({
+    ...makeDeploymentMachineGroup(),
+    id: 900 + index,
+    name: `machine-group-${900 + index}`
+}));
 
-export const deploymentMachines: DeploymentMachine[] = Array.from(
-    { length: 4 },
-    (_value, index) => ({
-        ...makeDeploymentMachine(),
-        id: 900 + index,
-        agent: {
-            ...makeAgent(`target-${900 + index}`),
-            id: 950 + index,
-            enabled: index !== 3,
-            status: index === 3 ? TaskAgentStatus.Offline : TaskAgentStatus.Online
-        },
-        properties: { region: `region-${900 + index}` },
-        tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
-    })
-);
+export const deploymentMachines: DeploymentMachine[] = Array.from({ length: 4 }, (_value, index) => ({
+    ...makeDeploymentMachine(),
+    id: 900 + index,
+    agent: {
+        ...makeAgent(`target-${900 + index}`),
+        id: 950 + index,
+        enabled: index !== 3,
+        status: index === 3 ? TaskAgentStatus.Offline : TaskAgentStatus.Online
+    },
+    properties: { region: `region-${900 + index}` },
+    tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
+}));
 
 export const makeAzureManagementGroup = (): AzureManagementGroup => ({
     displayName: fake.company.name(),
@@ -751,15 +724,9 @@ export const makeSecureFile = (name?: string): SecureFile => ({
     ticket: fake.string.alphanumeric(32)
 });
 
-export const azureManagementGroups: AzureManagementGroup[] = Array.from(
-    { length: 2 },
-    makeAzureManagementGroup
-);
+export const azureManagementGroups: AzureManagementGroup[] = Array.from({ length: 2 }, makeAzureManagementGroup);
 
-export const azureSubscriptions: AzureSubscription[] = Array.from(
-    { length: 3 },
-    makeAzureSubscription
-);
+export const azureSubscriptions: AzureSubscription[] = Array.from({ length: 3 }, makeAzureSubscription);
 
 export const endpointQueryResults: string[] = fake.helpers.distinct(
     3,
@@ -767,29 +734,23 @@ export const endpointQueryResults: string[] = fake.helpers.distinct(
     item => item
 );
 
-export const environments: EnvironmentInstance[] = fake.helpers.distinct(
-    3,
-    makeEnvironment,
-    item => item.name
-);
+export const environments: EnvironmentInstance[] = fake.helpers.distinct(3, makeEnvironment, item => item.name);
 
 export const environmentDeploymentRecords: EnvironmentDeploymentExecutionRecord[] = Array.from(
     { length: 3 },
     makeEnvironmentDeploymentRecord
 );
 
-export const kubernetesResources: KubernetesResource[] = Array.from(
-    { length: 2 },
-    makeKubernetesResource
-);
+export const kubernetesResources: KubernetesResource[] = Array.from({ length: 2 }, makeKubernetesResource);
 
-export const virtualMachineGroups: VirtualMachineGroup[] = Array.from(
-    { length: 2 },
-    makeVirtualMachineGroup
-);
+export const virtualMachineGroups: VirtualMachineGroup[] = Array.from({ length: 2 }, makeVirtualMachineGroup);
 
 export const virtualMachines: VirtualMachine[] = fake.helpers
-    .distinct(4, () => makeVirtualMachine(), item => item.agent.name)
+    .distinct(
+        4,
+        () => makeVirtualMachine(),
+        item => item.agent.name
+    )
     .map((machine, index) => ({
         ...machine,
         tags: index % 2 === 0 ? ["web", "prod"] : ["db", "staging"]
@@ -803,14 +764,11 @@ export const packages: PackageMetadata[] = [
     makePackageMetadata("pipelines-agent", "linux-arm64", "4.248.0")
 ];
 
-export const taskGroupRevisions: TaskGroupRevision[] = Array.from(
-    { length: 3 },
-    (_value, index) => ({
-        ...makeTaskGroupRevision(),
-        changeType: index === 0 ? AuditAction.Add : AuditAction.Update,
-        revision: index + 1
-    })
-);
+export const taskGroupRevisions: TaskGroupRevision[] = Array.from({ length: 3 }, (_value, index) => ({
+    ...makeTaskGroupRevision(),
+    changeType: index === 0 ? AuditAction.Add : AuditAction.Update,
+    revision: index + 1
+}));
 
 export const secureFiles: SecureFile[] = fake.helpers.distinct(
     3,
@@ -818,11 +776,7 @@ export const secureFiles: SecureFile[] = fake.helpers.distinct(
     item => item.name
 );
 
-export const taskDefinitions: TaskDefinition[] = fake.helpers.distinct(
-    3,
-    makeTaskDefinition,
-    item => item.name
-);
+export const taskDefinitions: TaskDefinition[] = fake.helpers.distinct(3, makeTaskDefinition, item => item.name);
 
 export const yamlSchema: Record<string, unknown> = {
     $schema: "http://json-schema.org/draft-07/schema#",

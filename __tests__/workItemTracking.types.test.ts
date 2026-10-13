@@ -20,8 +20,12 @@ import {
 } from "../azure-devops-extension-api/workItemTracking/Data";
 
 describe("WorkItemTrackingRestClient types, icons and reporting", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(WorkItemTrackingRestClient);
     const updateModel = {
@@ -70,8 +74,20 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
         ["getWorkItemTypeCategory", () => client.getWorkItemTypeCategory("proj", "Bug Category")],
         ["getWorkItemTypeColors", () => client.getWorkItemTypeColors(["proj", "other"])],
         ["getWorkItemTypeColorAndIcons", () => client.getWorkItemTypeColorAndIcons(["proj", "other"])],
-        ["getWorkItemTypeFieldsWithReferences", () => client.getWorkItemTypeFieldsWithReferences("proj", "Bug", WorkItemTypeFieldsExpandLevel.All)],
-        ["getWorkItemTypeFieldWithReferences", () => client.getWorkItemTypeFieldWithReferences("proj", "Bug", "System.Title", WorkItemTypeFieldsExpandLevel.All)],
+        [
+            "getWorkItemTypeFieldsWithReferences",
+            () => client.getWorkItemTypeFieldsWithReferences("proj", "Bug", WorkItemTypeFieldsExpandLevel.All)
+        ],
+        [
+            "getWorkItemTypeFieldWithReferences",
+            () =>
+                client.getWorkItemTypeFieldWithReferences(
+                    "proj",
+                    "Bug",
+                    "System.Title",
+                    WorkItemTypeFieldsExpandLevel.All
+                )
+        ],
         ["getWorkItemTypeStates", () => client.getWorkItemTypeStates("proj", "Bug")],
         ["getWorkItemIconJson", () => client.getWorkItemIconJson(workItemIcons[0].id, "ff0000", 1)],
         ["getWorkItemIconSvg", () => client.getWorkItemIconSvg("icon_bug", "ff0000", 1)],
@@ -83,18 +99,60 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
         ["getRelationType", () => client.getRelationType(relationTypes[0].referenceName)],
         ["getRelationTypes", () => client.getRelationTypes()],
         ["getWorkArtifactLinkTypes", () => client.getWorkArtifactLinkTypes()],
-        ["queryWorkItemsForArtifactUris", () => client.queryWorkItemsForArtifactUris({ artifactUris: ["vstfs:///Git/Commit/1", "vstfs:///Build/Build/2"] }, "proj")],
-        ["getReportingLinksByLinkType", () => client.getReportingLinksByLinkType("proj", [relationTypes[0].referenceName], ["Bug"], "token-1", new Date("2024-01-01T00:00:00.000Z"))],
-        ["readReportingRevisionsGet", () => client.readReportingRevisionsGet("proj", ["System.Title"], ["Bug"], "token-1", new Date("2024-01-01T00:00:00.000Z"), true, false, true, false, ReportingRevisionsExpand.Fields, false, 2)],
-        ["readReportingRevisionsPost", () => client.readReportingRevisionsPost(revisionsFilter, "proj", "token-1", new Date("2024-01-01T00:00:00.000Z"), ReportingRevisionsExpand.Fields)],
+        [
+            "queryWorkItemsForArtifactUris",
+            () =>
+                client.queryWorkItemsForArtifactUris(
+                    { artifactUris: ["vstfs:///Git/Commit/1", "vstfs:///Build/Build/2"] },
+                    "proj"
+                )
+        ],
+        [
+            "getReportingLinksByLinkType",
+            () =>
+                client.getReportingLinksByLinkType(
+                    "proj",
+                    [relationTypes[0].referenceName],
+                    ["Bug"],
+                    "token-1",
+                    new Date("2024-01-01T00:00:00.000Z")
+                )
+        ],
+        [
+            "readReportingRevisionsGet",
+            () =>
+                client.readReportingRevisionsGet(
+                    "proj",
+                    ["System.Title"],
+                    ["Bug"],
+                    "token-1",
+                    new Date("2024-01-01T00:00:00.000Z"),
+                    true,
+                    false,
+                    true,
+                    false,
+                    ReportingRevisionsExpand.Fields,
+                    false,
+                    2
+                )
+        ],
+        [
+            "readReportingRevisionsPost",
+            () =>
+                client.readReportingRevisionsPost(
+                    revisionsFilter,
+                    "proj",
+                    "token-1",
+                    new Date("2024-01-01T00:00:00.000Z"),
+                    ReportingRevisionsExpand.Fields
+                )
+        ],
         ["getAccountMyWorkData", () => client.getAccountMyWorkData(QueryOption.Doing)],
         ["getRecentActivityData", () => client.getRecentActivityData()],
         ["getRecentMentions", () => client.getRecentMentions()]
     ];
 
-    const voidCases: Array<[string, () => Promise<void>]> = [
-        ["sendMail", () => client.sendMail(mailBody, "proj")]
-    ];
+    const voidCases: Array<[string, () => Promise<void>]> = [["sendMail", () => client.sendMail(mailBody, "proj")]];
 
     it.each(valueCases)("%s resolves a value", async (_name, call) => {
         await expect(call()).resolves.toBeDefined();
@@ -156,7 +214,11 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
     });
 
     it("strips allowed and dependent fields when expand is none", async () => {
-        const result = await client.getWorkItemTypeFieldsWithReferences("proj", "Bug", WorkItemTypeFieldsExpandLevel.None);
+        const result = await client.getWorkItemTypeFieldsWithReferences(
+            "proj",
+            "Bug",
+            WorkItemTypeFieldsExpandLevel.None
+        );
         expect(result).toHaveLength(typeFields.length);
         expect(result.every(f => f.allowedValues.length === 0 && f.dependentFields.length === 0)).toBe(true);
     });
@@ -178,7 +240,12 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
     });
 
     it("fabricates an unknown type field", async () => {
-        const field = await client.getWorkItemTypeFieldWithReferences("proj", "Bug", "Custom.Nope", WorkItemTypeFieldsExpandLevel.None);
+        const field = await client.getWorkItemTypeFieldWithReferences(
+            "proj",
+            "Bug",
+            "Custom.Nope",
+            WorkItemTypeFieldsExpandLevel.None
+        );
         expect(field.referenceName).toBe("Custom.Nope");
         expect(field.name).toBe("Nope");
         expect(field.allowedValues.length).toBeGreaterThan(0);
@@ -241,12 +308,8 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
     it("returns state colours per project", async () => {
         const colors = await client.getWorkItemStateColors(["alpha", "beta"]);
         expect(colors.map(c => c.projectName)).toEqual(["alpha", "beta"]);
-        expect(colors[0].workItemTypeStateColors.map(c => c.workItemTypeName)).toEqual(
-            workItemTypes.map(t => t.name)
-        );
-        expect(colors[0].workItemTypeStateColors[0].stateColors.map(s => s.name)).toEqual(
-            stateColors.map(s => s.name)
-        );
+        expect(colors[0].workItemTypeStateColors.map(c => c.workItemTypeName)).toEqual(workItemTypes.map(t => t.name));
+        expect(colors[0].workItemTypeStateColors[0].stateColors.map(s => s.name)).toEqual(stateColors.map(s => s.name));
     });
 
     it("returns one work item per requested id in a batch", async () => {
@@ -315,8 +378,17 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
 
     it("returns only the latest revision when asked", async () => {
         const batch = await client.readReportingRevisionsGet(
-            "proj", ["System.Title"], ["Bug"], undefined, undefined,
-            true, false, true, true, ReportingRevisionsExpand.Fields, false
+            "proj",
+            ["System.Title"],
+            ["Bug"],
+            undefined,
+            undefined,
+            true,
+            false,
+            true,
+            true,
+            ReportingRevisionsExpand.Fields,
+            false
         );
         expect(batch.values).toHaveLength(1);
         expect(batch.values[0].rev).toBe(revisions[revisions.length - 1].rev);
@@ -325,8 +397,18 @@ describe("WorkItemTrackingRestClient types, icons and reporting", () => {
 
     it("pages revisions with a max page size", async () => {
         const batch = await client.readReportingRevisionsGet(
-            "proj", undefined, undefined, "revisions-7", undefined,
-            undefined, undefined, undefined, false, undefined, undefined, 2
+            "proj",
+            undefined,
+            undefined,
+            "revisions-7",
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            false,
+            undefined,
+            undefined,
+            2
         );
         expect(batch.values).toHaveLength(2);
         expect(batch.isLastBatch).toBe(false);

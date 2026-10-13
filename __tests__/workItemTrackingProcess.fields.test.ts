@@ -286,7 +286,12 @@ describe("WorkItemTrackingProcessRestClient mock fields, lists, rules and states
     });
 
     describe("states", () => {
-        const model: WorkItemStateInputModel = { color: "007acc", name: "In Review", order: 3, stateCategory: "InProgress" };
+        const model: WorkItemStateInputModel = {
+            color: "007acc",
+            name: "In Review",
+            order: 3,
+            stateCategory: "InProgress"
+        };
 
         it("creates a state echoing the posted model", async () => {
             const created = await client.createStateDefinition(model, AGILE_PROCESS_ID, BUG);
@@ -314,7 +319,13 @@ describe("WorkItemTrackingProcessRestClient mock fields, lists, rules and states
             const list = await client.getStateDefinitions(AGILE_PROCESS_ID, BUG);
             expect(list).toBe(states);
             expect(list.map(s => s.name)).toEqual(["New", "Active", "Resolved", "Closed", "Removed"]);
-            expect(list.map(s => s.stateCategory)).toEqual(["Proposed", "InProgress", "Resolved", "Completed", "Removed"]);
+            expect(list.map(s => s.stateCategory)).toEqual([
+                "Proposed",
+                "InProgress",
+                "Resolved",
+                "Completed",
+                "Removed"
+            ]);
             expect(list.map(s => s.hidden)).toEqual([false, false, false, false, true]);
             expect(new Set(list.map(s => s.id)).size).toBe(5);
         });

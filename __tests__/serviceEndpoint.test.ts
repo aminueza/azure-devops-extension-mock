@@ -175,7 +175,12 @@ describe("ServiceEndpointRestClient mock", () => {
 
     it("gets the details of a known service endpoint", async () => {
         const [first] = await seeded();
-        const details = await client.getServiceEndpointDetails("proj", first.id, ServiceEndpointActionFilter.Use, false);
+        const details = await client.getServiceEndpointDetails(
+            "proj",
+            first.id,
+            ServiceEndpointActionFilter.Use,
+            false
+        );
         expect(details).toBe(first);
     });
 
@@ -253,11 +258,21 @@ describe("ServiceEndpointRestClient mock", () => {
         const [first] = await seeded();
         const scheme = first.authorization.scheme;
         expect(
-            await client.getServiceEndpointsByNames("proj", [first.name], first.type, [scheme], first.owner, false, false)
+            await client.getServiceEndpointsByNames(
+                "proj",
+                [first.name],
+                first.type,
+                [scheme],
+                first.owner,
+                false,
+                false
+            )
         ).toEqual([first]);
         expect(await client.getServiceEndpointsByNames("proj", [first.name], "unknown-type")).toEqual([]);
         expect(await client.getServiceEndpointsByNames("proj", [first.name], first.type, ["Unknown"])).toEqual([]);
-        expect(await client.getServiceEndpointsByNames("proj", [first.name], first.type, [scheme], "nobody")).toEqual([]);
+        expect(await client.getServiceEndpointsByNames("proj", [first.name], first.type, [scheme], "nobody")).toEqual(
+            []
+        );
     });
 
     it("gets service endpoints with refreshed authentication", async () => {

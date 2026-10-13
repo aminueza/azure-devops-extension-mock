@@ -197,7 +197,11 @@ describe("WorkItemTrackingProcessRestClient mock", () => {
         });
 
         it("gets a known behavior with its own fields", async () => {
-            const behavior = await client.getProcessBehavior(AGILE_PROCESS_ID, EPIC_BEHAVIOR, GetBehaviorsExpand.Fields);
+            const behavior = await client.getProcessBehavior(
+                AGILE_PROCESS_ID,
+                EPIC_BEHAVIOR,
+                GetBehaviorsExpand.Fields
+            );
             expect(behavior).toEqual(behaviors[2]);
             expect(behavior.fields.map(f => f.referenceName)).toEqual([`${EPIC_BEHAVIOR}.Order`]);
         });
@@ -226,7 +230,11 @@ describe("WorkItemTrackingProcessRestClient mock", () => {
         });
 
         it("fabricates an unknown behavior", async () => {
-            const behavior = await client.getProcessBehavior(AGILE_PROCESS_ID, "Custom.Missing", GetBehaviorsExpand.Fields);
+            const behavior = await client.getProcessBehavior(
+                AGILE_PROCESS_ID,
+                "Custom.Missing",
+                GetBehaviorsExpand.Fields
+            );
             expect(behavior.referenceName).toBe("Custom.Missing");
             expect(behavior.customization).toBe(CustomizationType.Custom);
             expect(behavior.fields.length).toBe(1);
@@ -290,7 +298,14 @@ describe("WorkItemTrackingProcessRestClient mock", () => {
 
         it("creates an inherited work item type", async () => {
             const created = await client.createProcessWorkItemType(
-                { color: "cc293d", description: "", icon: "icon_insect", inheritsFrom: BUG, isDisabled: false, name: "Bug" },
+                {
+                    color: "cc293d",
+                    description: "",
+                    icon: "icon_insect",
+                    inheritsFrom: BUG,
+                    isDisabled: false,
+                    name: "Bug"
+                },
                 AGILE_PROCESS_ID
             );
             expect(created.customization).toBe(CustomizationType.Inherited);
@@ -343,7 +358,11 @@ describe("WorkItemTrackingProcessRestClient mock", () => {
         });
 
         it("fabricates an unknown work item type", async () => {
-            const type = await client.getProcessWorkItemType(AGILE_PROCESS_ID, "Custom.Missing", GetWorkItemTypeExpand.States);
+            const type = await client.getProcessWorkItemType(
+                AGILE_PROCESS_ID,
+                "Custom.Missing",
+                GetWorkItemTypeExpand.States
+            );
             expect(type.referenceName).toBe("Custom.Missing");
             expect(type.customization).toBe(CustomizationType.Custom);
             expect(type.states.length).toBe(states.length);

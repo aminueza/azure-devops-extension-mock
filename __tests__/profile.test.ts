@@ -1,9 +1,4 @@
-import {
-    AvatarSize,
-    CreateProfileContext,
-    ProfileRestClient,
-    ProfileState
-} from "azure-devops-extension-api/Profile";
+import { AvatarSize, CreateProfileContext, ProfileRestClient, ProfileState } from "azure-devops-extension-api/Profile";
 import { getClient, getRegisteredMockClient, MockProfileRestClient } from "../azure-devops-extension-api";
 import {
     CORE_CONTAINER,
@@ -64,7 +59,9 @@ describe("ProfileRestClient mock", () => {
     });
 
     it("sets an attribute", async () => {
-        await expect(client.setProfileAttribute({ value: "light" }, "me", "Application;Theme")).resolves.toBeUndefined();
+        await expect(
+            client.setProfileAttribute({ value: "light" }, "me", "Application;Theme")
+        ).resolves.toBeUndefined();
     });
 
     it("sets several attributes", async () => {

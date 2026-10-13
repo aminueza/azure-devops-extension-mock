@@ -67,12 +67,7 @@ import {
 } from "azure-devops-extension-api/Git";
 import { WebApiTagDefinition } from "azure-devops-extension-api/Core";
 import { IdentityRef, PagedList, ResourceRef } from "azure-devops-extension-api/WebApi";
-import {
-    makeIdentityRef,
-    makeProjectCollectionReference,
-    makeProjectReference,
-    makeTagDefinition
-} from "../core/Data";
+import { makeIdentityRef, makeProjectCollectionReference, makeProjectReference, makeTagDefinition } from "../core/Data";
 
 export const makeGitRepositoryRef = (): GitRepositoryRef => ({
     id: fake.string.uuid(),
@@ -323,9 +318,7 @@ export const makeForkSyncRequest = (): GitForkSyncRequest => ({
         projectId: fake.string.uuid(),
         repositoryId: fake.string.uuid()
     },
-    sourceToTargetRefs: [
-        { sourceRef: "refs/heads/main", targetRef: "refs/heads/main" }
-    ],
+    sourceToTargetRefs: [{ sourceRef: "refs/heads/main", targetRef: "refs/heads/main" }],
     detailedStatus: {
         allSteps: ["queued", "syncing", "completed"],
         currentStep: 3,
@@ -600,18 +593,12 @@ export const pullRequestProperties: Record<string, any> = {
     reviewedBy: "release-team"
 };
 
-export const makePullRequestChange = (
-    path: string,
-    changeTrackingId: number
-): GitPullRequestChange => ({
+export const makePullRequestChange = (path: string, changeTrackingId: number): GitPullRequestChange => ({
     ...makeGitChange(path),
     changeTrackingId
 });
 
-export const makePullRequestIteration = (
-    id: number,
-    reason: IterationReason
-): GitPullRequestIteration => ({
+export const makePullRequestIteration = (id: number, reason: IterationReason): GitPullRequestIteration => ({
     _links: {},
     author: makeIdentityRef(),
     changeList: [
@@ -634,10 +621,7 @@ export const makePullRequestIteration = (
     updatedDate: fake.date.recent()
 });
 
-type FileDiffDetailBase = Omit<
-    FileDiffDetail,
-    "changeType" | "isFolder" | "isLinuxExecutable" | "isSymbolicLink"
->;
+type FileDiffDetailBase = Omit<FileDiffDetail, "changeType" | "isFolder" | "isLinuxExecutable" | "isSymbolicLink">;
 
 const makeFileDiffDetailBase = (path: string): FileDiffDetailBase => ({
     lineDiffBlocks: [
@@ -719,11 +703,7 @@ export const makeConflictUpdateResult = (conflict: GitConflict): GitConflictUpda
     conflictId: conflict.conflictId,
     customMessage: "",
     updatedConflict: {
-        ...makeGitConflict(
-            conflict.conflictId,
-            conflict.conflictPath,
-            GitResolutionStatus.Resolved
-        ),
+        ...makeGitConflict(conflict.conflictId, conflict.conflictPath, GitResolutionStatus.Resolved),
         ...conflict,
         resolutionStatus: GitResolutionStatus.Resolved
     },
@@ -742,11 +722,7 @@ export const makePullRequestThread = (
     status
 });
 
-export const pullRequestThreadComments: Comment[] = [
-    makeComment(5401),
-    makeComment(5402),
-    makeComment(5403)
-];
+export const pullRequestThreadComments: Comment[] = [makeComment(5401), makeComment(5402), makeComment(5403)];
 
 export const pullRequestThreads: GitPullRequestCommentThread[] = [
     makePullRequestThread(5301, CommentThreadStatus.Active, pullRequestThreadComments),
@@ -776,10 +752,7 @@ export const makeAsyncRefOperation = (generatedRefName: string): GitAsyncRefOper
     url: fake.internet.url()
 });
 
-export const makeCherryPick = (
-    cherryPickId: number,
-    generatedRefName: string
-): GitCherryPick => ({
+export const makeCherryPick = (cherryPickId: number, generatedRefName: string): GitCherryPick => ({
     ...makeAsyncRefOperation(generatedRefName),
     cherryPickId
 });
@@ -915,8 +888,8 @@ export const makeBillableCommitterDetail = (
     samAccountName: fake.internet.username()
 });
 
-export const billableCommitterDetails: BillableCommitterDetail[] = billableCommitters.map(
-    committer => makeBillableCommitterDetail(advSecProjectIds[0], committer)
+export const billableCommitterDetails: BillableCommitterDetail[] = billableCommitters.map(committer =>
+    makeBillableCommitterDetail(advSecProjectIds[0], committer)
 );
 
 export const makeRefFavorite = (

@@ -436,7 +436,11 @@ describe("GraphRestClient mock", () => {
 
     it("looks up subjects by descriptor", async () => {
         const found = await client.lookupSubjects({
-            lookupKeys: [{ descriptor: scopes[1].descriptor }, { descriptor: users[3].descriptor }, { descriptor: UNKNOWN }]
+            lookupKeys: [
+                { descriptor: scopes[1].descriptor },
+                { descriptor: users[3].descriptor },
+                { descriptor: UNKNOWN }
+            ]
         });
         expect(found[scopes[1].descriptor]).toBe(scopes[1]);
         expect(found[users[3].descriptor]).toBe(users[3]);
@@ -446,7 +450,11 @@ describe("GraphRestClient mock", () => {
     it("queries subjects by kind", async () => {
         const found = await client.querySubjects({ query: "", scopeDescriptor: "", subjectKind: ["Group"] });
         expect(found).toEqual(groups);
-        const mixed = await client.querySubjects({ query: "", scopeDescriptor: "", subjectKind: ["User", "ServicePrincipal"] });
+        const mixed = await client.querySubjects({
+            query: "",
+            scopeDescriptor: "",
+            subjectKind: ["User", "ServicePrincipal"]
+        });
         expect(mixed).toEqual([...users, ...servicePrincipals]);
     });
 

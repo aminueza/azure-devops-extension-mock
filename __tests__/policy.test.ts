@@ -104,7 +104,11 @@ describe("PolicyRestClient mock", () => {
     });
 
     it("updates an unknown configuration", async () => {
-        const updated = await client.updatePolicyConfiguration({ isDeleted: true } as PolicyConfiguration, "proj", 888_888);
+        const updated = await client.updatePolicyConfiguration(
+            { isDeleted: true } as PolicyConfiguration,
+            "proj",
+            888_888
+        );
         expect(updated.id).toBe(888_888);
         expect(updated.isDeleted).toBe(true);
         expect(typeof updated.url).toBe("string");

@@ -20,19 +20,17 @@ const compareVersions = (a, b) => {
     return 0;
 };
 
-const floorOf = (range) =>
+const floorOf = range =>
     range
         .split("||")
-        .map((part) => part.trim().replace(/^[\^~]|^>=\s*/, ""))
+        .map(part => part.trim().replace(/^[\^~]|^>=\s*/, ""))
         .sort(compareVersions)[0];
 
 const peerVersions = (target, peers = manifest.peerDependencies) => {
     if (!TARGETS.includes(target)) {
         throw new Error(`Unknown target "${target}". Use one of: ${TARGETS.join(", ")}`);
     }
-    return Object.fromEntries(
-        PEERS.map((name) => [name, target === "floor" ? floorOf(peers[name]) : "latest"])
-    );
+    return Object.fromEntries(PEERS.map(name => [name, target === "floor" ? floorOf(peers[name]) : "latest"]));
 };
 
 const TYPE_CHECK = `import { getClient } from "azure-devops-extension-mock";
@@ -76,11 +74,11 @@ const { WikiRestClient } = require("azure-devops-extension-api/Wiki");
 
 const run = (command, args, cwd) => execFileSync(command, args, { cwd, stdio: "inherit" });
 
-const check = (target) => {
+const check = target => {
     const versions = peerVersions(target);
     const consumer = fs.mkdtempSync(path.join(os.tmpdir(), "mock-compat-"));
     run("npm", ["pack", "--silent", "--pack-destination", consumer], ROOT);
-    const tarball = fs.readdirSync(consumer).find((name) => name.endsWith(".tgz"));
+    const tarball = fs.readdirSync(consumer).find(name => name.endsWith(".tgz"));
     fs.writeFileSync(path.join(consumer, "package.json"), JSON.stringify({ name: "consumer", private: true }));
     fs.writeFileSync(path.join(consumer, "check.ts"), TYPE_CHECK);
     fs.writeFileSync(path.join(consumer, "smoke.js"), SMOKE);
@@ -93,13 +91,13 @@ const check = (target) => {
             "--silent",
             "--legacy-peer-deps",
             `./${tarball}`,
-            ...PEERS.map((name) => `${name}@${versions[name]}`),
+            ...PEERS.map(name => `${name}@${versions[name]}`),
             `typescript@${manifest.devDependencies.typescript}`,
             `@types/node@${manifest.devDependencies["@types/node"]}`
         ],
         consumer
     );
-    console.log(`Checking against ${PEERS.map((name) => `${name}@${versions[name]}`).join(" and ")}`);
+    console.log(`Checking against ${PEERS.map(name => `${name}@${versions[name]}`).join(" and ")}`);
     run(
         "npx",
         [

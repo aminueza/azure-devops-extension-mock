@@ -9,31 +9,148 @@ export interface DateSpan {
 }
 
 const WORDS = [
-    "alpha", "beta", "gamma", "delta", "omega", "sigma", "theta", "kappa", "lambda", "zeta",
-    "amber", "azure", "cobalt", "coral", "crimson", "ivory", "jade", "onyx", "pearl", "ruby",
-    "anchor", "beacon", "bridge", "canyon", "cloud", "compass", "engine", "falcon", "forest", "harbor",
-    "island", "lantern", "meadow", "mirror", "nebula", "orbit", "pixel", "prism", "quartz", "river",
-    "rocket", "saddle", "signal", "summit", "tunnel", "vector", "vertex", "voyage", "willow", "zenith"
+    "alpha",
+    "beta",
+    "gamma",
+    "delta",
+    "omega",
+    "sigma",
+    "theta",
+    "kappa",
+    "lambda",
+    "zeta",
+    "amber",
+    "azure",
+    "cobalt",
+    "coral",
+    "crimson",
+    "ivory",
+    "jade",
+    "onyx",
+    "pearl",
+    "ruby",
+    "anchor",
+    "beacon",
+    "bridge",
+    "canyon",
+    "cloud",
+    "compass",
+    "engine",
+    "falcon",
+    "forest",
+    "harbor",
+    "island",
+    "lantern",
+    "meadow",
+    "mirror",
+    "nebula",
+    "orbit",
+    "pixel",
+    "prism",
+    "quartz",
+    "river",
+    "rocket",
+    "saddle",
+    "signal",
+    "summit",
+    "tunnel",
+    "vector",
+    "vertex",
+    "voyage",
+    "willow",
+    "zenith"
 ];
 
 const NOUNS = [
-    "pipeline", "release", "artifact", "branch", "commit", "widget", "dashboard", "backlog", "sprint", "board",
-    "repository", "workflow", "agent", "pool", "queue", "variable", "secret", "token", "policy", "wiki"
+    "pipeline",
+    "release",
+    "artifact",
+    "branch",
+    "commit",
+    "widget",
+    "dashboard",
+    "backlog",
+    "sprint",
+    "board",
+    "repository",
+    "workflow",
+    "agent",
+    "pool",
+    "queue",
+    "variable",
+    "secret",
+    "token",
+    "policy",
+    "wiki"
 ];
 
 const VERBS = [
-    "add", "fix", "update", "remove", "refactor", "rename", "merge", "bump", "revert", "improve",
-    "document", "test", "optimize", "extract", "inline", "split", "clean", "migrate", "enable", "disable"
+    "add",
+    "fix",
+    "update",
+    "remove",
+    "refactor",
+    "rename",
+    "merge",
+    "bump",
+    "revert",
+    "improve",
+    "document",
+    "test",
+    "optimize",
+    "extract",
+    "inline",
+    "split",
+    "clean",
+    "migrate",
+    "enable",
+    "disable"
 ];
 
 const FIRST_NAMES = [
-    "Amanda", "Bruno", "Camila", "Diego", "Elena", "Felipe", "Gabriela", "Hugo", "Isabela", "Joao",
-    "Karina", "Lucas", "Mariana", "Nicolas", "Olivia", "Pedro", "Quinn", "Rafael", "Sofia", "Thiago"
+    "Amanda",
+    "Bruno",
+    "Camila",
+    "Diego",
+    "Elena",
+    "Felipe",
+    "Gabriela",
+    "Hugo",
+    "Isabela",
+    "Joao",
+    "Karina",
+    "Lucas",
+    "Mariana",
+    "Nicolas",
+    "Olivia",
+    "Pedro",
+    "Quinn",
+    "Rafael",
+    "Sofia",
+    "Thiago"
 ];
 
 const LAST_NAMES = [
-    "Souza", "Silva", "Santos", "Oliveira", "Pereira", "Costa", "Rodrigues", "Almeida", "Nascimento", "Lima",
-    "Araujo", "Fernandes", "Carvalho", "Gomes", "Martins", "Rocha", "Ribeiro", "Alves", "Monteiro", "Mendes"
+    "Souza",
+    "Silva",
+    "Santos",
+    "Oliveira",
+    "Pereira",
+    "Costa",
+    "Rodrigues",
+    "Almeida",
+    "Nascimento",
+    "Lima",
+    "Araujo",
+    "Fernandes",
+    "Carvalho",
+    "Gomes",
+    "Martins",
+    "Rocha",
+    "Ribeiro",
+    "Alves",
+    "Monteiro",
+    "Mendes"
 ];
 
 const COMPANY_SUFFIXES = ["Labs", "Group", "Systems", "Holdings", "Partners", "Networks", "Software", "Industries"];
@@ -65,8 +182,7 @@ export const seed = (value: number): void => {
 
 seed(Math.floor(Math.random() * 4_294_967_296));
 
-const int = ({ min = 0, max = 1_000_000 }: IntRange = {}): number =>
-    min + Math.floor(random() * (max - min + 1));
+const int = ({ min = 0, max = 1_000_000 }: IntRange = {}): number => min + Math.floor(random() * (max - min + 1));
 
 let lastId = 1_000;
 
@@ -142,7 +258,9 @@ export const fake = {
     person: { firstName, lastName, fullName },
     internet: { domainName, url, email, exampleEmail, username },
     company: { name: (): string => `${lastName()} ${arrayElement(COMPANY_SUFFIXES)}` },
-    commerce: { productName: (): string => `${arrayElement(ADJECTIVES)} ${arrayElement(MATERIALS)} ${arrayElement(PRODUCTS)}` },
+    commerce: {
+        productName: (): string => `${arrayElement(ADJECTIVES)} ${arrayElement(MATERIALS)} ${arrayElement(PRODUCTS)}`
+    },
     date: { recent, past, future },
     datatype: { boolean: (): boolean => random() < 0.5 },
     helpers: { arrayElement, distinct, absent },

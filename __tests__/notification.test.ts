@@ -142,11 +142,11 @@ describe("NotificationRestClient mock", () => {
 
     it("transforms an event", async () => {
         const result = await client.transformEvent({
-            eventPayload: "{\"id\":1}",
+            eventPayload: '{"id":1}',
             eventType: WORK_ITEM_CHANGED,
             systemInputs: { locale: "en-US" }
         });
-        expect(result.content).toBe("{\"id\":1}");
+        expect(result.content).toBe('{"id":1}');
         expect(result.systemInputs).toEqual({ locale: "en-US" });
         expect(result.data).toEqual({});
     });

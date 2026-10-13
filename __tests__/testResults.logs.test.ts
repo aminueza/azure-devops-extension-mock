@@ -18,8 +18,12 @@ import {
 const decode = (buffer: ArrayBuffer): string => new TextDecoder().decode(buffer);
 
 describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
-    beforeAll(() => { jest.spyOn(console, "log").mockImplementation(() => undefined); });
-    afterAll(() => { jest.restoreAllMocks(); });
+    beforeAll(() => {
+        jest.spyOn(console, "log").mockImplementation(() => undefined);
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
     const client = getClient(TestResultsRestClient);
 
@@ -51,8 +55,12 @@ describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
     });
 
     it("calls back the test agent with the request outcome", async () => {
-        await expect(client.callbackTestAgent({ success: true, task: "generate", workItemId: 1 } as any, "proj")).resolves.toBe(true);
-        await expect(client.callbackTestAgent({ success: false, task: "generate", workItemId: 1 } as any, "proj")).resolves.toBe(false);
+        await expect(
+            client.callbackTestAgent({ success: true, task: "generate", workItemId: 1 } as any, "proj")
+        ).resolves.toBe(true);
+        await expect(
+            client.callbackTestAgent({ success: false, task: "generate", workItemId: 1 } as any, "proj")
+        ).resolves.toBe(false);
     });
 
     it("enhances coverage", async () => {
@@ -74,7 +82,9 @@ describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
     });
 
     it("generates a test plan from a work item", async () => {
-        await expect(client.generateTestPlanFromWorkItem({ userInstructions: "cover login" }, "proj", 1)).resolves.toBe(true);
+        await expect(client.generateTestPlanFromWorkItem({ userInstructions: "cover login" }, "proj", 1)).resolves.toBe(
+            true
+        );
     });
 
     it("creates a build attachment in the log store", async () => {
@@ -171,11 +181,41 @@ describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
     it("filters logs by file name prefix and top", async () => {
         const target = testLogs[2].logReference.filePath;
         const prefix = fileNameOf(target);
-        const forBuild = await client.getTestLogsForBuild("proj", 1, TestLogType.System, "dir", prefix, true, 5, "token");
+        const forBuild = await client.getTestLogsForBuild(
+            "proj",
+            1,
+            TestLogType.System,
+            "dir",
+            prefix,
+            true,
+            5,
+            "token"
+        );
         expect(forBuild.map(log => log.logReference.filePath)).toEqual([target]);
-        const forResult = await client.getTestResultLogs("proj", 1, 2, TestLogType.System, "dir", prefix, true, 5, "token");
+        const forResult = await client.getTestResultLogs(
+            "proj",
+            1,
+            2,
+            TestLogType.System,
+            "dir",
+            prefix,
+            true,
+            5,
+            "token"
+        );
         expect(forResult.map(log => log.logReference.filePath)).toEqual([target]);
-        const forSubResult = await client.getTestSubResultLogs("proj", 1, 2, 3, TestLogType.System, "dir", prefix, true, 5, "token");
+        const forSubResult = await client.getTestSubResultLogs(
+            "proj",
+            1,
+            2,
+            3,
+            TestLogType.System,
+            "dir",
+            prefix,
+            true,
+            5,
+            "token"
+        );
         expect(forSubResult.map(log => log.logReference.filePath)).toEqual([target]);
         const forRun = await client.getTestRunLogs("proj", 1, TestLogType.System, "dir", prefix, true, 5, "token");
         expect(forRun.map(log => log.logReference.filePath)).toEqual([target]);
@@ -185,13 +225,43 @@ describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
         expect(top.length).toBe(2);
     });
 
-    const fileEndpoints: Array<[string, () => Promise<{ endpointSASUri: string; endpointType: TestLogStoreEndpointType; status: TestLogStatusCode }>]> = [
-        ["getTestLogStoreEndpointDetailsForBuildLog", () => client.getTestLogStoreEndpointDetailsForBuildLog("proj", 1, TestLogType.System, "a.log")],
-        ["getTestLogStoreEndpointDetailsForResultLog", () => client.getTestLogStoreEndpointDetailsForResultLog("proj", 1, 2, TestLogType.System, "a.log")],
-        ["getTestLogStoreEndpointDetailsForSubResultLog", () => client.getTestLogStoreEndpointDetailsForSubResultLog("proj", 1, 2, 3, TestLogType.System, "a.log")],
-        ["testLogStoreEndpointDetailsForResult", () => client.testLogStoreEndpointDetailsForResult("proj", 1, 2, 3, "a.log", TestLogType.System)],
-        ["getTestLogStoreEndpointDetailsForRunLog", () => client.getTestLogStoreEndpointDetailsForRunLog("proj", 1, TestLogType.System, "a.log")],
-        ["testLogStoreEndpointDetailsForRun", () => client.testLogStoreEndpointDetailsForRun("proj", 1, TestLogStoreOperationType.Create, "a.log", TestLogType.System)]
+    const fileEndpoints: Array<
+        [
+            string,
+            () => Promise<{ endpointSASUri: string; endpointType: TestLogStoreEndpointType; status: TestLogStatusCode }>
+        ]
+    > = [
+        [
+            "getTestLogStoreEndpointDetailsForBuildLog",
+            () => client.getTestLogStoreEndpointDetailsForBuildLog("proj", 1, TestLogType.System, "a.log")
+        ],
+        [
+            "getTestLogStoreEndpointDetailsForResultLog",
+            () => client.getTestLogStoreEndpointDetailsForResultLog("proj", 1, 2, TestLogType.System, "a.log")
+        ],
+        [
+            "getTestLogStoreEndpointDetailsForSubResultLog",
+            () => client.getTestLogStoreEndpointDetailsForSubResultLog("proj", 1, 2, 3, TestLogType.System, "a.log")
+        ],
+        [
+            "testLogStoreEndpointDetailsForResult",
+            () => client.testLogStoreEndpointDetailsForResult("proj", 1, 2, 3, "a.log", TestLogType.System)
+        ],
+        [
+            "getTestLogStoreEndpointDetailsForRunLog",
+            () => client.getTestLogStoreEndpointDetailsForRunLog("proj", 1, TestLogType.System, "a.log")
+        ],
+        [
+            "testLogStoreEndpointDetailsForRun",
+            () =>
+                client.testLogStoreEndpointDetailsForRun(
+                    "proj",
+                    1,
+                    TestLogStoreOperationType.Create,
+                    "a.log",
+                    TestLogType.System
+                )
+        ]
     ];
 
     it.each(fileEndpoints)("%s resolves a file endpoint", async (_name, call) => {
@@ -204,7 +274,11 @@ describe("TestResultsRestClient mock tags, agent, log store and logs", () => {
     it("resolves root endpoints when no file is named", async () => {
         const forBuild = await client.testLogStoreEndpointDetailsForBuild("proj", 1, TestLogStoreOperationType.Read);
         expect(forBuild.endpointType).toBe(TestLogStoreEndpointType.Root);
-        const forRun = await client.testLogStoreEndpointDetailsForRun("proj", 1, TestLogStoreOperationType.ReadAndCreate);
+        const forRun = await client.testLogStoreEndpointDetailsForRun(
+            "proj",
+            1,
+            TestLogStoreOperationType.ReadAndCreate
+        );
         expect(forRun.endpointType).toBe(TestLogStoreEndpointType.Root);
         expect(forRun.status).toBe(TestLogStatusCode.Success);
     });

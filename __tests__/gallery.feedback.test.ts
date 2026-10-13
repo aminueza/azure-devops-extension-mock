@@ -115,7 +115,13 @@ describe("GalleryRestClient mock: questions and reviews", () => {
     it("updates a known response", async () => {
         const question = questions[0];
         const target = question.responses[1];
-        const updated = await client.updateResponse({ ...target, id: 1, text: "Edited" }, "pub", "ext", question.id, target.id);
+        const updated = await client.updateResponse(
+            { ...target, id: 1, text: "Edited" },
+            "pub",
+            "ext",
+            question.id,
+            target.id
+        );
         expect(updated.id).toBe(target.id);
         expect(updated.text).toBe("Edited");
         expect(updated.user).toBe(target.user);

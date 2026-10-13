@@ -334,7 +334,10 @@ export const timeline: Timeline = makeTimeline();
 export const changes: Change[] = Array.from({ length: 3 }, makeChange);
 export const buildControllers: BuildController[] = Array.from({ length: 3 }, makeBuildController);
 export const buildTags: string[] = Array.from({ length: 4 }, (_unused, index) => `${fake.lorem.word()}-build-${index}`);
-export const definitionTags: string[] = Array.from({ length: 3 }, (_unused, index) => `${fake.lorem.word()}-def-${index}`);
+export const definitionTags: string[] = Array.from(
+    { length: 3 },
+    (_unused, index) => `${fake.lorem.word()}-def-${index}`
+);
 export const projectTags: string[] = [...buildTags, ...definitionTags];
 
 export const makeFolder = (path: string): Folder => ({
@@ -347,10 +350,7 @@ export const makeFolder = (path: string): Folder => ({
     project: makeProjectReference()
 });
 
-export const makeBuildDefinitionTemplate = (
-    id: string,
-    category: string
-): BuildDefinitionTemplate => ({
+export const makeBuildDefinitionTemplate = (id: string, category: string): BuildDefinitionTemplate => ({
     id,
     category,
     name: fake.lorem.slug(),
@@ -369,10 +369,7 @@ export const makeBuildMetric = (name: string, scope: string, date: Date): BuildM
     intValue: fake.number.int({ min: 1, max: 500 })
 });
 
-export const makeBuildDefinitionRevision = (
-    revision: number,
-    changeType: AuditAction
-): BuildDefinitionRevision => ({
+export const makeBuildDefinitionRevision = (revision: number, changeType: AuditAction): BuildDefinitionRevision => ({
     revision,
     changeType,
     name: fake.lorem.slug(),
@@ -382,10 +379,7 @@ export const makeBuildDefinitionRevision = (
     definitionUrl: fake.internet.url()
 });
 
-export const makeDefinitionResourceReference = (
-    id: string,
-    type: string
-): DefinitionResourceReference => ({
+export const makeDefinitionResourceReference = (id: string, type: string): DefinitionResourceReference => ({
     id,
     type,
     name: fake.lorem.slug(),
@@ -445,10 +439,7 @@ export const makeAttachment = (name: string): Attachment => ({
 
 export const attachmentType = "logs";
 
-export const attachments: Attachment[] = [
-    makeAttachment("build.log"),
-    makeAttachment("coverage.xml")
-];
+export const attachments: Attachment[] = [makeAttachment("build.log"), makeAttachment("coverage.xml")];
 
 export const buildLogLines: string[] = [
     "Starting: Checkout",
@@ -497,10 +488,7 @@ export const stageTimelines: Timeline[] = [
     makeStageTimeline("timeline-deploy", "Deploy")
 ];
 
-export const makeBuildOptionDefinition = (
-    id: string,
-    name: string
-): BuildOptionDefinition => ({
+export const makeBuildOptionDefinition = (id: string, name: string): BuildOptionDefinition => ({
     id,
     name,
     description: fake.lorem.sentence(),
@@ -577,10 +565,7 @@ export const makeBuildSettings = (): BuildSettings => ({
 
 export const buildSettings: BuildSettings = makeBuildSettings();
 
-export const makeSourceRepositoryItem = (
-    path: string,
-    isContainer: boolean
-): SourceRepositoryItem => ({
+export const makeSourceRepositoryItem = (path: string, isContainer: boolean): SourceRepositoryItem => ({
     path,
     isContainer,
     type: isContainer ? "tree" : "blob",
@@ -624,10 +609,7 @@ export const makeLeaseFromNew = (newLease: NewRetentionLease): RetentionLease =>
     };
 };
 
-export const makeUpdatedLease = (
-    leaseId: number,
-    update: RetentionLeaseUpdate
-): RetentionLease => {
+export const makeUpdatedLease = (leaseId: number, update: RetentionLeaseUpdate): RetentionLease => {
     const createdOn = fake.date.recent();
     return {
         leaseId,
@@ -666,11 +648,11 @@ export const retentionHistory: BuildRetentionHistory = {
     buildRetentionSamples: retentionSampleDaysAgo.map(makeBuildRetentionSample)
 };
 
-export const makeRetentionSetting = (
-    min: number,
-    max: number,
-    value: number
-): RetentionSetting => ({ min, max, value });
+export const makeRetentionSetting = (min: number, max: number, value: number): RetentionSetting => ({
+    min,
+    max,
+    value
+});
 
 export const projectRetentionSetting: ProjectRetentionSetting = {
     purgeArtifacts: makeRetentionSetting(1, 60, 30),
@@ -706,22 +688,11 @@ export const makePullRequest = (id: string, providerName: string): PullRequest =
     _links: {}
 });
 
-export const pullRequests: PullRequest[] = [
-    makePullRequest("pr-9401", "TfsGit"),
-    makePullRequest("pr-9402", "GitHub")
-];
+export const pullRequests: PullRequest[] = [makePullRequest("pr-9401", "TfsGit"), makePullRequest("pr-9402", "GitHub")];
 
-export const sourceBranches: string[] = [
-    "refs/heads/main",
-    "refs/heads/release",
-    "refs/heads/feature"
-];
+export const sourceBranches: string[] = ["refs/heads/main", "refs/heads/release", "refs/heads/feature"];
 
-export const makeSourceRepository = (
-    id: string,
-    name: string,
-    sourceProviderName: string
-): SourceRepository => ({
+export const makeSourceRepository = (id: string, name: string, sourceProviderName: string): SourceRepository => ({
     id,
     name,
     sourceProviderName,

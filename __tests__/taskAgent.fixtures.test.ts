@@ -179,7 +179,9 @@ describe("TaskAgent fixtures are complete", () => {
         expect(agentCloudRequests.every(request => !("systemCapabilities" in request.agent))).toBe(true);
         expect(agentRequests.map(request => request.reservedAgent.id)).toEqual([700, 701, 702]);
         expect(agentRequests.every(request => !("systemCapabilities" in request.reservedAgent))).toBe(true);
-        expect(deploymentMachines.every(machine => machine.agent.authorization.publicKey.modulus.length === 8)).toBe(true);
+        expect(deploymentMachines.every(machine => machine.agent.authorization.publicKey.modulus.length === 8)).toBe(
+            true
+        );
     });
 
     it("pages deployment groups with a continuation token", () => {

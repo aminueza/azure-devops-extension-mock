@@ -83,12 +83,7 @@ import { MockWorkItemTrackingProcessDefinitionsRestClient } from "./workItemTrac
 import { MockWorkItemTrackingProcessRestClient } from "./workItemTrackingProcess/WorkItemTrackingProcess";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
 
-import {
-    registerMockClient,
-    getRegisteredMockClient,
-    mockClient,
-    MockOverrides
-} from "./factory";
+import { registerMockClient, getRegisteredMockClient, mockClient, MockOverrides } from "./factory";
 
 // Register the real → mock client mapping once at module load.
 registerMockClient(AccountsRestClient, MockAccountsRestClient);
