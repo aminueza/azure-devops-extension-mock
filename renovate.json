@@ -13,6 +13,14 @@
       "automerge": true
     },
     {
+      "matchPackageNames": ["azure-devops-extension-api", "azure-devops-extension-sdk"],
+      "automerge": false
+    },
+    {
+      "matchDepTypes": ["peerDependencies"],
+      "enabled": false
+    },
+    {
       "matchPackageNames": ["js-yaml"],
       "matchUpdateTypes": ["major"],
       "enabled": false

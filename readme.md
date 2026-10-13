@@ -16,8 +16,11 @@ The package has no runtime dependencies. Requires Node.js 20.19 or newer.
 
 Peer dependencies (you almost certainly already have them):
 
-- `azure-devops-extension-api` ≥ 4
-- `azure-devops-extension-sdk` ≥ 4 (v5 supported)
+- `azure-devops-extension-api` ≥ 5.273
+- `azure-devops-extension-sdk` ≥ 4.0.2 (v5 supported)
+
+`azure-devops-extension-api` v4 is not supported: the mocks import
+`azure-devops-extension-api/Pipelines`, which only exists in v5.
 
 The mocks themselves do not depend on any test framework. The Jest helpers
 under `jest-helpers/` target Jest 29 and 30.
@@ -138,12 +141,12 @@ beforeEach(() => fake.seed(1234));
 Two things to wire up when testing an extension:
 
 1. Redirect the SDK import in `jest.config.js` (`moduleNameMapper`).
-2. If you use `azure-devops-extension-api` v4 and your tests import from
-   `azure-devops-extension-api/*` directly, add the AMD transformer that
-   ships with this repo: v4 is published as AMD-only and jest needs help
-   loading it under Node. v5 is CommonJS and needs no transform; the
-   transformer returns v5 modules unchanged, so keeping it configured
-   across an upgrade is harmless.
+2. Load `jest-helpers/setup-globals` so the browser globals the real
+   packages expect exist under Node.
+
+The AMD transformer under `jest-helpers/` is optional.
+`azure-devops-extension-api` v5 is CommonJS and the transformer returns its
+modules unchanged, so an existing configuration that lists it keeps working.
 
 A ready-to-copy configuration:
 
@@ -171,9 +174,11 @@ npm test              # runs jest with coverage (90% threshold enforced)
 npm run build         # emits dist/
 npm run surface       # compares the mocks with the real client declarations
 npm run audit:prod    # production dependency audit
+npm run compat floor  # installs the packed build next to the oldest supported peers
 ```
 
-CI runs tests on Node 22 and 24 (`node.js.yml`), weekly `npm audit` and
+CI runs tests on Node 22 and 24 and checks the packed build against the
+oldest and the latest supported peers (`node.js.yml`), weekly `npm audit` and
 Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
 scanning setup.
 

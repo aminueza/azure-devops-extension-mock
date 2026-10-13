@@ -11,6 +11,7 @@
     "types": ["jest", "node"],
     "baseUrl": ".",
     "paths": {
+      "azure-devops-extension-sdk": ["./node_modules/azure-devops-extension-sdk/SDK.d.ts"],
       "azure-devops-extension-sdk/SDK": ["./node_modules/azure-devops-extension-sdk/SDK.d.ts"]
     }
   },

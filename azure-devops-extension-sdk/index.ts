@@ -1,4 +1,4 @@
-import {
+import type {
   IHostContext,
   IUserContext,
   IExtensionInitOptions,
@@ -6,7 +6,7 @@ import {
   IExtensionContext,
   ITeamContext,
   IPageContext,
-} from "azure-devops-extension-sdk/SDK";
+} from "azure-devops-extension-sdk";
 import { fake } from "../azure-devops-extension-api/common/fixtures";
 import { instanceObjects } from "../azure-devops-extension-api/common/WorkItemNotificationListener";
 import { getService as getMockService } from "../azure-devops-extension-api";
