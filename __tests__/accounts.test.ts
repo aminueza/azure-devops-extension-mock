@@ -28,6 +28,23 @@ describe("AccountsRestClient mock", () => {
         }
     });
 
+    it("fills every member of each account", async () => {
+        const accounts = await client.getAccounts();
+        expect(accounts).toHaveLength(10);
+        for (const account of accounts) {
+            expect(typeof account.accountOwner).toBe("string");
+            expect(account.accountUri).toMatch(/^https:/);
+            expect(typeof account.createdBy).toBe("string");
+            expect(typeof account.hasMoved).toBe("boolean");
+            expect(typeof account.lastUpdatedBy).toBe("string");
+            expect(account.lastUpdatedDate).toBeInstanceOf(Date);
+            expect(account.namespaceId).toMatch(/^[0-9a-f-]{36}$/);
+            expect(account.newCollectionId).toMatch(/^[0-9a-f-]{36}$/);
+            expect(typeof account.organizationName).toBe("string");
+            expect(typeof account.statusReason).toBe("string");
+        }
+    });
+
     it("returns the same list regardless of filters", async () => {
         const unfiltered = await client.getAccounts();
         const filtered = await client.getAccounts("owner", "member", "props");

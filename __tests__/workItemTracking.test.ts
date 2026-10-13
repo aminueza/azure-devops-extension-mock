@@ -1,7 +1,22 @@
-import { WorkItemTrackingRestClient, QueryType } from "azure-devops-extension-api/WorkItemTracking";
+import {
+    LargeTextCustomHtmlFormat,
+    LinkQueryMode,
+    LogicalOperation,
+    QueryRecursionOption,
+    QueryResultType,
+    QueryType,
+    WorkItemTrackingRestClient
+} from "azure-devops-extension-api/WorkItemTracking";
 import { getClient } from "../azure-devops-extension-api";
 import {
+    categories,
+    makeFieldReference,
+    makeQuery,
+    makeQueryClause,
+    makeQueryResult,
+    makeWorkItem,
     makeWorkItemType,
+    makeWorkItemTypeCategory,
     queries,
     workItems,
     workItemTypes
@@ -190,5 +205,145 @@ describe("WorkItemTrackingRestClient mock", () => {
         const res = await client.queryByWiql({ query: "SELECT [System.Id] FROM WorkItems" }, "proj");
         expect(res.queryType).toBe(QueryType.Flat);
         expect(res.workItems.every(w => typeof w.id === "number")).toBe(true);
+    });
+
+    it("fills the comment version and multiline format of a work item", () => {
+        const item = makeWorkItem(42);
+        expect(item.commentVersionRef).toEqual({
+            commentId: expect.any(Number),
+            createdInRevision: item.rev,
+            isDeleted: false,
+            text: expect.any(String),
+            version: 1,
+            url: expect.stringMatching(/^https:/)
+        });
+        expect(item.multilineFieldsFormat).toEqual({
+            "System.Description": LargeTextCustomHtmlFormat.Html
+        });
+        expect(item.relations).toEqual([]);
+        expect(item._links.self.href).toMatch(/^https:/);
+    });
+
+    it("keeps the filled work item fields when creating a work item", async () => {
+        const created = await client.createWorkItem(
+            [{ op: "add", path: "/fields/System.Title", value: "typed" }],
+            "proj",
+            "Task"
+        );
+        expect(created.fields["System.Title"]).toBe("typed");
+        expect(created.commentVersionRef.createdInRevision).toBe(created.rev);
+        expect(created.multilineFieldsFormat["System.Description"]).toBe(LargeTextCustomHtmlFormat.Html);
+    });
+
+    it("fills every member of a work item type", () => {
+        const type = makeWorkItemType("User Story");
+        expect(type.icon).toEqual({ id: "user story", url: expect.stringMatching(/^https:/) });
+        expect(type.states.map(s => s.name)).toEqual(["New", "Active", "Resolved", "Closed", "Removed"]);
+        type.states.forEach(s => {
+            expect(s.category).toBe(s.name);
+            expect(s.color).toMatch(/^[0-9a-f]{6}$/);
+        });
+        expect(type.fields).toEqual([]);
+        expect(type.fieldInstances).toEqual([]);
+        expect(type.transitions).toEqual({});
+        expect(type.isDisabled).toBe(false);
+        expect(type.xmlForm).toBe("");
+        expect(type._links).toEqual({});
+    });
+
+    it("builds a field reference from a reference name", () => {
+        expect(makeFieldReference("System.AreaPath")).toEqual({
+            name: "AreaPath",
+            referenceName: "System.AreaPath",
+            url: expect.stringMatching(/^https:/)
+        });
+    });
+
+    it("builds a query clause with finite depth", () => {
+        const leaf = makeQueryClause("System.State", "Active");
+        expect(leaf.clauses).toEqual([]);
+        expect(leaf.field.referenceName).toBe("System.State");
+        expect(leaf.fieldValue.name).toBe("State");
+        expect(leaf.isFieldValue).toBe(false);
+        expect(leaf.logicalOperator).toBe(LogicalOperation.AND);
+        expect(leaf.operator).toEqual({ name: "=", referenceName: "SupportedOperations.Equals" });
+        expect(leaf.value).toBe("Active");
+        const group = makeQueryClause("System.TeamProject", "@project", [leaf]);
+        expect(group.clauses).toEqual([leaf]);
+    });
+
+    it("fills every member of a query", () => {
+        const query = makeQuery("query-id");
+        expect(query.id).toBe("query-id");
+        expect(query.children).toEqual([]);
+        expect(query.clauses.field.referenceName).toBe("System.TeamProject");
+        expect(query.clauses.clauses).toHaveLength(1);
+        expect(query.clauses.clauses[0].clauses).toEqual([]);
+        expect(query.columns.map(c => c.referenceName)).toEqual(["System.Id", "System.Title"]);
+        expect(typeof query.createdBy.name).toBe("string");
+        expect(typeof query.lastExecutedBy.id).toBe("string");
+        expect(typeof query.lastModifiedBy.displayName).toBe("string");
+        expect(query.createdDate).toBeInstanceOf(Date);
+        expect(query.lastExecutedDate).toBeInstanceOf(Date);
+        expect(query.lastModifiedDate).toBeInstanceOf(Date);
+        expect(query.filterOptions).toBe(LinkQueryMode.WorkItems);
+        expect(query.isDeleted).toBe(false);
+        expect(query.isInvalidSyntax).toBe(false);
+        expect(query.queryRecursionOption).toBe(QueryRecursionOption.ParentFirst);
+        expect(query.sortColumns).toEqual([
+            { descending: false, field: expect.objectContaining({ referenceName: "System.Id" }) }
+        ]);
+        expect(query.linkClauses.value).toBe("System.LinkTypes.Hierarchy-Forward");
+        expect(query.sourceClauses.value).toBe("Feature");
+        expect(query.targetClauses.value).toBe("User Story");
+        expect(query._links).toEqual({});
+    });
+
+    it("seeds queries with distinct names and paths and filled members", () => {
+        expect(new Set(queries.map(q => q.name)).size).toBe(queries.length);
+        expect(new Set(queries.map(q => q.path)).size).toBe(queries.length);
+        queries.forEach(q => {
+            expect(q.children).toEqual([]);
+            expect(q.sortColumns).toHaveLength(1);
+        });
+    });
+
+    it("fills every member of a query result", () => {
+        const result = makeQueryResult();
+        expect(result.queryResultType).toBe(QueryResultType.WorkItem);
+        expect(result.asOf).toBeInstanceOf(Date);
+        expect(result.columns).toEqual([
+            { referenceName: "System.Id", name: "ID", url: "" },
+            { referenceName: "System.Title", name: "Title", url: "" },
+            { referenceName: "System.State", name: "State", url: "" }
+        ]);
+        expect(result.sortColumns).toEqual([]);
+        expect(result.workItemRelations).toEqual([]);
+        result.workItems.forEach(w => expect(w.url).toMatch(/^https:/));
+    });
+
+    it("fills every member of a work item type category", () => {
+        const category = makeWorkItemTypeCategory("Hidden Types");
+        expect(category.name).toBe("Hidden Types");
+        expect(category.referenceName).toBe("Microsoft.VSTS.WorkItemTypes.HiddenTypesCategory");
+        expect(category.defaultWorkItemType.name).toBe("Bug");
+        expect(category.workItemTypes.map(t => t.name)).toEqual(["Bug"]);
+        expect(category.url).toMatch(/^https:/);
+        expect(category._links).toEqual({});
+    });
+
+    it("seeds one category per work item type", () => {
+        expect(categories.map(c => c.name)).toEqual([
+            "Bug Category",
+            "Task Category",
+            "User Story Category",
+            "Feature Category",
+            "Epic Category"
+        ]);
+        categories.forEach(c => {
+            expect(c.defaultWorkItemType.url).toMatch(/^https:/);
+            expect(c.url).toMatch(/^https:/);
+            expect(c._links).toEqual({});
+        });
     });
 });

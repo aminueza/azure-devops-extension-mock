@@ -420,7 +420,7 @@ export const makeTeamSetting = (): TeamSetting => ({
     bugsBehavior: BugsBehavior.AsRequirements,
     defaultIteration: makeIteration(),
     defaultIterationMacro: "@CurrentIteration",
-    workingDays: [1, 2, 3, 4, 5] as TeamSetting["workingDays"]
+    workingDays: [1, 2, 3, 4, 5]
 });
 
 export const makeIterationWorkItems = (): IterationWorkItems => ({
