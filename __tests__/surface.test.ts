@@ -15,6 +15,14 @@ import { OperationsRestClient } from "azure-devops-extension-api/Operations";
 import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
 import { PolicyRestClient } from "azure-devops-extension-api/Policy";
 import { ProjectAnalysisRestClient } from "azure-devops-extension-api/ProjectAnalysis";
+import { FavoriteRestClient } from "azure-devops-extension-api/Favorite";
+import { GitRestClient } from "azure-devops-extension-api/Git";
+import { GraphRestClient } from "azure-devops-extension-api/Graph";
+import { LocationsRestClient } from "azure-devops-extension-api/Locations";
+import { ManagementRestClient } from "azure-devops-extension-api/Management";
+import { PipelinesRestClient } from "azure-devops-extension-api/Pipelines";
+import { PolicyRestClient } from "azure-devops-extension-api/Policy";
+import { ProfileRestClient } from "azure-devops-extension-api/Profile";
 import { ReleaseRestClient } from "azure-devops-extension-api/Release";
 import { ResourceUsageRestClient } from "azure-devops-extension-api/ResourceUsage";
 import { ServiceEndpointRestClient } from "azure-devops-extension-api/ServiceEndpoint";
@@ -51,6 +59,14 @@ const REAL_CLASSES: Record<string, new (...args: any[]) => object> = {
     PipelinesRestClient,
     PolicyRestClient,
     ProjectAnalysisRestClient,
+    FavoriteRestClient,
+    GitRestClient,
+    GraphRestClient,
+    LocationsRestClient,
+    ManagementRestClient,
+    PipelinesRestClient,
+    PolicyRestClient,
+    ProfileRestClient,
     ReleaseRestClient,
     ResourceUsageRestClient,
     ServiceEndpointRestClient,

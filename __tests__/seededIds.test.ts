@@ -14,6 +14,14 @@ import * as operations from "../azure-devops-extension-api/operations/Data";
 import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
 import * as policy from "../azure-devops-extension-api/policy/Data";
 import * as projectAnalysis from "../azure-devops-extension-api/projectAnalysis/Data";
+import * as favorite from "../azure-devops-extension-api/favorite/Data";
+import * as git from "../azure-devops-extension-api/git/Data";
+import * as graph from "../azure-devops-extension-api/graph/Data";
+import * as locations from "../azure-devops-extension-api/locations/Data";
+import * as management from "../azure-devops-extension-api/management/Data";
+import * as pipelines from "../azure-devops-extension-api/pipelines/Data";
+import * as policy from "../azure-devops-extension-api/policy/Data";
+import * as profile from "../azure-devops-extension-api/profile/Data";
 import * as release from "../azure-devops-extension-api/release/Data";
 import * as resourceUsage from "../azure-devops-extension-api/resourceUsage/Data";
 import * as serviceEndpoint from "../azure-devops-extension-api/serviceEndpoint/Data";
@@ -45,6 +53,14 @@ const MODULES: Array<[string, Record<string, unknown>]> = [
     ["pipelines", pipelines],
     ["policy", policy],
     ["projectAnalysis", projectAnalysis],
+    ["favorite", favorite],
+    ["git", git],
+    ["graph", graph],
+    ["locations", locations],
+    ["management", management],
+    ["pipelines", pipelines],
+    ["policy", policy],
+    ["profile", profile],
     ["release", release],
     ["resourceUsage", resourceUsage],
     ["serviceEndpoint", serviceEndpoint],

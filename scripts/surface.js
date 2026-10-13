@@ -22,6 +22,14 @@ const CLIENTS = [
     { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
     { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
     { area: "ProjectAnalysis", real: "ProjectAnalysisRestClient", mock: "projectAnalysis/ProjectAnalysis.ts" },
+    { area: "Favorite", real: "FavoriteRestClient", mock: "favorite/Favorite.ts" },
+    { area: "Git", real: "GitRestClient", mock: "git/Git.ts" },
+    { area: "Graph", real: "GraphRestClient", mock: "graph/Graph.ts" },
+    { area: "Locations", real: "LocationsRestClient", mock: "locations/Locations.ts" },
+    { area: "Management", real: "ManagementRestClient", mock: "management/Management.ts" },
+    { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
+    { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
+    { area: "Profile", real: "ProfileRestClient", mock: "profile/Profile.ts" },
     { area: "Release", real: "ReleaseRestClient", mock: "release/Release.ts" },
     { area: "ResourceUsage", real: "ResourceUsageRestClient", mock: "resourceUsage/ResourceUsage.ts" },
     { area: "ServiceEndpoint", real: "ServiceEndpointRestClient", mock: "serviceEndpoint/ServiceEndpoint.ts" },
@@ -38,7 +46,7 @@ const CLIENTS = [
 
 const methodNames = (source) => {
     const names = new Set();
-    for (const match of source.matchAll(/^ {4}([a-zA-Z]+)\(/gm)) {
+    for (const match of source.matchAll(/^ {4}([a-zA-Z0-9]+)\(/gm)) {
         if (match[1] !== "constructor") {
             names.add(match[1]);
         }
