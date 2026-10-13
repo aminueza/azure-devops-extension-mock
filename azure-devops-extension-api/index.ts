@@ -25,6 +25,7 @@ import { TestResultsRestClient } from "azure-devops-extension-api/TestResults";
 import { TfvcRestClient } from "azure-devops-extension-api/Tfvc";
 import { WikiRestClient } from "azure-devops-extension-api/Wiki";
 import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkItemTrackingProcessDefinitionsRestClient } from "azure-devops-extension-api/WorkItemTrackingProcessDefinitions";
 
 import {
     MockExtensionDataService,
@@ -60,6 +61,7 @@ import { MockTestResultsRestClient } from "./testResults/TestResults";
 import { MockTfvcRestClient } from "./tfvc/Tfvc";
 import { MockWikiRestClient } from "./wiki/Wiki";
 import { MockWorkItemTrackingRestClient } from "./workItemTracking/WorkItemTracking";
+import { MockWorkItemTrackingProcessDefinitionsRestClient } from "./workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions";
 
 import {
     registerMockClient,
@@ -95,6 +97,7 @@ registerMockClient(TestResultsRestClient, MockTestResultsRestClient);
 registerMockClient(TfvcRestClient, MockTfvcRestClient);
 registerMockClient(WikiRestClient, MockWikiRestClient);
 registerMockClient(WorkItemTrackingRestClient, MockWorkItemTrackingRestClient);
+registerMockClient(WorkItemTrackingProcessDefinitionsRestClient, MockWorkItemTrackingProcessDefinitionsRestClient);
 
 const serviceDictionary: { [key: string]: any } = {
     [CommonServiceIds.ExtensionDataService]: MockExtensionDataService,
@@ -165,7 +168,8 @@ export {
     MockTestResultsRestClient,
     MockTfvcRestClient,
     MockWikiRestClient,
-    MockWorkItemTrackingRestClient
+    MockWorkItemTrackingRestClient,
+    MockWorkItemTrackingProcessDefinitionsRestClient
 };
 
 // Re-export service mocks.

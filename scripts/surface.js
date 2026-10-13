@@ -30,7 +30,8 @@ const CLIENTS = [
     { area: "TestResults", real: "TestResultsRestClient", mock: "testResults/TestResults.ts" },
     { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
-    { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" }
+    { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" },
+    { area: "WorkItemTrackingProcessDefinitions", real: "WorkItemTrackingProcessDefinitionsRestClient", mock: "workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions.ts" }
 ];
 
 const methodNames = (source) => {
