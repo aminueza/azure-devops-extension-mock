@@ -43,7 +43,9 @@
     "compat": "node scripts/compat.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "example": "node scripts/example.js",
+    "shape-diff": "node scripts/shape-diff.js"
   },
   "repository": {
     "type": "git",

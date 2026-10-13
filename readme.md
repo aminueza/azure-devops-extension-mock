@@ -176,20 +176,93 @@ modules unchanged, so an existing configuration that lists it keeps working.
 A ready-to-copy configuration:
 
 ```js
-// jest.config.js
 module.exports = {
-  preset: "ts-jest",
-  moduleNameMapper: {
-    "^azure-devops-extension-sdk$": "azure-devops-extension-mock/sdk",
-  },
-  transform: {
-    "node_modules[\\\\/]azure-devops-extension-api[\\\\/].+\\.js$":
-      "azure-devops-extension-mock/jest-helpers/amd-transformer",
-  },
-  transformIgnorePatterns: ["node_modules/(?!azure-devops-extension-api)"],
-  setupFiles: ["azure-devops-extension-mock/jest-helpers/setup-globals"],
+    preset: "ts-jest",
+    moduleNameMapper: {
+        "^azure-devops-extension-sdk$": "azure-devops-extension-mock/sdk"
+    },
+    transform: {
+        "node_modules[\\\\/]azure-devops-extension-api[\\\\/].+\\.js$":
+            "azure-devops-extension-mock/jest-helpers/amd-transformer"
+    },
+    transformIgnorePatterns: ["node_modules/(?!azure-devops-extension-api)"],
+    setupFiles: ["azure-devops-extension-mock/jest-helpers/setup-globals"]
 };
 ```
+
+This is the configuration of the example extension in
+[`examples/consumer`](./examples/consumer). CI installs the packed build into
+that example and runs its tests, and a test in this repository fails if the
+block above and the example's `jest.config.js` drift apart.
+
+## Testing extension code
+
+Extension code calls `getClient` from `azure-devops-extension-api`. To make
+that call return the mocks, replace it in the test file and keep every other
+export of the real package:
+
+```ts
+import { getClient } from "azure-devops-extension-api";
+import { getClient as getMockClient } from "azure-devops-extension-mock";
+
+jest.mock("azure-devops-extension-api", () => ({
+    ...jest.requireActual("azure-devops-extension-api"),
+    getClient: jest.fn()
+}));
+
+const useMockClients = (overrides: Record<string, unknown> = {}): void => {
+    (getClient as jest.Mock).mockImplementation(clientClass => getMockClient(clientClass, overrides));
+};
+
+beforeEach(() => useMockClients());
+```
+
+Pin a response for one test by passing overrides:
+
+```ts
+useMockClients({ getRepositories: async () => [] });
+```
+
+The SDK needs no such step: `moduleNameMapper` already points
+`azure-devops-extension-sdk` at the mock, so `SDK.ready()`, `SDK.getUser()`
+and `SDK.getService()` work as they are.
+[`examples/consumer`](./examples/consumer) has the full working test.
+
+The mocks keep no state between calls: an object you create with one method
+is not returned by a later `get` or `list`. Use overrides for flows that
+depend on that.
+
+## Fixture helpers
+
+`fake`, exported from `azure-devops-extension-mock/fixtures`, generates the
+random data and has two helpers for writing your own fixtures:
+
+- `fake.helpers.distinct(length, make, ...keys)` builds a list whose items
+  never repeat the given keys. Use it for a list you look up by name:
+  `fake.helpers.distinct(3, makeTeam, team => team.name)`.
+- `fake.helpers.absent()` stands in for a field the service leaves out, such
+  as `closedBy` on an open pull request. The field reads as `undefined`.
+
+## Upgrading from 1.x
+
+2.0.0 changes what some mocks return. If a test fails after upgrading, check
+these first; the [changelog](./CHANGELOG.md) has the full list.
+
+| Area | 1.x | 2.x |
+| --- | --- | --- |
+| Test result `outcome` | a number | the outcome name, such as `"Passed"` |
+| Test run `state` | `3` | `"Completed"` |
+| Test attachment `attachmentType` | `"GeneralAttachment"` | `AttachmentType.GeneralAttachment` |
+| `GitRestClient.getRefs` | a plain array | a `PagedList` with `continuationToken` |
+| `GitRestClient.getCommit` | no `treeId` | a `GitCommit` with `treeId` |
+| `ReleaseDefinition.environments` | release environments | definition environments, without `status` |
+| Agents inside TaskAgent requests | full agents | `TaskAgentReference` objects |
+| Pipeline `configuration.type` | `"yaml"` | `ConfigurationType.Yaml` |
+| Clients that had no mock | every method resolved to `undefined` | hand-written fixtures |
+| Values under a fixed `fake.seed` | | differ from 1.x |
+
+The peer range is narrower too: `azure-devops-extension-api` 5.273 or newer
+and `azure-devops-extension-sdk` 4.0.2 or newer.
 
 ## Contributing
 
@@ -197,24 +270,46 @@ module.exports = {
 npm ci
 npm run lint          # eslint with the typescript-eslint recommended rules
 npm run format        # prettier; CI runs format:check
-npm test              # runs jest with coverage (90% threshold enforced)
+npm test              # runs jest with coverage (100% threshold enforced)
 npm run build         # emits dist/
 npm run surface       # compares the mocks with the real client declarations
 npm run audit:prod    # production dependency audit
 npm run compat floor  # installs the packed build next to the oldest supported peers
+npm run example       # installs the packed build into examples/consumer and runs its tests
 ```
 
-CI runs tests on Node 20, 22 and 24 and checks the packed build against the
-oldest and the latest supported peers (`node.js.yml`), weekly `npm audit` and
-Gitleaks scans (`security.yml`), and CodeQL through GitHub's default code
-scanning setup.
+CI runs tests on Node 20, 22 and 24, checks the packed build against the
+oldest and the latest supported peers and runs the example extension
+(`node.js.yml`), weekly `npm audit` and Gitleaks scans (`security.yml`), and
+CodeQL through GitHub's default code scanning setup.
+
+[CONTRIBUTING.md](./CONTRIBUTING.md) has the rules a change must follow.
+
+### Comparing the mocks with a real organization
+
+The fixture values are generated, not recorded from the service.
+`npm run shape-diff` compares the field names a real organization returns
+with the ones the mocks return, for eight common list endpoints:
+
+```bash
+npm run build
+AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-org \
+AZURE_DEVOPS_PROJECT=YourProject \
+AZURE_DEVOPS_PAT=... \
+npm run shape-diff
+```
+
+It only issues `GET` requests, reads the token from the environment, and
+prints field names, never values. A token with read scope is enough.
 
 ## Releasing
 
 1. Update the version in `package.json` and move the `Unreleased` notes in
    `CHANGELOG.md` under that version.
 2. Merge to `main`, then push a tag matching the version: `git tag v1.2.3 && git push origin v1.2.3`.
-3. `release.yml` builds, tests, audits, publishes to npm with provenance
+3. `release.yml` checks that the tag matches `package.json` and that the
+   tagged commit is on `main`, then lints, builds, tests, runs the compat and
+   example checks, audits, publishes to npm with provenance
    via [trusted publishing](https://docs.npmjs.com/trusted-publishers), and
    creates the GitHub release. No npm token is stored in the repository.
 
