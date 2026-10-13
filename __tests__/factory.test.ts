@@ -1,9 +1,9 @@
 import { CommonServiceIds } from "azure-devops-extension-api/Common";
 import { GitRestClient } from "azure-devops-extension-api/Git";
-import { OperationsRestClient } from "azure-devops-extension-api/Operations";
 import { TestRestClient } from "azure-devops-extension-api/Test";
 import * as api from "../azure-devops-extension-api";
 import { RestClientBase } from "../azure-devops-extension-api/common/RestClientBase";
+import { RestClientBase as RealRestClientBase } from "../node_modules/azure-devops-extension-api/Common/RestClientBase";
 
 const {
     getClient,
@@ -13,6 +13,16 @@ const {
     getRegisteredMockClient,
     registerMockService
 } = api;
+
+class UnregisteredRestClient extends RealRestClientBase {
+    getRecord(recordId: string): Promise<{ id: string }> {
+        return this.beginRequest<{ id: string }>({
+            apiVersion: "7.2-preview.1",
+            routeTemplate: "_apis/records/{recordId}",
+            routeValues: { recordId }
+        });
+    }
+}
 
 class CustomRealClient extends RestClientBase {
     ping(): Promise<string> {
@@ -49,15 +59,15 @@ describe("getClient", () => {
     });
 
     it("auto-stubs unknown members of an unregistered class", async () => {
-        const client = getClient(OperationsRestClient);
-        expect(client).toBeInstanceOf(OperationsRestClient);
+        const client = getClient(UnregisteredRestClient);
+        expect(client).toBeInstanceOf(UnregisteredRestClient);
         await expect((client as any).notDefinedOnRealClient("op-id")).resolves.toBeUndefined();
     });
 
     it("stubs real methods of an unregistered class so no request is issued", async () => {
-        const client = getClient(OperationsRestClient);
-        expect(typeof client.getOperation).toBe("function");
-        await expect(client.getOperation("op-id")).resolves.toBeUndefined();
+        const client = getClient(UnregisteredRestClient);
+        expect(typeof client.getRecord).toBe("function");
+        await expect(client.getRecord("op-id")).resolves.toBeUndefined();
     });
 });
 
@@ -66,16 +76,16 @@ describe("mockClient", () => {
     afterAll(() => { jest.restoreAllMocks(); });
 
     it("resolves unknown methods to undefined on an unregistered class", async () => {
-        expect(getRegisteredMockClient(OperationsRestClient)).toBeUndefined();
-        const client = mockClient(OperationsRestClient);
+        expect(getRegisteredMockClient(UnregisteredRestClient)).toBeUndefined();
+        const client = mockClient(UnregisteredRestClient);
         await expect((client as any).somethingMissing(1, 2)).resolves.toBeUndefined();
     });
 
     it("prefers overrides over real methods on an unregistered class", async () => {
-        const client = mockClient(OperationsRestClient, {
-            getOperation: async () => ({ id: "fixed" } as any)
+        const client = mockClient(UnregisteredRestClient, {
+            getRecord: async () => ({ id: "fixed" })
         });
-        const op = await client.getOperation("any");
+        const op = await client.getRecord("any");
         expect(op.id).toBe("fixed");
     });
 
@@ -83,7 +93,7 @@ describe("mockClient", () => {
         const registered = mockClient(GitRestClient, { getRepositories: async () => [] });
         expect((registered as any)._rootPath).toBe("");
         const options = { rootPath: "https://h/" } as any;
-        const unregistered = mockClient(OperationsRestClient, {}, options);
+        const unregistered = mockClient(UnregisteredRestClient, {}, options);
         expect((unregistered as any)._options).toBe(options);
     });
 
@@ -144,22 +154,41 @@ describe("index re-exports", () => {
     it("exposes every mock client class", () => {
         const classes = [
             api.MockAccountsRestClient,
+            api.MockAlertRestClient,
             api.MockBoardsRestClient,
             api.MockBuildRestClient,
+            api.MockContributionsRestClient,
             api.MockCoreRestClient,
             api.MockDashboardRestClient,
+            api.MockExtensionManagementRestClient,
+            api.MockFavoriteRestClient,
+            api.MockFeatureAvailabilityRestClient,
+            api.MockFeatureManagementRestClient,
+            api.MockFileContainerRestClient,
+            api.MockGalleryRestClient,
             api.MockGitRestClient,
             api.MockGraphRestClient,
+            api.MockLocationsRestClient,
+            api.MockManagementRestClient,
+            api.MockNotificationRestClient,
+            api.MockOperationsRestClient,
             api.MockPipelinesRestClient,
             api.MockPolicyRestClient,
+            api.MockProfileRestClient,
+            api.MockProjectAnalysisRestClient,
             api.MockReleaseRestClient,
+            api.MockReportingRestClient,
+            api.MockResourceUsageRestClient,
             api.MockServiceEndpointRestClient,
+            api.MockServiceHooksRestClient,
             api.MockTaskAgentRestClient,
-            api.MockTestRestClient,
             api.MockTestPlanRestClient,
+            api.MockTestRestClient,
             api.MockTestResultsRestClient,
             api.MockTfvcRestClient,
             api.MockWikiRestClient,
+            api.MockWorkItemTrackingProcessDefinitionsRestClient,
+            api.MockWorkItemTrackingProcessRestClient,
             api.MockWorkItemTrackingRestClient
         ];
         classes.forEach(cls => {

@@ -401,11 +401,36 @@ export class MockReleaseRestClient extends RestClientBase {
         );
     }
 
+    getTaskLog2(
+        _project: string,
+        releaseId: number,
+        environmentId: number,
+        attemptId: number,
+        timelineId: string,
+        taskId: number,
+        _startLine?: number,
+        _endLine?: number
+    ): Promise<string> {
+        return Promise.resolve(
+            `release ${releaseId} env ${environmentId} attempt ${attemptId} timeline ${timelineId} task ${taskId} log`
+        );
+    }
+
     getTasks(
         _project: string,
         _releaseId: number,
         _environmentId: number,
         _attemptId?: number
+    ): Promise<ReleaseTask[]> {
+        return Promise.resolve([...releaseTasks]);
+    }
+
+    getTasks2(
+        _project: string,
+        _releaseId: number,
+        _environmentId: number,
+        _attemptId: number,
+        _timelineId: string
     ): Promise<ReleaseTask[]> {
         return Promise.resolve([...releaseTasks]);
     }

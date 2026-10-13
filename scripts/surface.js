@@ -6,28 +6,47 @@ const API = path.join(ROOT, "node_modules", "azure-devops-extension-api");
 
 const CLIENTS = [
     { area: "Accounts", real: "AccountsRestClient", mock: "accounts/Accounts.ts" },
-    { area: "Work", real: "WorkRestClient", mock: "boards/Boards.ts" },
+    { area: "AdvancedSecurity.Reporting", real: "ReportingRestClient", mock: "advancedSecurityReporting/Reporting.ts" },
+    { area: "Alert", real: "AlertRestClient", mock: "alert/Alert.ts" },
     { area: "Build", real: "BuildRestClient", mock: "build/Build.ts" },
+    { area: "Contributions", real: "ContributionsRestClient", mock: "contributions/Contributions.ts" },
     { area: "Core", real: "CoreRestClient", mock: "core/Core.ts" },
     { area: "Dashboard", real: "DashboardRestClient", mock: "dashboard/Dashboard.ts" },
+    { area: "ExtensionManagement", real: "ExtensionManagementRestClient", mock: "extensionManagement/ExtensionManagement.ts" },
+    { area: "Favorite", real: "FavoriteRestClient", mock: "favorite/Favorite.ts" },
+    { area: "FeatureAvailability", real: "FeatureAvailabilityRestClient", mock: "featureAvailability/FeatureAvailability.ts" },
+    { area: "FeatureManagement", real: "FeatureManagementRestClient", mock: "featureManagement/FeatureManagement.ts" },
+    { area: "FileContainer", real: "FileContainerRestClient", mock: "fileContainer/FileContainer.ts" },
+    { area: "Gallery", real: "GalleryRestClient", mock: "gallery/Gallery.ts" },
     { area: "Git", real: "GitRestClient", mock: "git/Git.ts" },
     { area: "Graph", real: "GraphRestClient", mock: "graph/Graph.ts" },
+    { area: "Locations", real: "LocationsRestClient", mock: "locations/Locations.ts" },
+    { area: "Management", real: "ManagementRestClient", mock: "management/Management.ts" },
+    { area: "Notification", real: "NotificationRestClient", mock: "notification/Notification.ts" },
+    { area: "Operations", real: "OperationsRestClient", mock: "operations/Operations.ts" },
     { area: "Pipelines", real: "PipelinesRestClient", mock: "pipelines/Pipelines.ts" },
     { area: "Policy", real: "PolicyRestClient", mock: "policy/Policy.ts" },
+    { area: "Profile", real: "ProfileRestClient", mock: "profile/Profile.ts" },
+    { area: "ProjectAnalysis", real: "ProjectAnalysisRestClient", mock: "projectAnalysis/ProjectAnalysis.ts" },
     { area: "Release", real: "ReleaseRestClient", mock: "release/Release.ts" },
+    { area: "ResourceUsage", real: "ResourceUsageRestClient", mock: "resourceUsage/ResourceUsage.ts" },
     { area: "ServiceEndpoint", real: "ServiceEndpointRestClient", mock: "serviceEndpoint/ServiceEndpoint.ts" },
+    { area: "ServiceHooks", real: "ServiceHooksRestClient", mock: "serviceHooks/ServiceHooks.ts" },
     { area: "TaskAgent", real: "TaskAgentRestClient", mock: "taskAgent/TaskAgent.ts" },
     { area: "Test", real: "TestRestClient", mock: "test/Test.ts" },
     { area: "TestPlan", real: "TestPlanRestClient", mock: "testPlan/TestPlan.ts" },
     { area: "TestResults", real: "TestResultsRestClient", mock: "testResults/TestResults.ts" },
     { area: "Tfvc", real: "TfvcRestClient", mock: "tfvc/Tfvc.ts" },
     { area: "Wiki", real: "WikiRestClient", mock: "wiki/Wiki.ts" },
-    { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" }
+    { area: "Work", real: "WorkRestClient", mock: "boards/Boards.ts" },
+    { area: "WorkItemTracking", real: "WorkItemTrackingRestClient", mock: "workItemTracking/WorkItemTracking.ts" },
+    { area: "WorkItemTrackingProcess", real: "WorkItemTrackingProcessRestClient", mock: "workItemTrackingProcess/WorkItemTrackingProcess.ts" },
+    { area: "WorkItemTrackingProcessDefinitions", real: "WorkItemTrackingProcessDefinitionsRestClient", mock: "workItemTrackingProcessDefinitions/WorkItemTrackingProcessDefinitions.ts" }
 ];
 
 const methodNames = (source) => {
     const names = new Set();
-    for (const match of source.matchAll(/^ {4}([a-zA-Z]+)\(/gm)) {
+    for (const match of source.matchAll(/^ {4}([a-zA-Z0-9]+)\(/gm)) {
         if (match[1] !== "constructor") {
             names.add(match[1]);
         }
@@ -35,8 +54,10 @@ const methodNames = (source) => {
     return names;
 };
 
+const clientName = (area) => area.split(".").pop();
+
 const realMethods = (area) =>
-    methodNames(fs.readFileSync(path.join(API, area, `${area}Client.d.ts`), "utf8"));
+    methodNames(fs.readFileSync(path.join(API, area, `${clientName(area)}Client.d.ts`), "utf8"));
 
 const mockMethods = (mock) =>
     methodNames(fs.readFileSync(path.join(ROOT, "azure-devops-extension-api", mock), "utf8"));

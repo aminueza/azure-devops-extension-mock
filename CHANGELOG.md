@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hand-written mocks for the last 19 `GitRestClient` methods: the Advanced Security enablement and billing methods and the ref favorite methods.
 - Hand-written mocks for the last 48 `TaskAgentRestClient` methods: environments, Kubernetes resources, virtual machine groups, secure files, task groups, task definitions, packages, Azure subscriptions and management groups, endpoint queries and the YAML schema. Every method of the twelve mocked clients now returns fixtures.
 - Hand-written mocks for six more clients, registered with `getClient` like the existing ones: `GraphRestClient` (40 methods), `PolicyRestClient` (12), `ServiceEndpointRestClient` (27), `TestPlanRestClient` (48), `TestResultsRestClient` (140) and `TfvcRestClient` (24). The mock classes are exported as `MockGraphRestClient`, `MockPolicyRestClient`, `MockServiceEndpointRestClient`, `MockTestPlanRestClient`, `MockTestResultsRestClient` and `MockTfvcRestClient`.
+- Hand-written mocks for the remaining 19 clients of `azure-devops-extension-api`, so every REST client the package ships is registered with `getClient`: `AlertRestClient` (34 methods), `ContributionsRestClient` (4), `ExtensionManagementRestClient` (26), `FavoriteRestClient` (10), `FeatureAvailabilityRestClient` (5), `FeatureManagementRestClient` (9), `FileContainerRestClient` (4), `GalleryRestClient` (88), `LocationsRestClient` (10), `ManagementRestClient` (21), `NotificationRestClient` (24), `OperationsRestClient` (1), `ProfileRestClient` (12), `ProjectAnalysisRestClient` (4), `ReportingRestClient` from `AdvancedSecurity.Reporting` (13), `ResourceUsageRestClient` (2), `ServiceHooksRestClient` (23), `WorkItemTrackingProcessRestClient` (57) and `WorkItemTrackingProcessDefinitionsRestClient` (46). Each mock class is exported as `Mock<Name>RestClient`.
+- `ReleaseRestClient.getTaskLog2` and `ReleaseRestClient.getTasks2`.
 
 ### Changed
 
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `npm run surface` skipped client methods with a digit in their name, so `ReleaseRestClient.getTaskLog2` and `getTasks2` were missing from the mock while the table reported the client as complete.
 - The seeded projects, teams, project collections and work item queries no longer repeat a name, and queries no longer repeat a path. Two entries could draw the same value, so a lookup by name, such as `CoreRestClient.getProject(name)`, returned the wrong entry in about 6% of runs for projects.
 - The SDK mock's declarations import their types from `azure-devops-extension-sdk` instead of `azure-devops-extension-sdk/SDK`. The SDK does not export that subpath, so the old import failed to resolve under `bundler` and `node16` module resolution.
 
