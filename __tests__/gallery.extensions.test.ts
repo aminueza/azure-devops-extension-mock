@@ -202,6 +202,29 @@ describe("GalleryRestClient mock: extensions", () => {
         expect(Object.keys(created.publisher).sort()).toEqual(Object.keys(known.publisher).sort());
     });
 
+    it("deprecates an extension with the posted details", async () => {
+        const effectiveDate = new Date("2027-01-01T00:00:00Z");
+        const deprecated = await client.setExtensionDeprecation(
+            {
+                customMessage: "Use the successor",
+                effectiveDate,
+                effectiveFromProductVersion: "17.0",
+                replacementName: "successor"
+            },
+            publisherName,
+            known.extensionName
+        );
+        expect(deprecated.extensionId).toBe(known.extensionId);
+        expect(deprecated.deprecation).toEqual({
+            customMessage: "Use the successor",
+            effectiveFromDate: effectiveDate,
+            effectiveFromProductVersion: "17.0",
+            replacementExtension: { displayName: "successor", name: "successor" }
+        });
+        expect(known.deprecation).toBeUndefined();
+        await expect(client.removeExtensionDeprecation(publisherName, known.extensionName)).resolves.toBeUndefined();
+    });
+
     it("deletes an extension", async () => {
         await expect(client.deleteExtensionById(known.extensionId)).resolves.toBeUndefined();
         await expect(client.deleteExtensionById(known.extensionId, "1.0.0")).resolves.toBeUndefined();

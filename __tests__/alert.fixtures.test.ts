@@ -118,6 +118,8 @@ describe("alert fixtures", () => {
         expect(alert.aiMetadataBlobReference).toBeUndefined();
         expect(alert.isDevDependency).toBeUndefined();
         expect(alert.validityDetails).toBeUndefined();
+        expect(alert.epssScore).toBeUndefined();
+        expect(alert.epssPercentile).toBeUndefined();
     });
 
     it("makes an alert of the given type and tool", () => {
@@ -132,6 +134,10 @@ describe("alert fixtures", () => {
         expect(alert.alertType).toBe(AlertType.Dependency);
         expect(alert.tools[0].name).toBe(DEPENDENCY_TOOL);
         expect(alert.isDevDependency).toBe(false);
+        expect(alert.epssScore).toBeGreaterThan(0);
+        expect(alert.epssScore).toBeLessThan(1);
+        expect(alert.epssPercentile).toBeGreaterThan(0);
+        expect(alert.epssPercentile).toBeLessThan(1);
         expect(alert.logicalLocations[0].kind).toBe(DependencyKind.VulnerableDependency);
         expect(alert.truncatedSecret).toBeUndefined();
         expect(makeDependencyAlert(tools[0]).tools[0]).toBe(tools[0]);

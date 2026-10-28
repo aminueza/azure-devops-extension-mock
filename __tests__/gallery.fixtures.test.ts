@@ -87,6 +87,8 @@ describe("gallery fixtures", () => {
         expect(file.source.endsWith("/Icon")).toBe(true);
         expect(makeExtensionDraftAsset().assetType).toBe("Microsoft.VisualStudio.Services.Icons.Default");
         expect(makeExtensionDraftAsset("Banner").assetType).toBe("Banner");
+        expect(makeExtensionDraftAsset().isPayloadAsset).toBe(false);
+        expect(makeExtensionDraftAsset("Microsoft.VisualStudio.Services.VSIXPackage").isPayloadAsset).toBe(true);
     });
 
     it("makes an extension version", () => {
@@ -128,6 +130,7 @@ describe("gallery fixtures", () => {
         expect(extension.publisher).toBe(facts);
         expect(extension.statistics.map(s => s.statisticName)).toEqual(["install", "averagerating", "ratingcount"]);
         expect(extension.sharedWith).toEqual([]);
+        expect(extension.deprecation).toBeUndefined();
         expect(typeof makePublishedExtension().publisher.publisherName).toBe("string");
     });
 

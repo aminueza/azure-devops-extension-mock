@@ -16,7 +16,8 @@ import {
     SarifJobStatus,
     SearchCriteria,
     Severity,
-    State
+    State,
+    TriageSignalAssessment
 } from "azure-devops-extension-api/Alert";
 import { getClient, getRegisteredMockClient, MockAlertRestClient } from "../azure-devops-extension-api";
 import {
@@ -483,6 +484,39 @@ describe("AlertRestClient mock", () => {
         const third = await client.uploadOrgSarif("{}");
         expect(new Set([first, second, third]).size).toBe(3);
         expect(typeof first).toBe("number");
+    });
+
+    it("admits a batch of triage signals", async () => {
+        const assess = (alertId: number): TriageSignalAssessment => ({
+            alertId,
+            assessmentId: `assessment-${alertId}`,
+            attackPath: "network",
+            classification: "true-positive",
+            decisionEvidence: [{ axis: "reachability", evidenceIds: ["e1"], reasonCode: "reachable" }],
+            disposition: "fix",
+            evaluatedAt: new Date("2026-10-01T00:00:00Z"),
+            gitRef: "refs/heads/main",
+            missingEvidence: [],
+            processingState: "complete",
+            providerExtensions: {},
+            severity: { rating: "high", score: 8.1, system: "cvss" },
+            urgency: "now"
+        });
+        const module = { name: "triage", runId: "run-1", version: "1.0.0" };
+        const receipt = await client.submitTriageSignals(
+            { assessments: [assess(dependency.alertId), assess(code.alertId)], contractVersion: "1.0", module },
+            "proj",
+            "repo"
+        );
+        expect(receipt.assessmentCount).toBe(2);
+        expect(typeof receipt.submissionId).toBe("number");
+        const empty = await client.submitTriageSignals(
+            { assessments: [], contractVersion: "1.0", module },
+            "proj",
+            "repo"
+        );
+        expect(empty.assessmentCount).toBe(0);
+        expect(empty.submissionId).not.toBe(receipt.submissionId);
     });
 
     it("gets the status of a SARIF upload", async () => {
