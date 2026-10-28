@@ -49,6 +49,17 @@ import {
     uxFilters
 } from "./Data";
 
+interface TriageSignalSubmission {
+    assessments: { alertId: number }[];
+    contractVersion: string;
+    module: { name: string };
+}
+
+interface TriageSignalReceipt {
+    assessmentCount: number;
+    submissionId: number;
+}
+
 const findAlert = (alertId: number): Alert =>
     [...alerts, ...draftAlerts].find(a => a.alertId === alertId) ?? { ...makeCodeAlert(), alertId };
 
@@ -337,6 +348,14 @@ export class MockAlertRestClient extends RestClientBase {
 
     uploadOrgSarif(_content: string): Promise<number> {
         return Promise.resolve(fake.number.id());
+    }
+
+    submitTriageSignals(
+        submission: TriageSignalSubmission,
+        _project: string,
+        _repository: string
+    ): Promise<TriageSignalReceipt> {
+        return Promise.resolve({ assessmentCount: submission.assessments.length, submissionId: fake.number.id() });
     }
 
     getValidityData(_project: string, _repository: string, alertId: number): Promise<ValidationRequestInfo> {

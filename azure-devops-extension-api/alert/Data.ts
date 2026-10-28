@@ -172,6 +172,8 @@ export const makeAlert = (alertType: AlertType = AlertType.Code, tool: Tool = ma
     alertType,
     confidence: Confidence.High,
     dismissal: fake.helpers.absent(),
+    epssPercentile: fake.helpers.absent(),
+    epssScore: fake.helpers.absent(),
     firstSeenDate: fake.date.past(),
     fixedDate: fake.helpers.absent(),
     gitRef: DEFAULT_BRANCH,
@@ -199,6 +201,8 @@ export const makeDependencyAlert = (tool: Tool = makeTool(DEPENDENCY_TOOL)): Ale
     const dependency = makeDependency();
     return {
         ...makeAlert(AlertType.Dependency, tool),
+        epssPercentile: fake.number.int({ min: 1, max: 99 }) / 100,
+        epssScore: fake.number.int({ min: 1, max: 99 }) / 100,
         isDevDependency: false,
         logicalLocations: [
             {

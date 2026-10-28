@@ -198,6 +198,21 @@ describe("GalleryRestClient mock: publishers", () => {
         expect(added.lastMatched).toBeUndefined();
     });
 
+    it("activates a known policy of a publisher", async () => {
+        const activated = await client.activatePolicy(known.publisherName, policies[1].key);
+        expect(activated).toEqual({ ...policies[1], lastMatched: activated.lastMatched });
+        expect(activated.lastMatched).toBeInstanceOf(Date);
+    });
+
+    it("fabricates an unknown policy on activation", async () => {
+        const activated = await client.activatePolicy(known.publisherName, 999_999);
+        expect(activated.key).toBe(999_999);
+        expect(activated.publisherId).toBe(known.publisherId);
+        const foreign = await client.activatePolicy(known.publisherName, policies[2].key);
+        expect(foreign.publisherId).toBe(known.publisherId);
+        expect(foreign).not.toBe(policies[2]);
+    });
+
     it("deletes a policy", async () => {
         await expect(client.deletePolicy(known.publisherName, policies[0].key)).resolves.toBeUndefined();
     });

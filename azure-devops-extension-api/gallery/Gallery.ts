@@ -92,6 +92,21 @@ const findExtension = (publisherName: string, extensionName: string): PublishedE
         extensionName
     };
 
+type FederatedCredentialPolicyShape = ReturnType<typeof makeFederatedCredentialPolicy>;
+
+interface ExtensionDeprecationRequest {
+    customMessage: string;
+    effectiveDate: Date;
+    effectiveFromProductVersion: string;
+    replacementName: string;
+}
+
+const findPolicy = (publisherId: string, policyId: number): FederatedCredentialPolicyShape =>
+    policies.find(p => p.publisherId === publisherId && p.key === policyId) ?? {
+        ...makeFederatedCredentialPolicy(publisherId),
+        key: policyId
+    };
+
 const findExtensionById = (extensionId: string): PublishedExtension =>
     extensions.find(e => e.extensionId === extensionId) ?? { ...makePublishedExtension(), extensionId };
 
@@ -318,6 +333,26 @@ export class MockGalleryRestClient extends RestClientBase {
         return Promise.resolve();
     }
 
+    removeExtensionDeprecation(_publisherName: string, _extensionName: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    setExtensionDeprecation(
+        request: ExtensionDeprecationRequest,
+        publisherName: string,
+        extensionName: string
+    ): Promise<PublishedExtension> {
+        return Promise.resolve({
+            ...findExtension(publisherName, extensionName),
+            deprecation: {
+                customMessage: request.customMessage,
+                effectiveFromDate: request.effectiveDate,
+                effectiveFromProductVersion: request.effectiveFromProductVersion,
+                replacementExtension: { displayName: request.replacementName, name: request.replacementName }
+            }
+        });
+    }
+
     createDraftForEditExtension(publisherName: string, extensionName: string): Promise<ExtensionDraft> {
         return Promise.resolve(makeExtensionDraft(publisherName, extensionName));
     }
@@ -520,6 +555,11 @@ export class MockGalleryRestClient extends RestClientBase {
 
     deletePolicy(_publisherName: string, _policyId: number): Promise<void> {
         return Promise.resolve();
+    }
+
+    activatePolicy(publisherName: string, policyId: number): Promise<FederatedCredentialPolicyShape> {
+        const { publisherId } = findPublisher(publisherName);
+        return Promise.resolve({ ...findPolicy(publisherId, policyId), lastMatched: new Date() });
     }
 
     addPolicy(

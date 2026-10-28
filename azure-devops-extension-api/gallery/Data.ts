@@ -132,6 +132,7 @@ export const makePublishedExtension = (publisher: PublisherFacts = makePublisher
     publisher,
     flags: PublishedExtensionFlags.Validated | PublishedExtensionFlags.Public,
     deploymentType: ExtensionDeploymentTechnology.Vsix,
+    deprecation: fake.helpers.absent(),
     categories: [fake.helpers.arrayElement(CATEGORY_NAMES)],
     tags: [fake.lorem.word(), fake.word.noun()],
     installationTargets: [makeInstallationTarget()],
@@ -302,8 +303,10 @@ export const makeAcquisitionOptions = (
     };
 };
 
-export const makeExtensionDraftAsset = (assetType = `${ASSET_PREFIX}.Icons.Default`): ExtensionDraftAsset =>
-    makeExtensionFile(assetType);
+export const makeExtensionDraftAsset = (assetType = `${ASSET_PREFIX}.Icons.Default`): ExtensionDraftAsset => ({
+    ...makeExtensionFile(assetType),
+    isPayloadAsset: assetType === `${ASSET_PREFIX}.VSIXPackage`
+});
 
 export const makeExtensionPayload = (): ExtensionPayload => ({
     displayName: fake.commerce.productName(),

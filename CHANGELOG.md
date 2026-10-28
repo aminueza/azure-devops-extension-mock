@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Hand-written mocks for the methods `azure-devops-extension-api` 5.280.1 adds: `AlertRestClient.submitTriageSignals` and `GalleryRestClient.activatePolicy`, `setExtensionDeprecation` and `removeExtensionDeprecation`.
+
+### Changed
+
+- The fixtures follow `azure-devops-extension-api` 5.280.1: alerts carry `epssScore` and `epssPercentile` (set on dependency alerts, absent elsewhere), published extensions carry `deprecation` (absent) and draft assets carry `isPayloadAsset`.
+
 ## [2.1.0] - 2026-10-13
 
 ### Added
