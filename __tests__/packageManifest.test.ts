@@ -49,6 +49,19 @@ describe("package manifest", () => {
         expect(offenders).toEqual([]);
     });
 
+    it("installs only minimatch releases that fix the globparts denial of service", () => {
+        const installed = Object.entries(lockfile.packages as Record<string, { version?: string }>)
+            .filter(([name]) => /(^|\/)node_modules\/minimatch$/.test(name))
+            .map(([, entry]) => entry.version ?? "");
+        expect(installed.length).toBeGreaterThan(0);
+        const vulnerable = installed.filter(version => {
+            const [major, minor, patch] = version.split(".").map(Number);
+            return major >= 7 && (major < 11 || (major === 11 && minor === 0 && patch < 1));
+        });
+        expect(vulnerable).toEqual([]);
+        expect(manifest.overrides.minimatch).toBe("^11.0.9");
+    });
+
     it("keeps sprintf-js out of the installed tree", () => {
         const installed = Object.keys(lockfile.packages);
         expect(installed.length).toBeGreaterThan(100);
