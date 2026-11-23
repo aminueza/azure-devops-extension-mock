@@ -133,7 +133,7 @@ export const makeAgentJobRequest = (): TaskAgentJobRequest => ({
     queueId: fake.number.int({ min: 1, max: 1000 }),
     queueTime: fake.date.past(),
     receiveTime: fake.date.recent(),
-    requestId: fake.number.int({ min: 1, max: 10_000 }),
+    requestId: fake.number.id(),
     reservedAgent: makeAgentReference(),
     result: TaskResult.Succeeded,
     scopeId: fake.string.uuid(),
@@ -432,7 +432,7 @@ export const makeAgentSession = (): TaskAgentSession => ({
 export const makeAgentMessage = (): TaskAgentMessage => ({
     body: JSON.stringify({ jobId: fake.string.uuid() }),
     iv: [9, 8, 7, 6],
-    messageId: fake.number.int({ min: 1, max: 10_000 }),
+    messageId: fake.number.id(),
     messageType: fake.helpers.arrayElement(["PipelineAgentJobRequest", "AgentRefresh", "JobCancellation"])
 });
 
@@ -479,7 +479,7 @@ export const makeMaintenanceJob = (): TaskAgentPoolMaintenanceJob => ({
     definitionId: fake.number.int({ min: 1, max: 1000 }),
     errorCount: 0,
     finishTime: fake.date.recent(),
-    jobId: fake.number.int({ min: 1, max: 10_000 }),
+    jobId: fake.number.id(),
     logsDownloadUrl: fake.internet.url(),
     orchestrationId: fake.string.uuid(),
     pool: makeAgentPool(),

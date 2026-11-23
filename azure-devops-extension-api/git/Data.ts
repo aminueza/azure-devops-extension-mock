@@ -153,7 +153,7 @@ export const makeGitCommit = (): GitCommit => ({
 export const makePullRequest = (): GitPullRequest => {
     const sourceRefName = `refs/heads/${fake.git.branch()}`;
     return {
-        pullRequestId: fake.number.int({ min: 1, max: 10_000 }),
+        pullRequestId: fake.number.id(),
         codeReviewId: fake.number.int(),
         artifactId: `vstfs:///Git/PullRequestId/${fake.string.uuid()}`,
         status: PullRequestStatus.Active,
@@ -311,7 +311,7 @@ export const makeDeletedRepository = (): GitDeletedRepository => ({
 });
 
 export const makeForkSyncRequest = (): GitForkSyncRequest => ({
-    operationId: fake.number.int({ min: 1, max: 10_000 }),
+    operationId: fake.number.id(),
     status: GitAsyncOperationStatus.Completed,
     source: {
         collectionId: fake.string.uuid(),
@@ -328,7 +328,7 @@ export const makeForkSyncRequest = (): GitForkSyncRequest => ({
 });
 
 export const makeImportRequest = (): GitImportRequest => ({
-    importRequestId: fake.number.int({ min: 1, max: 10_000 }),
+    importRequestId: fake.number.id(),
     status: GitAsyncOperationStatus.Completed,
     repository: makeGitRepository(),
     parameters: {
@@ -451,7 +451,7 @@ export const makeGitMerge = (comment: string): GitMerge => ({
         failureMessage: "",
         mergeCommitId: fake.git.commitSha()
     },
-    mergeOperationId: fake.number.int({ min: 1, max: 10_000 }),
+    mergeOperationId: fake.number.id(),
     status: GitAsyncOperationStatus.Completed,
     _links: {}
 });
