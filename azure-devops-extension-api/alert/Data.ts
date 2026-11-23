@@ -43,6 +43,47 @@ import {
 import { makeIdentityRef } from "../core/Data";
 import { advSecProjectIds, repositories } from "../git/Data";
 
+export interface DraftAlertTriage {
+    decision: {
+        computedAt: Date;
+        disposition: string;
+        policyVersion: string;
+        severity: Severity;
+        urgency: string;
+    };
+    failureCode: string;
+    state: number;
+}
+
+export type DraftAlert = Alert & { sarifSubmissionId: number; triage: DraftAlertTriage };
+
+export interface AlertExploitabilityEvidence {
+    evidenceId: number;
+    title: string;
+    url: string;
+}
+
+export interface AlertExploitability {
+    createdBy: string;
+    createdByIdentity: ReturnType<typeof makeIdentityRef>;
+    createdDate: Date;
+    evidence: AlertExploitabilityEvidence[];
+    exploitabilityId: number;
+    level: string;
+    properties: unknown;
+    sarifSubmissionId: number;
+}
+
+export interface AlertExploitabilityCreateRequest {
+    evidence: Array<{ title: string; url: string }>;
+    level: number;
+    properties: unknown;
+}
+
+export const EXPLOITABILITY_LEVELS = ["Unknown", "NotExploitable", "Low", "Medium", "High"];
+export const TRIAGE_SUCCEEDED = 4;
+export const DRAFT_SUBMISSION_ID = 7;
+
 export interface AlertJobArtifact {
     type: number;
     url: string;
@@ -167,7 +208,6 @@ export const makeValidationFingerprint = (): ValidationFingerprint => ({
 export const makeAlert = (alertType: AlertType = AlertType.Code, tool: Tool = makeTool()): Alert => ({
     additionalInformationMessage: "",
     additionalProperties: {},
-    aiMetadataBlobReference: fake.helpers.absent(),
     alertId: fake.number.id(),
     alertType,
     confidence: Confidence.High,
@@ -408,10 +448,53 @@ export const alerts: Alert[] = [
     { ...makeCodeAlert(tools[2]), fixedDate: fake.date.recent(), severity: Severity.Warning, state: State.Fixed }
 ];
 
-export const draftAlerts: Alert[] = [
-    { ...makeCodeAlert(tools[2]), state: DRAFT_STATE },
-    { ...makeCodeAlert(tools[2]), severity: Severity.Warning, state: DRAFT_STATE }
+export const makeDraftAlertTriage = (severity: Severity = Severity.High): DraftAlertTriage => ({
+    decision: {
+        computedAt: fake.date.recent(),
+        disposition: "TruePositive",
+        policyVersion: "1.0",
+        severity,
+        urgency: "Normal"
+    },
+    failureCode: "",
+    state: TRIAGE_SUCCEEDED
+});
+
+export const draftAlerts: DraftAlert[] = [
+    {
+        ...makeCodeAlert(tools[2]),
+        state: DRAFT_STATE,
+        sarifSubmissionId: DRAFT_SUBMISSION_ID,
+        triage: makeDraftAlertTriage()
+    },
+    {
+        ...makeCodeAlert(tools[2]),
+        severity: Severity.Warning,
+        state: DRAFT_STATE,
+        sarifSubmissionId: DRAFT_SUBMISSION_ID + 1,
+        triage: makeDraftAlertTriage(Severity.Warning)
+    }
 ];
+
+export const makeAlertExploitability = (level: string): AlertExploitability => {
+    const createdByIdentity = makeIdentityRef();
+    return {
+        createdBy: createdByIdentity.displayName,
+        createdByIdentity,
+        createdDate: fake.date.recent(),
+        evidence: [
+            { evidenceId: fake.number.id(), title: "Reachable from a public endpoint", url: fake.internet.url() }
+        ],
+        exploitabilityId: fake.number.id(),
+        level,
+        properties: {},
+        sarifSubmissionId: DRAFT_SUBMISSION_ID
+    };
+};
+
+export const exploitabilitiesByAlert = new Map<number, AlertExploitability[]>([
+    [alerts[3].alertId, [makeAlertExploitability("High"), makeAlertExploitability("Low")]]
+]);
 
 export const alertInstances: AlertAnalysisInstance[] = [
     makeAlertAnalysisInstance(),

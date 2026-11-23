@@ -115,7 +115,6 @@ describe("alert fixtures", () => {
         expect(alert.tools[0].name).toBe(CODE_TOOL);
         expect(alert.dismissal).toBeUndefined();
         expect(alert.fixedDate).toBeUndefined();
-        expect(alert.aiMetadataBlobReference).toBeUndefined();
         expect(alert.isDevDependency).toBeUndefined();
         expect(alert.validityDetails).toBeUndefined();
         expect(alert.epssScore).toBeUndefined();

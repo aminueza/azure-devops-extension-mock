@@ -27,6 +27,10 @@ import {
     autofixRequests,
     branches,
     draftAlerts,
+    DRAFT_SUBMISSION_ID,
+    EXPLOITABILITY_LEVELS,
+    exploitabilitiesByAlert,
+    TRIAGE_SUCCEEDED,
     jobs,
     makeRelationMetadata,
     SECRET_PLACEHOLDER,
@@ -51,11 +55,6 @@ describe("AlertRestClient mock", () => {
 
     it("is registered for the real client", () => {
         expect(getRegisteredMockClient(AlertRestClient)).toBe(MockAlertRestClient);
-    });
-
-    it("downloads the AI metadata of an alert", async () => {
-        const content = decode(await client.getAiMetadataContent("proj", code.alertId, "repo"));
-        expect(content).toEqual({ alertId: code.alertId, title: code.title });
     });
 
     it("downloads the SARIF of a submission", async () => {
@@ -356,6 +355,64 @@ describe("AlertRestClient mock", () => {
         for (const alert of list) {
             expect(alert.state).toBe(State.Draft);
         }
+    });
+
+    it("filters the draft alerts by SARIF submission and carries their triage", async () => {
+        const list = await client.getDraftAlerts(
+            "proj",
+            "repo",
+            undefined,
+            undefined,
+            undefined,
+            DRAFT_SUBMISSION_ID + 1,
+            "TriageSucceeded"
+        );
+        expect([...list]).toEqual([draftAlerts[1]]);
+        expect(list[0].triage.state).toBe(TRIAGE_SUCCEEDED);
+        expect(list[0].triage.decision.severity).toBe(draftAlerts[1].severity);
+        expect([...(await client.getDraftAlerts("proj", "repo", undefined, undefined, undefined, 404))]).toEqual([]);
+    });
+
+    it("records an exploitability assessment for an alert", async () => {
+        const assessment = await client.createAlertExploitability(
+            {
+                evidence: [{ title: "Called from login", url: "https://example.com/trace" }],
+                level: 4,
+                properties: { source: "manual" }
+            },
+            "proj",
+            "repo",
+            code.alertId
+        );
+        expect(assessment.level).toBe("High");
+        expect(assessment.evidence).toEqual([
+            {
+                title: "Called from login",
+                url: "https://example.com/trace",
+                evidenceId: assessment.evidence[0].evidenceId
+            }
+        ]);
+        expect(typeof assessment.evidence[0].evidenceId).toBe("number");
+        expect(assessment.properties).toEqual({ source: "manual" });
+        expect(assessment.createdBy).toBe(assessment.createdByIdentity.displayName);
+        const unknownLevel = await client.createAlertExploitability(
+            { evidence: [], level: 99 as never, properties: {} },
+            "proj",
+            "repo",
+            1
+        );
+        expect(unknownLevel.level).toBe(EXPLOITABILITY_LEVELS[0]);
+    });
+
+    it("lists the exploitability assessments of an alert", async () => {
+        const seeded = exploitabilitiesByAlert.get(code.alertId)!;
+        const list = await client.getAlertExploitabilityList("proj", "repo", code.alertId);
+        expect([...list]).toEqual(seeded);
+        expect(list.continuationToken).toBeNull();
+        expect([...(await client.getAlertExploitabilityList("proj", "repo", code.alertId, 1, "token"))]).toEqual([
+            seeded[0]
+        ]);
+        expect([...(await client.getAlertExploitabilityList("proj", "repo", 404))]).toEqual([]);
     });
 
     it("limits the draft alerts with top", async () => {
