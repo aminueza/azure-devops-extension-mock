@@ -62,6 +62,19 @@ describe("package manifest", () => {
         expect(manifest.overrides.minimatch).toBe("^11.0.9");
     });
 
+    it("installs only glob releases that fix the AbortSignal traversal", () => {
+        const installed = Object.entries(lockfile.packages as Record<string, { version?: string }>)
+            .filter(([name]) => /(^|\/)node_modules\/glob$/.test(name))
+            .map(([, entry]) => entry.version ?? "");
+        expect(installed.length).toBeGreaterThan(0);
+        const vulnerable = installed.filter(version => {
+            const [major, minor, patch] = version.split(".").map(Number);
+            return major >= 9 && (major < 14 || (major === 14 && minor === 0 && patch < 2));
+        });
+        expect(vulnerable).toEqual([]);
+        expect(manifest.overrides.glob).toBe("^14.0.6");
+    });
+
     it("keeps sprintf-js out of the installed tree", () => {
         const installed = Object.keys(lockfile.packages);
         expect(installed.length).toBeGreaterThan(100);
