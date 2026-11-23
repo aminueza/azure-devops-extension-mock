@@ -56,7 +56,7 @@ export const makeWorkItemReference = (): WorkItemReference => ({
 });
 
 export const makeWorkItem = (id?: number): WorkItem => {
-    const workItemId = id ?? fake.number.int({ min: 1, max: 10_000 });
+    const workItemId = id ?? fake.number.id();
     const rev = fake.number.int({ min: 1, max: 10 });
     return {
         id: workItemId,

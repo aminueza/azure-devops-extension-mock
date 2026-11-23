@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Pull requests, fork sync requests, import requests, merges, retention leases, agent job requests, agent messages, maintenance jobs and work items drew their ids from a small random range, so two seeded entries could share an id and a lookup returned the wrong one. Their ids now come from the sequential generator (`fake.number.id()`) and never repeat. The ids are different numbers than before.
+
 ## [2.2.0] - 2026-11-23
 
 ### Added

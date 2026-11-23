@@ -599,7 +599,7 @@ export const makeRetentionLease = (
 export const makeLeaseFromNew = (newLease: NewRetentionLease): RetentionLease => {
     const createdOn = fake.date.recent();
     return {
-        leaseId: fake.number.int({ min: 1, max: 100_000 }),
+        leaseId: fake.number.id(),
         ownerId: newLease.ownerId,
         definitionId: newLease.definitionId,
         runId: newLease.runId,

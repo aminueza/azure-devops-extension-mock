@@ -153,12 +153,12 @@ describe("the same calls with the mode off", () => {
     it("draws ids as before and builds updates from fresh fixtures", async () => {
         const git = getClient(GitRestClient);
         const created = await git.createPullRequest({ title: "Off" } as GitPullRequest, "repo");
-        expect(created.pullRequestId).toBeLessThanOrEqual(10_000);
+        expect(created.pullRequestId).toBeLessThan(10_000_000);
         const seeded = pullRequests[0];
         const updated = await git.updatePullRequest({ title: "Off" } as GitPullRequest, "repo", seeded.pullRequestId);
         expect(updated.createdBy).not.toBe(seeded.createdBy);
         const workItem = await getClient(WorkItemTrackingRestClient).createWorkItem([], "proj", "Bug");
-        expect(workItem.id).toBeLessThanOrEqual(10_000);
+        expect(workItem.id).toBeLessThan(10_000_000);
         expect(workItem.fields["System.Id"]).toBe(workItem.id);
     });
 });
