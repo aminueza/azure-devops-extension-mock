@@ -190,6 +190,7 @@ export const makePipelineTestMetrics = (): PipelineTestMetrics => ({
 });
 
 export const makeTestResultsSettings = (): TestResultsSettings => ({
+    coverageUploadSettings: { coverageAttachmentSizeLimitInMB: 100 },
     advancedFlakyDetectionSettings: {
         filingBugThreshold: fake.number.int({ min: 1, max: 100 }),
         flakyTestBugConfig: {

@@ -260,6 +260,7 @@ describe("TestResultsRestClient mock results, runs and reports", () => {
 
     it("gets and updates the test results settings", async () => {
         await expect(client.getTestResultsSettings("proj")).resolves.toBe(testResultsSettings);
+        expect(testResultsSettings.coverageUploadSettings.coverageAttachmentSizeLimitInMB).toBe(100);
         const updated = await client.updatePipelinesTestSettings(
             { newTestResultLoggingSettings: { logNewTests: false } } as any,
             "proj"

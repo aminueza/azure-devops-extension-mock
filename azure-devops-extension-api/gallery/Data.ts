@@ -146,6 +146,7 @@ export const makePublishedExtension = (publisher: PublisherFacts = makePublisher
         makeExtensionStatistic("ratingcount", fake.number.int({ min: 1, max: 500 }))
     ],
     versions: [makeExtensionVersion("2.0.0"), makeExtensionVersion("1.1.0"), makeExtensionVersion("1.0.0")],
+    versionsTruncated: false,
     presentInConflictList: fake.helpers.absent()
 });
 

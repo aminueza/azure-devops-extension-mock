@@ -28,7 +28,13 @@ import {
 import { PagedList } from "azure-devops-extension-api/WebApi";
 import { fake } from "../common/fixtures";
 import {
+    AlertExploitability,
+    AlertExploitabilityCreateRequest,
     AlertJob,
+    DraftAlert,
+    EXPLOITABILITY_LEVELS,
+    exploitabilitiesByAlert,
+    makeAlertExploitability,
     alertInstances,
     alerts,
     alertsMetadata,
@@ -101,10 +107,6 @@ export class MockAlertRestClient extends RestClientBase {
     public TYPE = AlertRestClient;
     constructor(options: IVssRestClientOptions) {
         super(options);
-    }
-
-    getAiMetadataContent(_project: string, alertId: number, _repository: string): Promise<unknown> {
-        return Promise.resolve(makeBuffer(JSON.stringify({ alertId, title: findAlert(alertId).title })));
     }
 
     getSarifContent(_submissionId: number): Promise<unknown> {
@@ -258,9 +260,37 @@ export class MockAlertRestClient extends RestClientBase {
         _repository: string,
         top?: number,
         _orderBy?: string,
+        _continuationToken?: string,
+        sarifSubmissionId?: number,
+        _triageState?: string
+    ): Promise<PagedList<DraftAlert>> {
+        const selected = draftAlerts.filter(
+            alert => sarifSubmissionId === undefined || alert.sarifSubmissionId === sarifSubmissionId
+        );
+        return Promise.resolve(page(selected, top));
+    }
+
+    createAlertExploitability(
+        assessment: AlertExploitabilityCreateRequest,
+        _project: string,
+        _repository: string,
+        _alertId: number
+    ): Promise<AlertExploitability> {
+        return Promise.resolve({
+            ...makeAlertExploitability(EXPLOITABILITY_LEVELS[assessment.level] ?? EXPLOITABILITY_LEVELS[0]),
+            evidence: assessment.evidence.map(evidence => ({ ...evidence, evidenceId: fake.number.id() })),
+            properties: assessment.properties
+        });
+    }
+
+    getAlertExploitabilityList(
+        _project: string,
+        _repository: string,
+        alertId: number,
+        top?: number,
         _continuationToken?: string
-    ): Promise<PagedList<Alert>> {
-        return Promise.resolve(page(draftAlerts, top));
+    ): Promise<PagedList<AlertExploitability>> {
+        return Promise.resolve(page(exploitabilitiesByAlert.get(alertId) ?? [], top));
     }
 
     uploadSarifToGitHub(

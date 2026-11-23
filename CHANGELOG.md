@@ -10,10 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Hand-written mocks for the methods `azure-devops-extension-api` 5.280.1 adds: `AlertRestClient.submitTriageSignals` and `GalleryRestClient.activatePolicy`, `setExtensionDeprecation` and `removeExtensionDeprecation`.
+- `AlertRestClient.createAlertExploitability` and `AlertRestClient.getAlertExploitabilityList`, new in `azure-devops-extension-api` 5.281. The assessment types are declared inline, so the package still loads against 5.273.
 
 ### Changed
 
 - The fixtures follow `azure-devops-extension-api` 5.280.1: alerts carry `epssScore` and `epssPercentile` (set on dependency alerts, absent elsewhere), published extensions carry `deprecation` (absent) and draft assets carry `isPayloadAsset`.
+- `AlertRestClient.getDraftAlerts` returns draft alerts with `sarifSubmissionId` and `triage`, as 5.281 declares, and filters by the `sarifSubmissionId` argument.
+- Seeded Gallery extensions carry `versionsTruncated: false`, and the TestResults settings carry `coverageUploadSettings`. 5.281 made both fields required.
+
+### Removed
+
+- `AlertRestClient.getAiMetadataContent` and the `aiMetadataBlobReference` field on alerts. 5.281 removed both from the real client. Through `getClient`, the method still exists on older releases and resolves to `undefined`.
 
 ## [2.1.0] - 2026-10-13
 

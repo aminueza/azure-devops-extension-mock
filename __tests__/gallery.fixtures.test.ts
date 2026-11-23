@@ -132,6 +132,7 @@ describe("gallery fixtures", () => {
         expect(extension.sharedWith).toEqual([]);
         expect(extension.deprecation).toBeUndefined();
         expect(typeof makePublishedExtension().publisher.publisherName).toBe("string");
+        expect(makePublishedExtension().versionsTruncated).toBe(false);
     });
 
     it("makes an azure publisher", () => {
